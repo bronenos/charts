@@ -12,6 +12,13 @@
 		D46182222234614F006B72A7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D46182202234614F006B72A7 /* Main.storyboard */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
+		D461823322346536006B72A7 /* Heartbeat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461823222346536006B72A7 /* Heartbeat.swift */; };
+		D4618236223465B2006B72A7 /* DesignBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4618235223465B2006B72A7 /* DesignBook.swift */; };
+		D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461823822346690006B72A7 /* HeartbeatProviders.swift */; };
+		D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461823A22346760006B72A7 /* LocaleProvider.swift */; };
+		D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824022346BEC006B72A7 /* FormattingProvider.swift */; };
+		D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824222346C30006B72A7 /* FormattingTypes.swift */; };
+		D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824422346FF3006B72A7 /* DesignTypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +29,13 @@
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D461822622346151006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D461822822346151006B72A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D461823222346536006B72A7 /* Heartbeat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heartbeat.swift; sourceTree = "<group>"; };
+		D4618235223465B2006B72A7 /* DesignBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignBook.swift; sourceTree = "<group>"; };
+		D461823822346690006B72A7 /* HeartbeatProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartbeatProviders.swift; sourceTree = "<group>"; };
+		D461823A22346760006B72A7 /* LocaleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleProvider.swift; sourceTree = "<group>"; };
+		D461824022346BEC006B72A7 /* FormattingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingProvider.swift; sourceTree = "<group>"; };
+		D461824222346C30006B72A7 /* FormattingTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingTypes.swift; sourceTree = "<group>"; };
+		D461824422346FF3006B72A7 /* DesignTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +68,9 @@
 		D461821B2234614F006B72A7 /* TGCharts */ = {
 			isa = PBXGroup;
 			children = (
+				D4618231223464D9006B72A7 /* Heartbeat */,
+				D461822E223461F4006B72A7 /* Modules */,
+				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
 				D461821E2234614F006B72A7 /* ViewController.swift */,
 				D46182202234614F006B72A7 /* Main.storyboard */,
@@ -62,6 +79,74 @@
 				D461822822346151006B72A7 /* Info.plist */,
 			);
 			path = TGCharts;
+			sourceTree = "<group>";
+		};
+		D461822E223461F4006B72A7 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				D461822F2234634D006B72A7 /* Root */,
+				D4618230223463C1006B72A7 /* Stat */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
+		D461822F2234634D006B72A7 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Root;
+			sourceTree = "<group>";
+		};
+		D4618230223463C1006B72A7 /* Stat */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Stat;
+			sourceTree = "<group>";
+		};
+		D4618231223464D9006B72A7 /* Heartbeat */ = {
+			isa = PBXGroup;
+			children = (
+				D461823222346536006B72A7 /* Heartbeat.swift */,
+				D461823722346642006B72A7 /* Providers */,
+			);
+			path = Heartbeat;
+			sourceTree = "<group>";
+		};
+		D461823422346575006B72A7 /* DesignBook */ = {
+			isa = PBXGroup;
+			children = (
+				D461824422346FF3006B72A7 /* DesignTypes.swift */,
+				D4618235223465B2006B72A7 /* DesignBook.swift */,
+			);
+			path = DesignBook;
+			sourceTree = "<group>";
+		};
+		D461823722346642006B72A7 /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				D461823822346690006B72A7 /* HeartbeatProviders.swift */,
+				D461823C22346771006B72A7 /* LocaleProvider */,
+				D461823F22346BE0006B72A7 /* FormattingProvider */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
+		D461823C22346771006B72A7 /* LocaleProvider */ = {
+			isa = PBXGroup;
+			children = (
+				D461823A22346760006B72A7 /* LocaleProvider.swift */,
+			);
+			path = LocaleProvider;
+			sourceTree = "<group>";
+		};
+		D461823F22346BE0006B72A7 /* FormattingProvider */ = {
+			isa = PBXGroup;
+			children = (
+				D461824222346C30006B72A7 /* FormattingTypes.swift */,
+				D461824022346BEC006B72A7 /* FormattingProvider.swift */,
+			);
+			path = FormattingProvider;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,8 +220,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
+				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
+				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
+				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D461821F2234614F006B72A7 /* ViewController.swift in Sources */,
+				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
+				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
+				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
