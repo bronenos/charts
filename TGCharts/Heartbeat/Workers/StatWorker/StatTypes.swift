@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum StatState {
     case unknown
@@ -14,22 +15,17 @@ enum StatState {
     case ready([StatChart])
 }
 
-struct StatRawChart {
-    
-}
-
-struct StatRawColumn {
-    
-}
-
 struct StatChart {
-    
+    let axis: StatChartAxis
+    let lines: [StatChartLine]
 }
 
 struct StatChartAxis {
-    
+    let dates: [Date]
 }
 
 struct StatChartLine {
-    
+    let name: String
+    let color: UIColor
+    let values: [Int]
 }

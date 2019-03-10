@@ -37,6 +37,7 @@
 		D46182812235A571006B72A7 /* JsonReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182802235A571006B72A7 /* JsonReader.swift */; };
 		D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182852235AF64006B72A7 /* BroadcastObservable.swift */; };
 		D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182872235AFB6006B72A7 /* BroadcastObserver.swift */; };
+		D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182892235C902006B72A7 /* UIColorExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +75,7 @@
 		D46182802235A571006B72A7 /* JsonReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonReader.swift; sourceTree = "<group>"; };
 		D46182852235AF64006B72A7 /* BroadcastObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObservable.swift; sourceTree = "<group>"; };
 		D46182872235AFB6006B72A7 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
+		D46182892235C902006B72A7 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -223,6 +225,7 @@
 		D461827B2235A401006B72A7 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				D46182892235C902006B72A7 /* UIColorExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -326,6 +329,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
