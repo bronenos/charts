@@ -1,5 +1,5 @@
 //
-//  StatTypes.swift
+//  HeartbeatWorkers.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 10/03/2019.
@@ -7,3 +7,7 @@
 //
 
 import Foundation
+
+struct HeartbeatWorkers {
+    let statWorker: IStatWorker
+}

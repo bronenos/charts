@@ -10,10 +10,12 @@ import Foundation
 
 protocol IHeartbeat: class {
     var providers: HeartbeatProviders { get }
+    var workers: HeartbeatWorkers { get }
 }
 
 final class Heartbeat: IHeartbeat {
     let providers: HeartbeatProviders
+    let workers: HeartbeatWorkers
     
     init() {
         let localeProvider = LocaleProvider()
@@ -25,6 +27,14 @@ final class Heartbeat: IHeartbeat {
         providers = HeartbeatProviders(
             localeProvider: localeProvider,
             formattingProvider: formattingProvider
+        )
+        
+        let statWorker = StatWorker(
+            jsonFilename: "chart_data"
+        )
+        
+        workers = HeartbeatWorkers(
+            statWorker: statWorker
         )
         
         DesignBook.setShared(LightDesignBook())

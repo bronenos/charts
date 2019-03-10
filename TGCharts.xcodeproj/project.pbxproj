@@ -28,9 +28,15 @@
 		D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182542234DA0D006B72A7 /* StatInteractor.swift */; };
 		D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182582234DB2B006B72A7 /* BaseInteractor.swift */; };
 		D46182662234E0D5006B72A7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D46182682234E0D5006B72A7 /* Localizable.strings */; };
-		D461826C2234E279006B72A7 /* StatTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826B2234E279006B72A7 /* StatTypes.swift */; };
 		D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826D2234E35E006B72A7 /* StatDataSource.swift */; };
 		D4618270223595A8006B72A7 /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = D461826F223595A8006B72A7 /* chart_data.json */; };
+		D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827322359873006B72A7 /* HeartbeatWorkers.swift */; };
+		D461827622359895006B72A7 /* StatWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827522359895006B72A7 /* StatWorker.swift */; };
+		D461827822359927006B72A7 /* StatTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827722359927006B72A7 /* StatTypes.swift */; };
+		D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182792235A0D5006B72A7 /* StatParser.swift */; };
+		D46182812235A571006B72A7 /* JsonReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182802235A571006B72A7 /* JsonReader.swift */; };
+		D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182852235AF64006B72A7 /* BroadcastObservable.swift */; };
+		D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182872235AFB6006B72A7 /* BroadcastObserver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,9 +65,15 @@
 		D46182632234DFF6006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D46182692234E0D9006B72A7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D461826A2234E106006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D461826B2234E279006B72A7 /* StatTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTypes.swift; sourceTree = "<group>"; };
 		D461826D2234E35E006B72A7 /* StatDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDataSource.swift; sourceTree = "<group>"; };
 		D461826F223595A8006B72A7 /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
+		D461827322359873006B72A7 /* HeartbeatWorkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartbeatWorkers.swift; sourceTree = "<group>"; };
+		D461827522359895006B72A7 /* StatWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatWorker.swift; sourceTree = "<group>"; };
+		D461827722359927006B72A7 /* StatTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTypes.swift; sourceTree = "<group>"; };
+		D46182792235A0D5006B72A7 /* StatParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatParser.swift; sourceTree = "<group>"; };
+		D46182802235A571006B72A7 /* JsonReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonReader.swift; sourceTree = "<group>"; };
+		D46182852235AF64006B72A7 /* BroadcastObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObservable.swift; sourceTree = "<group>"; };
+		D46182872235AFB6006B72A7 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +108,8 @@
 			children = (
 				D4618231223464D9006B72A7 /* Heartbeat */,
 				D461822E223461F4006B72A7 /* Modules */,
+				D461827E2235A545006B72A7 /* Logic */,
+				D461827B2235A401006B72A7 /* Extensions */,
 				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
 				D461822322346151006B72A7 /* Assets.xcassets */,
@@ -133,7 +147,6 @@
 		D4618230223463C1006B72A7 /* Stat */ = {
 			isa = PBXGroup;
 			children = (
-				D461826B2234E279006B72A7 /* StatTypes.swift */,
 				D46182522234DA0D006B72A7 /* StatRouter.swift */,
 				D46182542234DA0D006B72A7 /* StatInteractor.swift */,
 				D46182532234DA0D006B72A7 /* StatViewController.swift */,
@@ -147,6 +160,7 @@
 			children = (
 				D461823222346536006B72A7 /* Heartbeat.swift */,
 				D461823722346642006B72A7 /* Providers */,
+				D46182712235984C006B72A7 /* Workers */,
 			);
 			path = Heartbeat;
 			sourceTree = "<group>";
@@ -185,6 +199,58 @@
 				D461824022346BEC006B72A7 /* FormattingProvider.swift */,
 			);
 			path = FormattingProvider;
+			sourceTree = "<group>";
+		};
+		D46182712235984C006B72A7 /* Workers */ = {
+			isa = PBXGroup;
+			children = (
+				D461827322359873006B72A7 /* HeartbeatWorkers.swift */,
+				D46182722235985E006B72A7 /* StatWorker */,
+			);
+			path = Workers;
+			sourceTree = "<group>";
+		};
+		D46182722235985E006B72A7 /* StatWorker */ = {
+			isa = PBXGroup;
+			children = (
+				D461827722359927006B72A7 /* StatTypes.swift */,
+				D461827522359895006B72A7 /* StatWorker.swift */,
+				D46182792235A0D5006B72A7 /* StatParser.swift */,
+			);
+			path = StatWorker;
+			sourceTree = "<group>";
+		};
+		D461827B2235A401006B72A7 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D461827E2235A545006B72A7 /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				D46182842235AF56006B72A7 /* BroadcastObservable */,
+				D461827F2235A553006B72A7 /* JsonReader */,
+			);
+			path = Logic;
+			sourceTree = "<group>";
+		};
+		D461827F2235A553006B72A7 /* JsonReader */ = {
+			isa = PBXGroup;
+			children = (
+				D46182802235A571006B72A7 /* JsonReader.swift */,
+			);
+			path = JsonReader;
+			sourceTree = "<group>";
+		};
+		D46182842235AF56006B72A7 /* BroadcastObservable */ = {
+			isa = PBXGroup;
+			children = (
+				D46182872235AFB6006B72A7 /* BroadcastObserver.swift */,
+				D46182852235AF64006B72A7 /* BroadcastObservable.swift */,
+			);
+			path = BroadcastObservable;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,12 +326,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
+				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
+				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
+				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
@@ -273,11 +343,13 @@
 				D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */,
 				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
+				D46182812235A571006B72A7 /* JsonReader.swift in Sources */,
 				D46182472234D7B8006B72A7 /* BaseRouter.swift in Sources */,
 				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
+				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
-				D461826C2234E279006B72A7 /* StatTypes.swift in Sources */,
+				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);

@@ -30,5 +30,7 @@ final class StatInteractor: IStatInteractor {
         case .light: view.configureModeSwitcher(title: heartbeat.localized(key: "Stat.Mode.Dark"))
         case .dark: view.configureModeSwitcher(title: heartbeat.localized(key: "Stat.Mode.Light"))
         }
+        
+        heartbeat.workers.statWorker.requestIfNeeded()
     }
 }
