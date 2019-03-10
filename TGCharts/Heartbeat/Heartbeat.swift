@@ -8,7 +8,11 @@
 
 import Foundation
 
-struct Heartbeat {
+protocol IHeartbeat: class {
+    var providers: HeartbeatProviders { get }
+}
+
+final class Heartbeat: IHeartbeat {
     let providers: HeartbeatProviders
     
     init() {
@@ -22,5 +26,13 @@ struct Heartbeat {
             localeProvider: localeProvider,
             formattingProvider: formattingProvider
         )
+        
+        DesignBook.setShared(LightDesignBook())
+    }
+}
+
+extension IHeartbeat {
+    func localized(key: String) -> String {
+        return providers.localeProvider.localize(key: key)
     }
 }

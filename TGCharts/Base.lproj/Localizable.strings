@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  TGCharts
+
+  Created by Stan Potemkin on 10/03/2019.
+  Copyright © 2019 bronenos. All rights reserved.
+*/
+
+"Stat.Title" = "Statistics";
+"Stat.Mode.Light" = "Switch to Day Mode";
+"Stat.Mode.Dark" = "Switch to Night Mode";

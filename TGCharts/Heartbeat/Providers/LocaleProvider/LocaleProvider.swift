@@ -14,14 +14,8 @@ protocol ILocaleProvider: class {
 }
 
 final class LocaleProvider: ILocaleProvider {
-    static var activeLocale: Locale!
-    
-    init() {
-        LocaleProvider.activeLocale = Locale.current
-    }
-    
     var activeLocale: Locale {
-        return LocaleProvider.activeLocale
+        return Locale.current
     }
     
     func localize(key: String) -> String {

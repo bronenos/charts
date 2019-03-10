@@ -12,9 +12,11 @@ import UIKit
 fileprivate var sharedInstance: IDesignBook!
 
 protocol IDesignBook: class {
+    var style: DesignBookStyle { get }
     func color(_ color: DesignBookColor) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
-    func resolive(colorAlias: DesignBookColorAlias) -> UIColor
+    func resolve(colorAlias: DesignBookColorAlias) -> UIColor
+    func resolveStatusBarStyle() -> UIStatusBarStyle
 }
 
 class DesignBook: IDesignBook {
@@ -24,6 +26,10 @@ class DesignBook: IDesignBook {
     
     class var shared: IDesignBook {
         return sharedInstance
+    }
+    
+    var style: DesignBookStyle {
+        preconditionFailure("Override in specific subclass")
     }
     
     func color(_ color: DesignBookColor) -> UIColor {
@@ -49,13 +55,21 @@ class DesignBook: IDesignBook {
         }
     }
     
-    func resolive(colorAlias: DesignBookColorAlias) -> UIColor {
+    func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
+        preconditionFailure("Must use the specific subclass")
+    }
+    
+    func resolveStatusBarStyle() -> UIStatusBarStyle {
         preconditionFailure("Must use the specific subclass")
     }
 }
 
 final class LightDesignBook: DesignBook {
-    override func resolive(colorAlias: DesignBookColorAlias) -> UIColor {
+    override var style: DesignBookStyle {
+        return .light
+    }
+    
+    override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
         switch colorAlias {
         case .generalBackground: return color(.background)
         case .elementBackground: return color(.white)
@@ -71,10 +85,18 @@ final class LightDesignBook: DesignBook {
         case .actionForeground: return color(.blue)
         }
     }
+    
+    override func resolveStatusBarStyle() -> UIStatusBarStyle {
+        return .default
+    }
 }
 
 final class DarkDesignBook: DesignBook {
-    override func resolive(colorAlias: DesignBookColorAlias) -> UIColor {
+    override var style: DesignBookStyle {
+        return .dark
+    }
+    
+    override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
         switch colorAlias {
         case .generalBackground: return color(.darkAsphalt)
         case .elementBackground: return color(.lightAsphalt)
@@ -89,5 +111,9 @@ final class DarkDesignBook: DesignBook {
         case .optionForeground: return color(.white)
         case .actionForeground: return color(.blue)
         }
+    }
+    
+    override func resolveStatusBarStyle() -> UIStatusBarStyle {
+        return .lightContent
     }
 }

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
-		D461821F2234614F006B72A7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821E2234614F006B72A7 /* ViewController.swift */; };
-		D46182222234614F006B72A7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D46182202234614F006B72A7 /* Main.storyboard */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
 		D461823322346536006B72A7 /* Heartbeat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461823222346536006B72A7 /* Heartbeat.swift */; };
@@ -19,15 +17,25 @@
 		D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824022346BEC006B72A7 /* FormattingProvider.swift */; };
 		D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824222346C30006B72A7 /* FormattingTypes.swift */; };
 		D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824422346FF3006B72A7 /* DesignTypes.swift */; };
+		D46182472234D7B8006B72A7 /* BaseRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182462234D7B8006B72A7 /* BaseRouter.swift */; };
+		D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182482234D7E4006B72A7 /* RootRouter.swift */; };
+		D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182492234D7E4006B72A7 /* RootViewController.swift */; };
+		D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824A2234D7E4006B72A7 /* RootInteractor.swift */; };
+		D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461824E2234D97B006B72A7 /* BaseViewController.swift */; };
+		D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182502234D99B006B72A7 /* BaseNavigationController.swift */; };
+		D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182522234DA0D006B72A7 /* StatRouter.swift */; };
+		D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182532234DA0D006B72A7 /* StatViewController.swift */; };
+		D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182542234DA0D006B72A7 /* StatInteractor.swift */; };
+		D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182582234DB2B006B72A7 /* BaseInteractor.swift */; };
+		D46182662234E0D5006B72A7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D46182682234E0D5006B72A7 /* Localizable.strings */; };
+		D461826C2234E279006B72A7 /* StatTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826B2234E279006B72A7 /* StatTypes.swift */; };
+		D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826D2234E35E006B72A7 /* StatDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D461821E2234614F006B72A7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		D46182212234614F006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		D461822622346151006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D461822822346151006B72A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D461823222346536006B72A7 /* Heartbeat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heartbeat.swift; sourceTree = "<group>"; };
 		D4618235223465B2006B72A7 /* DesignBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignBook.swift; sourceTree = "<group>"; };
@@ -36,6 +44,22 @@
 		D461824022346BEC006B72A7 /* FormattingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingProvider.swift; sourceTree = "<group>"; };
 		D461824222346C30006B72A7 /* FormattingTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingTypes.swift; sourceTree = "<group>"; };
 		D461824422346FF3006B72A7 /* DesignTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTypes.swift; sourceTree = "<group>"; };
+		D46182462234D7B8006B72A7 /* BaseRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseRouter.swift; sourceTree = "<group>"; };
+		D46182482234D7E4006B72A7 /* RootRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootRouter.swift; sourceTree = "<group>"; };
+		D46182492234D7E4006B72A7 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		D461824A2234D7E4006B72A7 /* RootInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootInteractor.swift; sourceTree = "<group>"; };
+		D461824E2234D97B006B72A7 /* BaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
+		D46182502234D99B006B72A7 /* BaseNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseNavigationController.swift; sourceTree = "<group>"; };
+		D46182522234DA0D006B72A7 /* StatRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatRouter.swift; sourceTree = "<group>"; };
+		D46182532234DA0D006B72A7 /* StatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatViewController.swift; sourceTree = "<group>"; };
+		D46182542234DA0D006B72A7 /* StatInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatInteractor.swift; sourceTree = "<group>"; };
+		D46182582234DB2B006B72A7 /* BaseInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseInteractor.swift; sourceTree = "<group>"; };
+		D46182612234DFED006B72A7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ru; path = ru.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D46182632234DFF6006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D46182692234E0D9006B72A7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		D461826A2234E106006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		D461826B2234E279006B72A7 /* StatTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTypes.swift; sourceTree = "<group>"; };
+		D461826D2234E35E006B72A7 /* StatDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,11 +96,10 @@
 				D461822E223461F4006B72A7 /* Modules */,
 				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
-				D461821E2234614F006B72A7 /* ViewController.swift */,
-				D46182202234614F006B72A7 /* Main.storyboard */,
 				D461822322346151006B72A7 /* Assets.xcassets */,
 				D461822522346151006B72A7 /* LaunchScreen.storyboard */,
 				D461822822346151006B72A7 /* Info.plist */,
+				D46182682234E0D5006B72A7 /* Localizable.strings */,
 			);
 			path = TGCharts;
 			sourceTree = "<group>";
@@ -84,6 +107,10 @@
 		D461822E223461F4006B72A7 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				D46182462234D7B8006B72A7 /* BaseRouter.swift */,
+				D46182582234DB2B006B72A7 /* BaseInteractor.swift */,
+				D461824E2234D97B006B72A7 /* BaseViewController.swift */,
+				D46182502234D99B006B72A7 /* BaseNavigationController.swift */,
 				D461822F2234634D006B72A7 /* Root */,
 				D4618230223463C1006B72A7 /* Stat */,
 			);
@@ -93,6 +120,9 @@
 		D461822F2234634D006B72A7 /* Root */ = {
 			isa = PBXGroup;
 			children = (
+				D46182482234D7E4006B72A7 /* RootRouter.swift */,
+				D461824A2234D7E4006B72A7 /* RootInteractor.swift */,
+				D46182492234D7E4006B72A7 /* RootViewController.swift */,
 			);
 			path = Root;
 			sourceTree = "<group>";
@@ -100,6 +130,11 @@
 		D4618230223463C1006B72A7 /* Stat */ = {
 			isa = PBXGroup;
 			children = (
+				D461826B2234E279006B72A7 /* StatTypes.swift */,
+				D46182522234DA0D006B72A7 /* StatRouter.swift */,
+				D46182542234DA0D006B72A7 /* StatInteractor.swift */,
+				D46182532234DA0D006B72A7 /* StatViewController.swift */,
+				D461826D2234E35E006B72A7 /* StatDataSource.swift */,
 			);
 			path = Stat;
 			sourceTree = "<group>";
@@ -191,6 +226,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = D46182102234614F006B72A7;
 			productRefGroup = D461821A2234614F006B72A7 /* Products */;
@@ -208,8 +244,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */,
+				D46182662234E0D5006B72A7 /* Localizable.strings in Resources */,
 				D461822422346151006B72A7 /* Assets.xcassets in Resources */,
-				D46182222234614F006B72A7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,12 +258,23 @@
 			files = (
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
+				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
+				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
-				D461821F2234614F006B72A7 /* ViewController.swift in Sources */,
+				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
+				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
+				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
+				D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */,
+				D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */,
 				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
+				D46182472234D7B8006B72A7 /* BaseRouter.swift in Sources */,
+				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
+				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
+				D461826C2234E279006B72A7 /* StatTypes.swift in Sources */,
+				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -235,20 +282,22 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D46182202234614F006B72A7 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D46182212234614F006B72A7 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D461822522346151006B72A7 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				D461822622346151006B72A7 /* Base */,
+				D46182612234DFED006B72A7 /* ru */,
+				D46182632234DFF6006B72A7 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		D46182682234E0D5006B72A7 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D46182692234E0D9006B72A7 /* ru */,
+				D461826A2234E106006B72A7 /* Base */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -258,6 +307,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -305,7 +355,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -319,6 +369,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -360,7 +411,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

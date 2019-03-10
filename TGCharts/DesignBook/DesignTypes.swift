@@ -9,6 +9,11 @@
 import Foundation
 import UIKit
 
+enum DesignBookStyle {
+    case light
+    case dark
+}
+
 enum DesignBookColor {
     case black
     case white
