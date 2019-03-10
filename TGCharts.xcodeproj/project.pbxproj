@@ -30,6 +30,7 @@
 		D46182662234E0D5006B72A7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D46182682234E0D5006B72A7 /* Localizable.strings */; };
 		D461826C2234E279006B72A7 /* StatTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826B2234E279006B72A7 /* StatTypes.swift */; };
 		D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826D2234E35E006B72A7 /* StatDataSource.swift */; };
+		D4618270223595A8006B72A7 /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = D461826F223595A8006B72A7 /* chart_data.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		D461826A2234E106006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D461826B2234E279006B72A7 /* StatTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTypes.swift; sourceTree = "<group>"; };
 		D461826D2234E35E006B72A7 /* StatDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDataSource.swift; sourceTree = "<group>"; };
+		D461826F223595A8006B72A7 /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +102,7 @@
 				D461822522346151006B72A7 /* LaunchScreen.storyboard */,
 				D461822822346151006B72A7 /* Info.plist */,
 				D46182682234E0D5006B72A7 /* Localizable.strings */,
+				D461826F223595A8006B72A7 /* chart_data.json */,
 			);
 			path = TGCharts;
 			sourceTree = "<group>";
@@ -245,6 +248,7 @@
 			files = (
 				D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */,
 				D46182662234E0D5006B72A7 /* Localizable.strings in Resources */,
+				D4618270223595A8006B72A7 /* chart_data.json in Resources */,
 				D461822422346151006B72A7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

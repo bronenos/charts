@@ -9,8 +9,8 @@
 import Foundation
 import UIKit
 
-func RootModuleAssembly(heartbeat: IHeartbeat) -> Module<IRootRouter> {
-    let router = RootRouter(heartbeat: heartbeat)
+func RootModuleAssembly(window: UIWindow, heartbeat: IHeartbeat) -> Module<IRootRouter> {
+    let router = RootRouter(window: window, heartbeat: heartbeat)
     return .init(router: router, viewController: router.viewController)
 }
 
@@ -19,13 +19,16 @@ protocol IRootRouter: IBaseRouter {
 }
 
 final class RootRouter: IRootRouter {
+    private let window: UIWindow
     private let heartbeat: IHeartbeat
     private let interactor: IRootInteractor
     private weak var internalViewController: RootViewController?
     
     private weak var statRouter: IStatRouter?
+    private var snapshotWindow: UIWindow?
     
-    init(heartbeat: IHeartbeat) {
+    init(window: UIWindow, heartbeat: IHeartbeat) {
+        self.window = window
         self.heartbeat = heartbeat
         
         interactor = RootInteractor(heartbeat: heartbeat)
@@ -68,16 +71,22 @@ final class RootRouter: IRootRouter {
         statRouter?.recursiveReload()
     }
     
-    private func presentSnapshot(whileExecuting block: () -> Void) {
-        guard let snapshot = internalViewController?.view.snapshotView(afterScreenUpdates: false) else {
+    private func presentSnapshot(whileExecuting block: @escaping () -> Void) {
+        guard let snapshot = viewController.view.snapshotView(afterScreenUpdates: false) else {
             return
         }
         
-        let vc = UIViewController()
-        vc.view.addSubview(snapshot)
+        window.addSubview(snapshot)
         
-        internalViewController?.present(vc, animated: false, completion: nil)
-        block()
-        internalViewController?.dismiss(animated: false, completion: nil)
+        viewController.present(UIViewController(), animated: false) { [weak self] in
+            block()
+            self?.viewController.dismiss(animated: false, completion: nil)
+        }
+        
+        UIView.animate(
+            withDuration: 0.25,
+            animations: { snapshot.alpha = 0 },
+            completion: { _ in snapshot.removeFromSuperview() }
+        )
     }
 }

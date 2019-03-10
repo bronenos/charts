@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let window = UIWindow(frame: UIScreen.main.bounds)
         self.window = window
         
-        let module = RootModuleAssembly(heartbeat: Heartbeat())
+        let module = RootModuleAssembly(window: window, heartbeat: Heartbeat())
         rootRouter = module.router
         
         window.rootViewController = module.viewController
