@@ -16,15 +16,17 @@ final class RootViewController: BaseNavigationController, IRootView {
     var router: IRootRouter!
     weak var interactor: IRootInteractor!
     
+    override func updateDesign() {
+        super.updateDesign()
+        navigationBar.barTintColor = DesignBook.shared.resolve(colorAlias: .navigationBackground)
+        navigationBar.titleTextAttributes = DesignBook.shared.resolveNavigationTitleAttributes()
+        setNeedsStatusBarAppearanceUpdate()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if isFirstLoad {
-            interactor.interfaceStartup()
-        }
-        else {
-            setNeedsStatusBarAppearanceUpdate()
-        }
+        interactor.interfaceStartup()
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {

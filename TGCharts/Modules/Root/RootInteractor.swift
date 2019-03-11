@@ -33,7 +33,5 @@ final class RootInteractor: IRootInteractor {
         case .light: DesignBook.setShared(DarkDesignBook())
         case .dark: DesignBook.setShared(LightDesignBook())
         }
-        
-        router.recursiveReload()
     }
 }

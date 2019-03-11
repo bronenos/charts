@@ -39,7 +39,7 @@ final class RootRouter: IRootRouter {
             return vc
         }
         else {
-            let vc = RootViewController()
+            let vc = RootViewController(designObservable: DesignBook.shared.styleObservable)
             vc.router = self
             vc.interactor = interactor
             internalViewController = vc
@@ -66,11 +66,6 @@ final class RootRouter: IRootRouter {
         internalViewController?.viewControllers = [module.viewController]
     }
     
-    func recursiveReload() {
-        internalViewController?.view = nil
-        statRouter?.recursiveReload()
-    }
-    
     private func presentSnapshot(whileExecuting block: @escaping () -> Void) {
         guard let snapshot = viewController.view.snapshotView(afterScreenUpdates: false) else {
             return
@@ -78,11 +73,8 @@ final class RootRouter: IRootRouter {
         
         window.addSubview(snapshot)
         
-        viewController.present(UIViewController(), animated: false) { [weak self] in
-            block()
-            self?.viewController.dismiss(animated: false, completion: nil)
-        }
-        
+        block()
+
         UIView.animate(
             withDuration: 0.25,
             animations: { snapshot.alpha = 0 },

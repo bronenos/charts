@@ -29,6 +29,9 @@ final class StatParser: IStatParser {
         guard let axis = parseChartAxis(object: object, key: "x") else { return nil }
         let lines = columnNames.compactMap({ parseChartLine(object: object, key: $0) })
         
+        let axisLength = axis.dates.count
+        guard lines.allSatisfy({ $0.values.count == axisLength }) else { return nil }
+        
         return StatChart(
             axis: axis,
             lines: lines
@@ -37,7 +40,7 @@ final class StatParser: IStatParser {
     
     private func parseChartAxis(object: JsonReader, key: String) -> StatChartAxis? {
         guard object["types"][key].string == "x" else { return nil }
-        guard let timestamps = obtainColumnValues(object: object, key: key) as? [TimeInterval] else { return nil }
+        let timestamps: [TimeInterval] = obtainColumnValues(object: object, key: key)
         
         return StatChartAxis(
             dates: timestamps.map { Date(timeIntervalSince1970: $0 / 1000) }
@@ -48,19 +51,26 @@ final class StatParser: IStatParser {
         guard object["types"][key].string == "line" else { return nil }
         guard let name = object["names"][key].string else { return nil }
         guard let color = object["colors"][key].string else { return nil }
-        guard let values = obtainColumnValues(object: object, key: key) as? [Int] else { return nil }
+        let values: [Int] = obtainColumnValues(object: object, key: key)
         
         return StatChartLine(
+            key: key,
             name: name,
             color: UIColor(hex: color),
             values: values
         )
     }
     
-    private func obtainColumnValues(object: JsonReader, key: String) -> [Any] {
+    private func obtainColumnValues<T>(object: JsonReader, key: String) -> [T] {
         guard let columns = object["columns"].array?.map(JsonReader.init) else { return [] }
         guard let keyColumn = columns.first(where: { $0[0].string == key }) else { return [] }
-        guard let values = keyColumn.array else { return [] }
-        return Array(values.dropFirst())
+        guard let values = keyColumn.array?.dropFirst() else { return [] }
+        
+        if let result = Array(values) as? [T] {
+            return result
+        }
+        else {
+            return []
+        }
     }
 }

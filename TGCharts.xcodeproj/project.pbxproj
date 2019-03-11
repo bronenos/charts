@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D42658D02236341000FB79AB /* ChartTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658CF2236341000FB79AB /* ChartTypes.swift */; };
+		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
@@ -38,9 +40,13 @@
 		D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182852235AF64006B72A7 /* BroadcastObservable.swift */; };
 		D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182872235AFB6006B72A7 /* BroadcastObserver.swift */; };
 		D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182892235C902006B72A7 /* UIColorExtensions.swift */; };
+		D461828E223630A0006B72A7 /* ChartControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828D223630A0006B72A7 /* ChartControl.swift */; };
+		D4618290223630AE006B72A7 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828F223630AE006B72A7 /* ChartView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D42658CF2236341000FB79AB /* ChartTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTypes.swift; sourceTree = "<group>"; };
+		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -76,6 +82,8 @@
 		D46182852235AF64006B72A7 /* BroadcastObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObservable.swift; sourceTree = "<group>"; };
 		D46182872235AFB6006B72A7 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
 		D46182892235C902006B72A7 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
+		D461828D223630A0006B72A7 /* ChartControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartControl.swift; sourceTree = "<group>"; };
+		D461828F223630AE006B72A7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,8 +117,9 @@
 			isa = PBXGroup;
 			children = (
 				D4618231223464D9006B72A7 /* Heartbeat */,
-				D461822E223461F4006B72A7 /* Modules */,
 				D461827E2235A545006B72A7 /* Logic */,
+				D461822E223461F4006B72A7 /* Modules */,
+				D461828B22362F72006B72A7 /* Controls */,
 				D461827B2235A401006B72A7 /* Extensions */,
 				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
@@ -153,6 +162,7 @@
 				D46182542234DA0D006B72A7 /* StatInteractor.swift */,
 				D46182532234DA0D006B72A7 /* StatViewController.swift */,
 				D461826D2234E35E006B72A7 /* StatDataSource.swift */,
+				D42658D1223678CC00FB79AB /* StatSectionHeader.swift */,
 			);
 			path = Stat;
 			sourceTree = "<group>";
@@ -256,6 +266,24 @@
 			path = BroadcastObservable;
 			sourceTree = "<group>";
 		};
+		D461828B22362F72006B72A7 /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				D461828C22363090006B72A7 /* ChartControl */,
+			);
+			path = Controls;
+			sourceTree = "<group>";
+		};
+		D461828C22363090006B72A7 /* ChartControl */ = {
+			isa = PBXGroup;
+			children = (
+				D42658CF2236341000FB79AB /* ChartTypes.swift */,
+				D461828D223630A0006B72A7 /* ChartControl.swift */,
+				D461828F223630AE006B72A7 /* ChartView.swift */,
+			);
+			path = ChartControl;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -335,20 +363,24 @@
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
+				D4618290223630AE006B72A7 /* ChartView.swift in Sources */,
 				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
+				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
+				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,
 				D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */,
 				D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */,
 				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
 				D46182812235A571006B72A7 /* JsonReader.swift in Sources */,
 				D46182472234D7B8006B72A7 /* BaseRouter.swift in Sources */,
+				D461828E223630A0006B72A7 /* ChartControl.swift in Sources */,
 				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,

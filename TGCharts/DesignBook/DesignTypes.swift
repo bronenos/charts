@@ -24,7 +24,8 @@ enum DesignBookColor {
     case darkGray
     case lightSilver
     case darkSilver
-    case blue
+    case lightBlue
+    case darkBlue
 }
 
 enum DesignBookFontWeight {
@@ -36,6 +37,7 @@ enum DesignBookFontWeight {
 enum DesignBookColorAlias {
     case generalBackground
     case elementBackground
+    case navigationBackground
     case navigationForeground
     case sectionTitleForeground
     case chartIndexForeground
@@ -46,4 +48,8 @@ enum DesignBookColorAlias {
     case sliderControlForeground
     case optionForeground
     case actionForeground
+}
+
+protocol DesignBookUpdatable: class {
+    func updateDesign()
 }

@@ -11,45 +11,48 @@ import UIKit
 
 protocol IStatView: class {
     func setTitle(_ title: String)
-    func configureModeSwitcher(title: String)
+    func setCharts(titlePrefix: String, charts: [StatChart])
+    func setDesignSwitcher(title: String)
 }
 
 final class StatViewController: BaseViewController, IStatView {
     var router: IStatRouter!
     weak var interactor: IStatInteractor!
     
-    private let tableView = UITableView()
+    private let tableView = UITableView(frame: .zero, style: .grouped)
     
-    private var dataSource = StatDataSource()
+    private let dataSource = StatDataSource()
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    override init(designObservable: BroadcastObservable<DesignBookStyle>) {
+        super.init(designObservable: designObservable)
         
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
+        
+        dataSource.switchDesignHandler = { [weak self] in
+            self?.router.toggleDesign()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        abort()
+    }
+    
+    func setCharts(titlePrefix: String, charts: [StatChart]) {
+        let chartControls = charts.map(ChartControl.init)
+        dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
+    }
+    
+    func setDesignSwitcher(title: String) {
+        dataSource.setDesignSwitcherTitle(title)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
         view.addSubview(tableView)
         
-        dataSource = StatDataSource()
         dataSource.register(in: tableView)
-        
         interactor.interfaceStartup()
-        
-        dataSource.switchModeHandler = { [weak self] in
-            self?.router.toggleDesign()
-        }
-    }
-
-    func configureModeSwitcher(title: String) {
-        dataSource.setModeSwitcherTitle(title)
     }
     
     override func viewDidLayoutSubviews() {
@@ -57,6 +60,12 @@ final class StatViewController: BaseViewController, IStatView {
 
         let layout = getLayout(size: view.bounds.size)
         tableView.frame = layout.tableViewFrame
+    }
+    
+    override func updateDesign() {
+        super.updateDesign()
+        tableView.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
+        dataSource.updateDesign()
     }
 
     private func getLayout(size: CGSize) -> Layout {

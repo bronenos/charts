@@ -9,15 +9,26 @@
 import Foundation
 import UIKit
 
-class BaseNavigationController: UINavigationController {
-    private var numberOfLoads = 0
+class BaseNavigationController: UINavigationController, DesignBookUpdatable {
+    private var designObserver: BroadcastObserver<DesignBookStyle>?
     
-    var isFirstLoad: Bool {
-        return (numberOfLoads == 1)
+    init(designObservable: BroadcastObservable<DesignBookStyle>) {
+        super.init(nibName: nil, bundle: nil)
+        
+        designObserver = designObservable.addObserver { [weak self] _ in
+            self?.updateDesign()
+        }
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        numberOfLoads += 1
+        updateDesign()
+    }
+    
+    func updateDesign() {
     }
 }

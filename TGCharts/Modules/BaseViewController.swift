@@ -9,20 +9,31 @@
 import Foundation
 import UIKit
 
-class BaseViewController: UIViewController {
-    private var numberOfLoads = 0
+class BaseViewController: UIViewController, DesignBookUpdatable {
+    private var designObserver: BroadcastObserver<DesignBookStyle>?
     
-    var isFirstLoad: Bool {
-        return (numberOfLoads == 1)
+    init(designObservable: BroadcastObservable<DesignBookStyle>) {
+        super.init(nibName: nil, bundle: nil)
+        
+        designObserver = designObservable.addObserver { [weak self] _ in
+            self?.updateDesign()
+        }
     }
-
+    
+    required init?(coder aDecoder: NSCoder) {
+        abort()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
-        numberOfLoads += 1
+        updateDesign()
     }
     
     func setTitle(_ title: String) {
         navigationItem.title = title
+    }
+    
+    func updateDesign() {
+        view.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
     }
 }

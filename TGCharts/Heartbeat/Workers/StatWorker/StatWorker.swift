@@ -9,16 +9,16 @@
 import Foundation
 
 protocol IStatWorker: class {
-    var state: StatState { get }
-    var stateObservable: BroadcastObservable<StatState> { get }
+    var state: StatLoadingState { get }
+    var stateObservable: BroadcastObservable<StatLoadingState> { get }
     func requestIfNeeded()
 }
 
 final class StatWorker: IStatWorker {
     private let jsonFilename: String
     
-    private(set) var state = StatState.unknown
-    let stateObservable = BroadcastObservable<StatState>()
+    private(set) var state = StatLoadingState.unknown
+    let stateObservable = BroadcastObservable<StatLoadingState>()
     
     init(jsonFilename: String) {
         self.jsonFilename = jsonFilename
@@ -43,21 +43,26 @@ final class StatWorker: IStatWorker {
         
         DispatchQueue.global(qos: .background).async { [weak self] in
             guard let chartsURL = Bundle.main.url(forResource: filename, withExtension: "json") else {
-                DispatchQueue.main.async { self?.state = .ready([]) }
+                DispatchQueue.main.async { self?.storeAndBroadcast(charts: []) }
                 return
             }
             
             guard let chartsData = try? Data(contentsOf: chartsURL) else {
-                DispatchQueue.main.async { self?.state = .ready([]) }
+                DispatchQueue.main.async { self?.storeAndBroadcast(charts: []) }
                 return
             }
             
-            if let _ = try? StatParser().parse(data: chartsData) {
-                
+            if let charts = try? StatParser().parse(data: chartsData) {
+                DispatchQueue.main.async { self?.storeAndBroadcast(charts: charts) }
             }
             else {
-                
+                DispatchQueue.main.async { self?.storeAndBroadcast(charts: []) }
             }
         }
+    }
+    
+    private func storeAndBroadcast(charts: [StatChart]) {
+        state = .ready(charts)
+        stateObservable.broadcast(state)
     }
 }

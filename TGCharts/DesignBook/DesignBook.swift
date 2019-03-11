@@ -10,18 +10,22 @@ import Foundation
 import UIKit
 
 fileprivate var sharedInstance: IDesignBook!
+fileprivate let sharedStyleObservable = BroadcastObservable<DesignBookStyle>()
 
 protocol IDesignBook: class {
     var style: DesignBookStyle { get }
+    var styleObservable: BroadcastObservable<DesignBookStyle> { get }
     func color(_ color: DesignBookColor) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
     func resolve(colorAlias: DesignBookColorAlias) -> UIColor
     func resolveStatusBarStyle() -> UIStatusBarStyle
+    func resolveNavigationTitleAttributes() -> [NSAttributedString.Key: Any]
 }
 
 class DesignBook: IDesignBook {
     class func setShared(_ instance: IDesignBook) {
         sharedInstance = instance
+        sharedStyleObservable.broadcast(instance.style)
     }
     
     class var shared: IDesignBook {
@@ -30,6 +34,10 @@ class DesignBook: IDesignBook {
     
     var style: DesignBookStyle {
         preconditionFailure("Override in specific subclass")
+    }
+    
+    var styleObservable: BroadcastObservable<DesignBookStyle> {
+        return sharedStyleObservable
     }
     
     func color(_ color: DesignBookColor) -> UIColor {
@@ -43,7 +51,8 @@ class DesignBook: IDesignBook {
         case .darkGray: return UIColor.darkGray
         case .lightSilver: return UIColor(red: 0.82, green: 0.82, blue: 0.84, alpha: 1.0)
         case .darkSilver: return UIColor(red: 0.77, green: 0.77, blue: 0.80, alpha: 1.0)
-        case .blue: return UIColor.blue
+        case .lightBlue: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
+        case .darkBlue: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
         }
     }
     
@@ -62,6 +71,10 @@ class DesignBook: IDesignBook {
     func resolveStatusBarStyle() -> UIStatusBarStyle {
         preconditionFailure("Must use the specific subclass")
     }
+    
+    func resolveNavigationTitleAttributes() -> [NSAttributedString.Key : Any] {
+        return [.foregroundColor: resolve(colorAlias: .navigationForeground)]
+    }
 }
 
 final class LightDesignBook: DesignBook {
@@ -73,6 +86,7 @@ final class LightDesignBook: DesignBook {
         switch colorAlias {
         case .generalBackground: return color(.background)
         case .elementBackground: return color(.white)
+        case .navigationBackground: return color(.white)
         case .navigationForeground: return color(.black)
         case .sectionTitleForeground: return color(.darkGray)
         case .chartIndexForeground: return color(.lightGray)
@@ -82,7 +96,7 @@ final class LightDesignBook: DesignBook {
         case .sliderControlBackground: return color(.darkSilver)
         case .sliderControlForeground: return color(.lightSilver)
         case .optionForeground: return color(.black)
-        case .actionForeground: return color(.blue)
+        case .actionForeground: return color(.darkBlue)
         }
     }
     
@@ -100,6 +114,7 @@ final class DarkDesignBook: DesignBook {
         switch colorAlias {
         case .generalBackground: return color(.darkAsphalt)
         case .elementBackground: return color(.lightAsphalt)
+        case .navigationBackground: return color(.lightAsphalt)
         case .navigationForeground: return color(.white)
         case .sectionTitleForeground: return color(.lightSilver)
         case .chartIndexForeground: return color(.lightSilver)
@@ -109,7 +124,7 @@ final class DarkDesignBook: DesignBook {
         case .sliderControlBackground: return color(.lightSilver)
         case .sliderControlForeground: return color(.white)
         case .optionForeground: return color(.white)
-        case .actionForeground: return color(.blue)
+        case .actionForeground: return color(.lightBlue)
         }
     }
     

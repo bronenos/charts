@@ -11,7 +11,6 @@ import UIKit
 
 protocol IBaseRouter: class {
     var viewController: UIViewController { get }
-    func recursiveReload()
 }
 
 struct Module<RT> {

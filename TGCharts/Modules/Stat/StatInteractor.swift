@@ -19,16 +19,24 @@ final class StatInteractor: IStatInteractor {
     weak var router: IStatRouter!
     weak var view: IStatView!
     
+    private var statObserver: BroadcastObserver<StatLoadingState>?
+    
     init(heartbeat: IHeartbeat) {
         self.heartbeat = heartbeat
+        
+        statObserver = heartbeat.workers.statWorker.stateObservable.addObserver { [weak self] value in
+            guard case .ready(let charts) = value else { return }
+            let prefix = heartbeat.localized(key: "Stat.Section.TitlePrefix")
+            self?.view.setCharts(titlePrefix: prefix, charts: charts)
+        }
     }
     
     func interfaceStartup() {
         view.setTitle(heartbeat.localized(key: "Stat.Title"))
         
         switch DesignBook.shared.style {
-        case .light: view.configureModeSwitcher(title: heartbeat.localized(key: "Stat.Mode.Dark"))
-        case .dark: view.configureModeSwitcher(title: heartbeat.localized(key: "Stat.Mode.Light"))
+        case .light: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Dark"))
+        case .dark: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Light"))
         }
         
         heartbeat.workers.statWorker.requestIfNeeded()

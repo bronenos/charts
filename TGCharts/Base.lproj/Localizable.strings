@@ -7,5 +7,6 @@
 */
 
 "Stat.Title" = "Statistics";
+"Stat.Section.TitlePrefix" = "Followers";
 "Stat.Mode.Light" = "Switch to Day Mode";
 "Stat.Mode.Dark" = "Switch to Night Mode";

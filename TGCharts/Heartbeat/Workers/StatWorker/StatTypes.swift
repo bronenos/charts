@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-enum StatState {
+enum StatLoadingState {
     case unknown
     case waiting
     case ready([StatChart])
@@ -20,11 +20,16 @@ struct StatChart {
     let lines: [StatChartLine]
 }
 
+struct StatChartPresentingState {
+    var visibleLines: [String]
+}
+
 struct StatChartAxis {
     let dates: [Date]
 }
 
 struct StatChartLine {
+    let key: String
     let name: String
     let color: UIColor
     let values: [Int]

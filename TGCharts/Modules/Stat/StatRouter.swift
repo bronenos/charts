@@ -37,7 +37,7 @@ final class StatRouter: IStatRouter {
             return vc
         }
         else {
-            let vc = StatViewController()
+            let vc = StatViewController(designObservable: DesignBook.shared.styleObservable)
             vc.router = self
             vc.interactor = interactor
             internalViewController = vc
