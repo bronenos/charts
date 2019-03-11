@@ -12,6 +12,8 @@ import UIKit
 fileprivate let standardHeaderHeight = CGFloat(25)
 fileprivate let standardCellHeight = CGFloat(40)
 fileprivate let chartCellHeight = CGFloat(350)
+fileprivate let optionCellReuseID = "option_cell"
+fileprivate let actionCellReuseID = "action_cell"
 
 final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate, DesignBookUpdatable {
     var switchDesignHandler: (() -> Void)?
@@ -41,6 +43,9 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.dataSource = self
         tableView.delegate = self
         
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: optionCellReuseID)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: actionCellReuseID)
+
         tableView.reloadData()
         self.tableView = tableView
     }
@@ -108,15 +113,13 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch true {
         case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
-            let chartControl = chartControls[indexPath.section]
-            return constructChartControlCell(chartControl)
+            return reusableChartControlCell()
             
         case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
-            let lineConfig = chartControls[indexPath.section].config.lines[indexPath.row - 1]
-            return constructChartLineControlCell(lineConfig)
+            return reusableChartLineControlCell()
             
         case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
-            return constructSwitchDesignCell()
+            return reusableSwitchDesignCell()
             
         default:
             assertionFailure()
@@ -124,9 +127,27 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         }
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        switch true {
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+            let chartControl = chartControls[indexPath.section]
+            populateChartControl(control: chartControl, intoCell: cell)
+            
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+            let lineConfig = chartControls[indexPath.section].config.lines[indexPath.row - 1]
+            populateChartLineControl(config: lineConfig, intoCell: cell)
+            
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+            populateSwitchDesignCell(intoCell: cell)
+            
+        default:
+            assertionFailure()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        
+
         switch true {
         case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
             break
@@ -135,7 +156,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
             let chartControl = chartControls[indexPath.section]
             let key = chartControl.config.lines[indexPath.row - 1].key
             chartControl.toggleLine(key: key)
-            tableView.reloadData()
+            updateRowsWithoutAnimations(indexPaths: [indexPath])
 
         case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
             switchDesignHandler?()
@@ -148,29 +169,34 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     func updateDesign() {
         guard let tableView = tableView else { return }
         guard let visibleIndexPaths = tableView.indexPathsForVisibleRows else { return }
-        
-        UIView.setAnimationsEnabled(false)
-        tableView.beginUpdates()
-        tableView.reloadRows(at: visibleIndexPaths, with: .none)
-        tableView.endUpdates()
-        UIView.setAnimationsEnabled(true)
+        updateRowsWithoutAnimations(indexPaths: visibleIndexPaths)
     }
     
     private func sectionBelongsToAnyChart(_ section: Int) -> Bool {
         return (section < chartControls.count)
     }
     
-    private func constructChartControlCell(_ chart: IChartControl) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.selectionStyle = .none
-        cell.contentView.addSubview(chart.view)
-        chart.view.frame = cell.contentView.bounds
-        chart.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        return cell
+    private func reusableChartControlCell() -> UITableViewCell {
+        return UITableViewCell()
     }
     
-    private func constructChartLineControlCell(_ config: ChartConfigLine) -> UITableViewCell {
+    private func populateChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
         let cell = UITableViewCell()
+        cell.selectionStyle = .none
+        cell.contentView.addSubview(control.view)
+        control.view.frame = cell.contentView.bounds
+        control.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    }
+    
+    private func reusableChartLineControlCell() -> UITableViewCell {
+        if let cell = tableView?.dequeueReusableCell(withIdentifier: optionCellReuseID) {
+            return cell
+        }
+        
+        return UITableViewCell(style: .default, reuseIdentifier: optionCellReuseID)
+    }
+    
+    private func populateChartLineControl(config: ChartConfigLine, intoCell cell: UITableViewCell) {
         cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
         cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
         cell.textLabel?.text = config.name
@@ -178,16 +204,23 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         cell.textLabel?.textAlignment = .left
         cell.imageView?.image = generateLineIcon(color: config.color)
         cell.accessoryType = config.visible ? .checkmark : .none
-        return cell
     }
     
-    private func constructSwitchDesignCell() -> UITableViewCell {
-        let cell = UITableViewCell()
+    private func reusableSwitchDesignCell() -> UITableViewCell {
+        if let cell = tableView?.dequeueReusableCell(withIdentifier: actionCellReuseID) {
+            return cell
+        }
+        
+        return UITableViewCell(style: .default, reuseIdentifier: actionCellReuseID)
+    }
+    
+    private func populateSwitchDesignCell(intoCell cell: UITableViewCell) {
+        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
         cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
+        cell.textLabel?.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
         cell.textLabel?.text = designSwitcherTitle
         cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .actionForeground)
         cell.textLabel?.textAlignment = .center
-        return cell
     }
     
     private func generateLineIcon(color: UIColor) -> UIImage? {
@@ -213,6 +246,20 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
             
             _draw(in: context)
             return UIGraphicsGetImageFromCurrentImageContext()
+        }
+    }
+    
+    fileprivate func updateRowsWithoutAnimations(indexPaths: [IndexPath]) {
+        guard let tableView = tableView else { return }
+        guard !tableView.visibleCells.isEmpty else { return }
+        
+        // workaround: system has been animating its cells for a short period;
+        // so don't mix our doings with system ones
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+            tableView.visibleCells.forEach { cell in
+                guard let indexPath = tableView.indexPath(for: cell) else { return }
+                tableView.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
+            }
         }
     }
 }
