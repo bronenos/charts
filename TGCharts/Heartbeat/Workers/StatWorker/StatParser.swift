@@ -33,6 +33,7 @@ final class StatParser: IStatParser {
         guard lines.allSatisfy({ $0.values.count == axisLength }) else { return nil }
         
         return StatChart(
+            size: axisLength,
             axis: axis,
             lines: lines
         )

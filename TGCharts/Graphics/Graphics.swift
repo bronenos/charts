@@ -12,8 +12,10 @@ import UIKit
 protocol IGraphics: class {
     var engineName: String { get }
     func link(to view: UIView)
+    func unlink(from view: UIView)
+    func render(drawingBlock: (IGraphics) -> Void)
     func setBackground(color: UIColor)
-    func render()
+    func drawLine(points: [CGPoint], color: UIColor, width: CGFloat)
 }
 
 func obtainGraphicsForCurrentDevice() -> IGraphics {

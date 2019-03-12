@@ -19,8 +19,6 @@ final class OpenGraphics: IGraphics {
     private var renderBuffer = GLuint(0)
     private var renderTexture = GLuint(0)
     
-    private var backgroundColor = UIColor.white
-
     init(context: EAGLContext) {
         self.context = context
     }
@@ -43,11 +41,13 @@ final class OpenGraphics: IGraphics {
         setupEnvironment()
     }
     
-    func setBackground(color: UIColor) {
-        backgroundColor = color
+    func unlink(from view: UIView) {
+        guard renderView.isDescendant(of: view) else { return }
+        renderView.removeFromSuperview()
+        closeEnvironment()
     }
     
-    func render() {
+    func render(drawingBlock: (IGraphics) -> Void) {
         EAGLContext.setCurrent(context)
         
         glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, renderBuffer)
@@ -60,7 +60,7 @@ final class OpenGraphics: IGraphics {
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
         
-        renderBackground()
+        drawingBlock(self)
         
         glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
         
@@ -70,6 +70,34 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(nil)
     }
     
+    func setBackground(color: UIColor) {
+        var r = CGFloat(0), g = CGFloat(0), b = CGFloat(0), a = CGFloat(0)
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        glClearColor(r.to_clamp, g.to_clamp, b.to_clamp, a.to_clamp)
+        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
+    }
+    
+    func drawLine(points: [CGPoint], color: UIColor, width: CGFloat) {
+        var r = CGFloat(0), g = CGFloat(0), b = CGFloat(0), a = CGFloat(0)
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        glColor4f(r.to_float, g.to_float, b.to_float, a.to_float)
+        glLineWidth(width.to_float);
+        
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        
+        var coords = [GLfloat](repeating: 0, count: points.count * 2)
+        points.enumerated().forEach { index, point in
+            coords[index * 2 + 0] = point.x.to_float
+            coords[index * 2 + 1] = point.y.to_float
+        }
+        
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
+        glDrawArrays(GL_LINE_STRIP.to_enum, 0, points.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
+    }
     
     private func setupEnvironment() {
         guard renderBuffer == 0 else { return }
@@ -106,8 +134,6 @@ final class OpenGraphics: IGraphics {
         glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         
         EAGLContext.setCurrent(nil)
-        
-        render()
     }
     
     private func closeEnvironment() {
@@ -127,13 +153,11 @@ final class OpenGraphics: IGraphics {
         
         EAGLContext.setCurrent(nil)
     }
-    
-    private func renderBackground() {
-        var r = CGFloat(0), g = CGFloat(0), b = CGFloat(0)
-        backgroundColor.getRed(&r, green: &g, blue: &b, alpha: nil)
-        
-        glClearColor(r.to_clamp, g.to_clamp, b.to_clamp, 1)
-        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
+}
+
+fileprivate extension Int {
+    var to_size: GLsizei {
+        return GLsizei(self)
     }
 }
 

@@ -11,6 +11,7 @@ import Foundation
 protocol IStatInteractor: IBaseInteractor {
     var router: IStatRouter! { get set }
     var view: IStatView! { get set }
+    func toggleDesign()
 }
 
 final class StatInteractor: IStatInteractor {
@@ -33,12 +34,19 @@ final class StatInteractor: IStatInteractor {
     
     func interfaceStartup() {
         view.setTitle(heartbeat.localized(key: "Stat.Title"))
-        
+        updateDesignSwitcher()
+        heartbeat.workers.statWorker.requestIfNeeded()
+    }
+    
+    func toggleDesign() {
+        router.toggleDesign()
+        updateDesignSwitcher()
+    }
+    
+    private func updateDesignSwitcher() {
         switch DesignBook.shared.style {
         case .light: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Dark"))
         case .dark: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Light"))
         }
-        
-        heartbeat.workers.statWorker.requestIfNeeded()
     }
 }

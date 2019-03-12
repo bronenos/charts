@@ -34,7 +34,10 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func setDesignSwitcherTitle(_ title: String) {
         designSwitcherTitle = title
-        tableView?.reloadData()
+        
+        updateRowsWithoutAnimations(
+            indexPaths: [IndexPath(row: 0, section: chartControls.count)]
+        )
     }
     
     func register(in tableView: UITableView) {
@@ -147,6 +150,23 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         }
     }
     
+    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        switch true {
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+            let chartControl = chartControls[indexPath.section]
+            utilizeChartControl(control: chartControl, intoCell: cell)
+            
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+            break
+            
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+            break
+            
+        default:
+            assertionFailure()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
 
@@ -182,7 +202,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         if let cell = tableView?.dequeueReusableCell(withIdentifier: chartCellReuseID) {
             return cell
         }
-        
+
         return UITableViewCell(style: .default, reuseIdentifier: chartCellReuseID)
     }
     
@@ -190,6 +210,10 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         cell.selectionStyle = .none
         control.link(to: cell.contentView)
         control.render()
+    }
+    
+    private func utilizeChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
+        control.unlink()
     }
     
     private func reusableChartLineControlCell() -> UITableViewCell {

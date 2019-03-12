@@ -31,7 +31,7 @@ final class StatViewController: BaseViewController, IStatView {
         tableView.tableFooterView = UIView()
         
         dataSource.switchDesignHandler = { [weak self] in
-            self?.router.toggleDesign()
+            self?.interactor.toggleDesign()
         }
     }
     

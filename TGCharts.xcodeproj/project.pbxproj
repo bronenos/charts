@@ -45,6 +45,7 @@
 		D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF532236EF0B00C232E6 /* Graphics.swift */; };
 		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
 		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
+		D48EEF5C2237C6EE00C232E6 /* ChartSliceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartSliceNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +91,7 @@
 		D48EEF532236EF0B00C232E6 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
 		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
 		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
+		D48EEF5B2237C6ED00C232E6 /* ChartSliceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSliceNode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -287,6 +289,7 @@
 				D42658CF2236341000FB79AB /* ChartTypes.swift */,
 				D461828D223630A0006B72A7 /* ChartControl.swift */,
 				D461828F223630AE006B72A7 /* ChartView.swift */,
+				D48EEF5A2237C6D300C232E6 /* Nodes */,
 			);
 			path = ChartControl;
 			sourceTree = "<group>";
@@ -307,6 +310,14 @@
 				D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */,
 			);
 			path = OpenGraphics;
+			sourceTree = "<group>";
+		};
+		D48EEF5A2237C6D300C232E6 /* Nodes */ = {
+			isa = PBXGroup;
+			children = (
+				D48EEF5B2237C6ED00C232E6 /* ChartSliceNode.swift */,
+			);
+			path = Nodes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -387,6 +398,7 @@
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
+				D48EEF5C2237C6EE00C232E6 /* ChartSliceNode.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
 				D4618290223630AE006B72A7 /* ChartView.swift in Sources */,
 				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,

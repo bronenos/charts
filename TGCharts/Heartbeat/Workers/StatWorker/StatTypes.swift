@@ -16,6 +16,7 @@ enum StatLoadingState {
 }
 
 struct StatChart {
+    let size: Int
     let axis: StatChartAxis
     let lines: [StatChartLine]
 }
