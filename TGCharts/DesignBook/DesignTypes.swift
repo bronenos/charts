@@ -36,7 +36,8 @@ enum DesignBookFontWeight {
 
 enum DesignBookColorAlias {
     case generalBackground
-    case elementBackground
+    case elementRegularBackground
+    case elementFocusedBackground
     case navigationBackground
     case navigationForeground
     case sectionTitleForeground

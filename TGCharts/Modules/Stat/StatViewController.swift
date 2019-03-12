@@ -22,7 +22,8 @@ final class StatViewController: BaseViewController, IStatView {
     private let tableView = UITableView(frame: .zero, style: .grouped)
     
     private let dataSource = StatDataSource()
-    
+    private var chartControls = [IChartControl]()
+
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
         
@@ -39,7 +40,7 @@ final class StatViewController: BaseViewController, IStatView {
     }
     
     func setCharts(titlePrefix: String, charts: [StatChart]) {
-        let chartControls = charts.map(ChartControl.init)
+        chartControls = charts.map(ChartControl.init)
         dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
     }
     
@@ -64,8 +65,12 @@ final class StatViewController: BaseViewController, IStatView {
     
     override func updateDesign() {
         super.updateDesign()
+        
         tableView.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
         dataSource.updateDesign()
+        
+        let chartBackground = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        chartControls.forEach { control in control.setBackground(color: chartBackground) }
     }
 
     private func getLayout(size: CGSize) -> Layout {

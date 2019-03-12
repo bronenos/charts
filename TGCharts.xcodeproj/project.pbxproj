@@ -42,6 +42,9 @@
 		D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182892235C902006B72A7 /* UIColorExtensions.swift */; };
 		D461828E223630A0006B72A7 /* ChartControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828D223630A0006B72A7 /* ChartControl.swift */; };
 		D4618290223630AE006B72A7 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828F223630AE006B72A7 /* ChartView.swift */; };
+		D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF532236EF0B00C232E6 /* Graphics.swift */; };
+		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
+		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +87,9 @@
 		D46182892235C902006B72A7 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D461828D223630A0006B72A7 /* ChartControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartControl.swift; sourceTree = "<group>"; };
 		D461828F223630AE006B72A7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
+		D48EEF532236EF0B00C232E6 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
+		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
+		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +126,7 @@
 				D461827E2235A545006B72A7 /* Logic */,
 				D461822E223461F4006B72A7 /* Modules */,
 				D461828B22362F72006B72A7 /* Controls */,
+				D48EEF522236EE7700C232E6 /* Graphics */,
 				D461827B2235A401006B72A7 /* Extensions */,
 				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
@@ -284,6 +291,24 @@
 			path = ChartControl;
 			sourceTree = "<group>";
 		};
+		D48EEF522236EE7700C232E6 /* Graphics */ = {
+			isa = PBXGroup;
+			children = (
+				D48EEF532236EF0B00C232E6 /* Graphics.swift */,
+				D48EEF552236F0AA00C232E6 /* OpenGraphics */,
+			);
+			path = Graphics;
+			sourceTree = "<group>";
+		};
+		D48EEF552236F0AA00C232E6 /* OpenGraphics */ = {
+			isa = PBXGroup;
+			children = (
+				D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */,
+				D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */,
+			);
+			path = OpenGraphics;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -372,6 +397,7 @@
 				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
+				D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
 				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,
 				D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */,
@@ -383,10 +409,12 @@
 				D461828E223630A0006B72A7 /* ChartControl.swift in Sources */,
 				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
+				D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
+				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

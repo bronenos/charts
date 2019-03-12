@@ -12,6 +12,9 @@ import UIKit
 protocol IChartControl: class {
     var view: UIView & IChartView { get }
     var config: ChartConfig { get }
+    func link(to parentView: UIView)
+    func setBackground(color: UIColor)
+    func render()
     func toggleLine(key: String)
 }
 
@@ -21,9 +24,26 @@ final class ChartControl: IChartControl {
 
     let view: (UIView & IChartView) = ChartView()
     
+    private let graphics = obtainGraphicsForCurrentDevice()
+    
     init(chart: StatChart) {
         self.chart = chart
         self.config = ChartConfig(lines: chart.lines.map(startupConfigForLine))
+    }
+    
+    func link(to parentView: UIView) {
+        view.frame = parentView.bounds
+        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        graphics.link(to: parentView)
+    }
+    
+    func setBackground(color: UIColor) {
+        graphics.setBackground(color: color)
+        graphics.render()
+    }
+    
+    func render() {
+        graphics.render()
     }
     
     func toggleLine(key: String) {

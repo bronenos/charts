@@ -12,6 +12,7 @@ import UIKit
 fileprivate let standardHeaderHeight = CGFloat(25)
 fileprivate let standardCellHeight = CGFloat(40)
 fileprivate let chartCellHeight = CGFloat(350)
+fileprivate let chartCellReuseID = "chart_cell"
 fileprivate let optionCellReuseID = "option_cell"
 fileprivate let actionCellReuseID = "action_cell"
 
@@ -43,6 +44,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.dataSource = self
         tableView.delegate = self
         
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: chartCellReuseID)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: optionCellReuseID)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: actionCellReuseID)
 
@@ -177,15 +179,17 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     private func reusableChartControlCell() -> UITableViewCell {
-        return UITableViewCell()
+        if let cell = tableView?.dequeueReusableCell(withIdentifier: chartCellReuseID) {
+            return cell
+        }
+        
+        return UITableViewCell(style: .default, reuseIdentifier: chartCellReuseID)
     }
     
     private func populateChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
-        let cell = UITableViewCell()
         cell.selectionStyle = .none
-        cell.contentView.addSubview(control.view)
-        control.view.frame = cell.contentView.bounds
-        control.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        control.link(to: cell.contentView)
+        control.render()
     }
     
     private func reusableChartLineControlCell() -> UITableViewCell {
@@ -197,8 +201,12 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     private func populateChartLineControl(config: ChartConfigLine, intoCell cell: UITableViewCell) {
-        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
-        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
+        let selectedBackgroundView = UIView()
+        selectedBackgroundView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementFocusedBackground)
+        
+        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.selectedBackgroundView = selectedBackgroundView
+        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
         cell.textLabel?.text = config.name
         cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .optionForeground)
         cell.textLabel?.textAlignment = .left
@@ -215,9 +223,13 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     private func populateSwitchDesignCell(intoCell cell: UITableViewCell) {
-        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
-        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
-        cell.textLabel?.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementBackground)
+        let selectedBackgroundView = UIView()
+        selectedBackgroundView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementFocusedBackground)
+        
+        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.selectedBackgroundView = selectedBackgroundView
+        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.textLabel?.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
         cell.textLabel?.text = designSwitcherTitle
         cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .actionForeground)
         cell.textLabel?.textAlignment = .center

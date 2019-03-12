@@ -85,7 +85,8 @@ final class LightDesignBook: DesignBook {
     override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
         switch colorAlias {
         case .generalBackground: return color(.background)
-        case .elementBackground: return color(.white)
+        case .elementRegularBackground: return color(.white)
+        case .elementFocusedBackground: return color(.lightGray)
         case .navigationBackground: return color(.white)
         case .navigationForeground: return color(.black)
         case .sectionTitleForeground: return color(.darkGray)
@@ -113,7 +114,8 @@ final class DarkDesignBook: DesignBook {
     override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
         switch colorAlias {
         case .generalBackground: return color(.darkAsphalt)
-        case .elementBackground: return color(.lightAsphalt)
+        case .elementRegularBackground: return color(.lightAsphalt)
+        case .elementFocusedBackground: return color(.darkGray)
         case .navigationBackground: return color(.lightAsphalt)
         case .navigationForeground: return color(.white)
         case .sectionTitleForeground: return color(.lightSilver)
