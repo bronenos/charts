@@ -46,6 +46,7 @@
 		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
 		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartSliceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartSliceNode.swift */; };
+		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -92,6 +93,7 @@
 		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
 		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartSliceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSliceNode.swift; sourceTree = "<group>"; };
+		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +254,7 @@
 		D461827E2235A545006B72A7 /* Logic */ = {
 			isa = PBXGroup;
 			children = (
+				D4F4610A2238C60B00EDDF90 /* global.swift */,
 				D46182842235AF56006B72A7 /* BroadcastObservable */,
 				D461827F2235A553006B72A7 /* JsonReader */,
 			);
@@ -405,6 +408,7 @@
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
+				D4F4610B2238C60B00EDDF90 /* global.swift in Sources */,
 				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
 				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,

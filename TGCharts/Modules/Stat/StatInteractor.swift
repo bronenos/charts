@@ -39,8 +39,12 @@ final class StatInteractor: IStatInteractor {
     }
     
     func toggleDesign() {
+        switch DesignBook.shared.style {
+        case .light: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Light"))
+        case .dark: view.setDesignSwitcher(title: heartbeat.localized(key: "Stat.Mode.Dark"))
+        }
+        
         router.toggleDesign()
-        updateDesignSwitcher()
     }
     
     private func updateDesignSwitcher() {

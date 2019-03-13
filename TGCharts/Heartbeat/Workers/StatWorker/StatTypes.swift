@@ -19,6 +19,13 @@ struct StatChart {
     let size: Int
     let axis: StatChartAxis
     let lines: [StatChartLine]
+    
+    func visibleLines(config: ChartConfig) -> [StatChartLine] {
+        return zip(lines, config.lines).compactMap { line, lineConfig in
+            guard lineConfig.visible else { return nil }
+            return line
+        }
+    }
 }
 
 struct StatChartPresentingState {

@@ -34,10 +34,6 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func setDesignSwitcherTitle(_ title: String) {
         designSwitcherTitle = title
-        
-        updateRowsWithoutAnimations(
-            indexPaths: [IndexPath(row: 0, section: chartControls.count)]
-        )
     }
     
     func register(in tableView: UITableView) {
@@ -100,13 +96,13 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch true {
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             return chartCellHeight
             
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+        case sectionBelongsToAnyChart(indexPath.section) && not(indexPath.isFirstRow):
             return standardCellHeight
             
-        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             return standardCellHeight
             
         default:
@@ -117,13 +113,13 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch true {
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             return reusableChartControlCell()
             
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+        case sectionBelongsToAnyChart(indexPath.section) && not(indexPath.isFirstRow):
             return reusableChartLineControlCell()
             
-        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             return reusableSwitchDesignCell()
             
         default:
@@ -134,15 +130,15 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         switch true {
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             let chartControl = chartControls[indexPath.section]
             populateChartControl(control: chartControl, intoCell: cell)
             
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+        case sectionBelongsToAnyChart(indexPath.section) && !indexPath.isFirstRow:
             let lineConfig = chartControls[indexPath.section].config.lines[indexPath.row - 1]
             populateChartLineControl(config: lineConfig, intoCell: cell)
             
-        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             populateSwitchDesignCell(intoCell: cell)
             
         default:
@@ -152,14 +148,14 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         switch true {
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             let chartControl = chartControls[indexPath.section]
             utilizeChartControl(control: chartControl, intoCell: cell)
             
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+        case sectionBelongsToAnyChart(indexPath.section) && not(indexPath.isFirstRow):
             break
             
-        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             break
             
         default:
@@ -171,17 +167,21 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.deselectRow(at: indexPath, animated: false)
 
         switch true {
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
+        case sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             break
             
-        case sectionBelongsToAnyChart(indexPath.section) && indexPath.row > 0:
+        case sectionBelongsToAnyChart(indexPath.section) && not(indexPath.isFirstRow):
             let chartControl = chartControls[indexPath.section]
             let key = chartControl.config.lines[indexPath.row - 1].key
             chartControl.toggleLine(key: key)
             updateRowsWithoutAnimations(indexPaths: [indexPath])
 
-        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.row == 0:
-            switchDesignHandler?()
+        case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
+            // let the system to animate the cell back with the current design
+            // and then we can perform the design switch
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
+                self?.switchDesignHandler?()
+            }
             
         default:
             assertionFailure()
@@ -289,13 +289,15 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         guard let tableView = tableView else { return }
         guard !tableView.visibleCells.isEmpty else { return }
         
-        // workaround: system has been animating its cells for a short period;
-        // so don't mix our doings with system ones
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
-            tableView.visibleCells.forEach { cell in
-                guard let indexPath = tableView.indexPath(for: cell) else { return }
-                tableView.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
-            }
+        tableView.visibleCells.forEach { cell in
+            guard let indexPath = tableView.indexPath(for: cell) else { return }
+            tableView.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
         }
+    }
+}
+
+fileprivate extension IndexPath {
+    var isFirstRow: Bool {
+        return (row == 0)
     }
 }

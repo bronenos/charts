@@ -73,12 +73,15 @@ final class RootRouter: IRootRouter {
         
         window.addSubview(snapshot)
         
-        block()
-
-        UIView.animate(
-            withDuration: 0.75,
-            animations: { snapshot.alpha = 0 },
-            completion: { _ in snapshot.removeFromSuperview() }
-        )
+        // let the system to finish its current drawings
+        DispatchQueue.main.async {
+            block()
+            
+            UIView.animate(
+                withDuration: 0.15,
+                animations: { snapshot.alpha = 0 },
+                completion: { _ in snapshot.removeFromSuperview() }
+            )
+        }
     }
 }

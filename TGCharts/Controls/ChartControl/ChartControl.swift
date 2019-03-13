@@ -59,13 +59,13 @@ final class ChartControl: IChartControl {
     func render() {
         guard let _ = renderingSize else { return }
         
-        let focusedIndices = obtainFocusedRangeIndices()
-        guard let edgeValues = calculateEdges(in: focusedIndices) else { return }
-        
         graphics.render { link in
             link.setBackground(color: backgroundColor)
             
-            chart.lines.forEach { line in
+            let focusedIndices = obtainFocusedRangeIndices()
+            guard let edgeValues = calculateEdges(in: focusedIndices) else { return }
+            
+            chart.visibleLines(config: config).forEach { line in
                 let points = calculatePoints(line: line, in: focusedIndices, edges: edgeValues)
                 link.drawLine(points: points, color: line.color, width: 2)
             }
@@ -75,6 +75,7 @@ final class ChartControl: IChartControl {
     func toggleLine(key: String) {
         guard let index = config.lines.firstIndex(where: { $0.key == key }) else { return }
         config.lines[index].visible.toggle()
+        render()
     }
     
     private var renderingSize: CGSize? {
@@ -93,8 +94,8 @@ final class ChartControl: IChartControl {
     
     private func calculateEdges(in range: NSRange) -> ChartEdges? {
         let sliceRange = (range.lowerBound ..< range.upperBound)
-        let lowerValuesPerLine = chart.lines.compactMap { $0.values[sliceRange].min() }
-        let upperValuesPerLine = chart.lines.compactMap { $0.values[sliceRange].max() }
+        let lowerValuesPerLine = chart.visibleLines(config: config).compactMap { $0.values[sliceRange].min() }
+        let upperValuesPerLine = chart.visibleLines(config: config).compactMap { $0.values[sliceRange].max() }
         
         guard !lowerValuesPerLine.isEmpty else { return nil }
         guard lowerValuesPerLine.count == upperValuesPerLine.count else { return nil }
@@ -113,7 +114,7 @@ final class ChartControl: IChartControl {
         
         return line.values[sliceRange].enumerated().map { index, value in
             let x = CGFloat(index) * horizontalStep
-            let y = (CGFloat(value - edges.start) / CGFloat(edges.end)) * size.height
+            let y = (CGFloat(value - edges.start) / CGFloat(edges.end - edges.start)) * size.height
             return CGPoint(x: x, y: y)
         }
     }

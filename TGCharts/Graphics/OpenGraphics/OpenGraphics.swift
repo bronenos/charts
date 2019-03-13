@@ -71,18 +71,14 @@ final class OpenGraphics: IGraphics {
     }
     
     func setBackground(color: UIColor) {
-        var r = CGFloat(0), g = CGFloat(0), b = CGFloat(0), a = CGFloat(0)
-        color.getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        glClearColor(r.to_clamp, g.to_clamp, b.to_clamp, a.to_clamp)
+        let c = color.extractComponents()
+        glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
         glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
     }
     
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat) {
-        var r = CGFloat(0), g = CGFloat(0), b = CGFloat(0), a = CGFloat(0)
-        color.getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        glColor4f(r.to_float, g.to_float, b.to_float, a.to_float)
+        let c = color.extractComponents()
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         glLineWidth(width.to_float);
         
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
@@ -190,5 +186,20 @@ fileprivate extension CGFloat {
     
     var to_clamp: GLclampf {
         return GLclampf(self)
+    }
+}
+
+fileprivate extension UIColor {
+    struct Components {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+    }
+    
+    func extractComponents() -> Components {
+        var c = Components()
+        getRed(&c.red, green: &c.green, blue: &c.blue, alpha: &c.alpha)
+        return c
     }
 }
