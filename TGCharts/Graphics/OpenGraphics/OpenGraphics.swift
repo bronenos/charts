@@ -15,7 +15,7 @@ final class OpenGraphics: IGraphics {
     private let context: EAGLContext
     private var renderSize = CGSize.zero
     private var renderScale = CGFloat(0)
-    private var frameBuffer = GLuint(0)
+    private var generalFrameBuffer = GLuint(0)
     private var renderBuffer = GLuint(0)
     private var renderTexture = GLuint(0)
     
@@ -69,15 +69,34 @@ final class OpenGraphics: IGraphics {
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
         
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
+//        glEnable(GL_LINE_SMOOTH.to_enum)
+//        glHint(GL_LINE_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
+        
+        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
         drawingBlock(self)
         
-        glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
+//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE.to_enum, generalFrameBuffer)
+//        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE.to_enum, msaaFrameBuffer)
+//        glResolveMultisampleFramebufferAPPLE()
         
+        glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
         context.presentRenderbuffer(GL_RENDERBUFFER.to_int)
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, 0)
         
         EAGLContext.setCurrent(nil)
+    }
+    
+    func stroke(points: [CGPoint], color: UIColor, width: CGFloat) {
+        guard let c = color.extractComponents() else { return }
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
+        glLineWidth(width.to_float)
+
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        
+        let coords = convertPointsToCoords(points)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
+        glDrawArrays(GL_LINE_STRIP.to_enum, 0, points.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
     }
     
     func fill(frame: CGRect, color: UIColor) {
@@ -102,7 +121,7 @@ final class OpenGraphics: IGraphics {
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat) {
         guard let c = color.extractComponents() else { return }
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
-        glLineWidth(width.to_float);
+        glLineWidth(width.to_float)
         
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         
@@ -135,9 +154,10 @@ final class OpenGraphics: IGraphics {
             context.renderbufferStorage(GL_RENDERBUFFER.to_int, from: renderView.drawableLayer)
         }
         
-        glGenFramebuffers(1, &frameBuffer)
-        if frameBuffer > 0 {
-            glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
+        glGenFramebuffers(1, &generalFrameBuffer)
+//        glGenFramebuffers(1, &msaaFrameBuffer)
+        if generalFrameBuffer > 0 {
+            glBindFramebuffer(GL_FRAMEBUFFER.to_enum, generalFrameBuffer)
         }
         
         glGenTextures(1, &renderTexture)
@@ -150,6 +170,8 @@ final class OpenGraphics: IGraphics {
             glTexImage2D(GL_TEXTURE_2D.to_enum, 0, GL_RGBA, renderSize.width.to_size, renderSize.height.to_size, 0, GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum, nil)
         }
         
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
+        
         EAGLContext.setCurrent(nil)
     }
     
@@ -157,9 +179,9 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(context)
         
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, 0)
-        glDeleteFramebuffers(1, &frameBuffer)
-        frameBuffer = 0
-        
+        glDeleteFramebuffers(1, &generalFrameBuffer)
+        generalFrameBuffer = 0
+
         glBindRenderbuffer(GL_RENDERBUFFER.to_enum, 0)
         glDeleteRenderbuffers(1, &renderBuffer)
         renderBuffer = 0

@@ -68,9 +68,6 @@ final class StatViewController: BaseViewController, IStatView {
         
         tableView.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
         dataSource.updateDesign()
-        
-        let chartBackground = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
-        chartControls.forEach { control in control.setBackgroundColor(chartBackground) }
     }
 
     private func getLayout(size: CGSize) -> Layout {

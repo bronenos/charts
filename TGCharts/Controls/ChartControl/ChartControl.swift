@@ -9,15 +9,12 @@
 import Foundation
 import UIKit
 
-fileprivate let maximumDistanceBetweenDates = CGFloat(15)
-
 protocol IChartControl: class {
     var view: UIView & IChartView { get }
     var config: ChartConfig { get }
     func link(to parentView: UIView)
     func unlink()
     func render()
-    func setBackgroundColor(_ color: UIColor)
     func toggleLine(key: String)
 }
 
@@ -29,20 +26,13 @@ final class ChartControl: IChartControl {
     private var parentView: UIView?
 
     private let graphics = obtainGraphicsForCurrentDevice()
-    private let scene = ChartNode()
-    private let graphSliceNode = ChartGraphNode()
-    private let graphNavigationNode = ChartGraphNode()
-    private let sliderNode = ChartSliderNode()
+    private let scene = ChartSceneNode()
     
     private var range = ChartRange(startPoint: 0.15, endPoint: 0.5)
     
     init(chart: StatChart) {
         self.chart = chart
         self.config = ChartConfig(lines: chart.lines.map(startupConfigForLine))
-        
-        scene.addChild(node: graphSliceNode)
-        scene.addChild(node: graphNavigationNode)
-        graphNavigationNode.addChild(node: sliderNode)
     }
     
     func link(to parentView: UIView) {
@@ -60,34 +50,10 @@ final class ChartControl: IChartControl {
     
     func render() {
         guard let size = renderingSize else { return }
-        
-        let bounds = CGRect(origin: .zero, size: size)
-        let graphFrames = bounds.divided(atDistance: 40, from: .minYEdge)
-        
-        let graphSliceFrame = graphFrames.remainder
-        let graphNavigationFrame = graphFrames.slice
-        let sliderFrame = CGRect(x: size.width * range.startPoint, y: 0, width: size.width * range.distance, height: graphNavigationFrame.height)
-
-        scene.setFrame(bounds)
-        
-        graphSliceNode.setFrame(graphSliceFrame)
-        graphSliceNode.setChart(chart, config: config, range: range)
-        
-        graphNavigationNode.setFrame(graphNavigationFrame)
-        graphNavigationNode.setBackgroundColor(DesignBook.shared.resolve(colorAlias: .sliderInactiveBackground))
-        graphNavigationNode.setChart(chart, config: config, range: ChartRange.full)
-        
-        sliderNode.setFrame(sliderFrame)
-        sliderNode.setBackgroundColor(DesignBook.shared.resolve(colorAlias: .sliderControlBackground))
-
-        graphics.render { link in
-            scene.renderWithChildren(graphics: link)
-        }
-    }
-    
-    func setBackgroundColor(_ color: UIColor) {
-        scene.setBackgroundColor(color)
-        render()
+        scene.setFrame(CGRect(origin: .zero, size: size))
+        scene.setChart(chart, config: config, range: range)
+        scene.applyDesign()
+        graphics.render { link in scene.renderWithChildren(graphics: link)}
     }
     
     func toggleLine(key: String) {
@@ -99,7 +65,6 @@ final class ChartControl: IChartControl {
     private var renderingSize: CGSize? {
         return parentView?.bounds.size
     }
-    
 }
 
 fileprivate func startupConfigForLine(_ line: StatChartLine) -> ChartConfigLine {
@@ -109,4 +74,32 @@ fileprivate func startupConfigForLine(_ line: StatChartLine) -> ChartConfigLine 
         color: line.color,
         visible: true
     )
+}
+
+fileprivate extension ChartSceneNode {
+    func applyDesign() {
+        setBackgroundColor(
+            DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        )
+        
+        navigatorNode.setBackgroundColor(
+            DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        )
+        
+        navigatorNode.canvasNode.setBackgroundColor(
+            DesignBook.shared.resolve(colorAlias: .sliderActiveBackground)
+        )
+        
+        navigatorNode.graphNode.setBackgroundColor(
+            DesignBook.shared.resolve(colorAlias: .sliderInactiveBackground)
+        )
+        
+        navigatorNode.sliderNode.setControlBackgroundColor(
+            DesignBook.shared.resolve(colorAlias: .sliderControlBackground)
+        )
+        
+        navigatorNode.sliderNode.setControlForegroundColor(
+            DesignBook.shared.resolve(colorAlias: .sliderControlForeground)
+        )
+    }
 }

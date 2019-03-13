@@ -9,30 +9,42 @@
 import Foundation
 import UIKit
 
-protocol IChartGraphNode: IChartNode {
+protocol IChartGraphNode: IChartFigureNode {
     func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange)
 }
 
-final class ChartGraphNode: ChartNode, IChartGraphNode {
+final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
+    private var figureNodes = [ChartFigureNode]()
+    
     private var chart = StatChart()
     private var config = ChartConfig()
     private var range = ChartRange(startPoint: 0, endPoint: 1.0)
+    
+    override func setFrame(_ frame: CGRect) {
+        super.setFrame(frame)
+        update()
+    }
     
     func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange) {
         self.chart = chart
         self.config = config
         self.range = range
+        update()
     }
     
-    override func render(graphics: IGraphics) {
-        super.render(graphics: graphics)
+    private func update() {
+        removeAllChildren()
         
         let focusedIndices = obtainFocusedRangeIndices()
         guard let edgeValues = calculateEdges(in: focusedIndices) else { return }
         
         chart.visibleLines(config: config).forEach { line in
-            let points = calculatePoints(line: line, in: focusedIndices, edges: edgeValues)
-            graphics.drawLine(points: points, color: line.color, width: 2)
+            let figureNode = ChartFigureNode()
+            figureNode.setFrame(bounds)
+            figureNode.setWidth(2)
+            figureNode.setStrokeColor(line.color)
+            figureNode.setPoints(calculatePoints(line: line, in: focusedIndices, edges: edgeValues))
+            addChild(node: figureNode)
         }
     }
     

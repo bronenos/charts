@@ -209,7 +209,6 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     private func populateChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
         cell.selectionStyle = .none
         control.link(to: cell.contentView)
-        control.setBackgroundColor(DesignBook.shared.resolve(colorAlias: .elementRegularBackground))
         control.render()
     }
     

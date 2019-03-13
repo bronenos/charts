@@ -11,6 +11,10 @@
 		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4B223952E800733F2F /* ChartNode.swift */; };
 		D42B7A4E22396D6800733F2F /* ChartSliderNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */; };
+		D42B7A502239750400733F2F /* ChartNavigatorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */; };
+		D42B7A522239779B00733F2F /* ChartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A512239779B00733F2F /* ChartScene.swift */; };
+		D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A552239893E00733F2F /* ChartFigureNode.swift */; };
+		D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */; };
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
@@ -56,6 +60,10 @@
 		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D42B7A4B223952E800733F2F /* ChartNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNode.swift; sourceTree = "<group>"; };
 		D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSliderNode.swift; sourceTree = "<group>"; };
+		D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNavigatorNode.swift; sourceTree = "<group>"; };
+		D42B7A512239779B00733F2F /* ChartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartScene.swift; sourceTree = "<group>"; };
+		D42B7A552239893E00733F2F /* ChartFigureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartFigureNode.swift; sourceTree = "<group>"; };
+		D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRectExtensions.swift; sourceTree = "<group>"; };
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -251,6 +259,7 @@
 			isa = PBXGroup;
 			children = (
 				D46182892235C902006B72A7 /* UIColorExtensions.swift */,
+				D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -323,8 +332,11 @@
 			isa = PBXGroup;
 			children = (
 				D42B7A4B223952E800733F2F /* ChartNode.swift */,
+				D42B7A512239779B00733F2F /* ChartScene.swift */,
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
+				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
+				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 			);
 			path = Nodes;
 			sourceTree = "<group>";
@@ -405,10 +417,12 @@
 				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
+				D42B7A522239779B00733F2F /* ChartScene.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
 				D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
+				D42B7A502239750400733F2F /* ChartNavigatorNode.swift in Sources */,
 				D4618290223630AE006B72A7 /* ChartView.swift in Sources */,
 				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
@@ -435,7 +449,9 @@
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
 				D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
+				D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
+				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,

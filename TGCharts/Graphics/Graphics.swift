@@ -16,6 +16,7 @@ protocol IGraphics: class {
     func pushOffset(_ offset: CGPoint)
     func popOffset()
     func render(drawingBlock: (IGraphics) -> Void)
+    func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat)
 }

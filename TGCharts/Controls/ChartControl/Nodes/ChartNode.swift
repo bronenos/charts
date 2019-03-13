@@ -12,7 +12,9 @@ import UIKit
 protocol IChartNode: class {
     var origin: CGPoint { get }
     var size: CGSize { get }
+    var bounds: CGRect { get }
     func addChild(node: IChartNode)
+    func removeAllChildren()
     func renderWithChildren(graphics: IGraphics)
     func render(graphics: IGraphics)
     func setFrame(_ frame: CGRect)
@@ -32,8 +34,16 @@ class ChartNode: IChartNode {
         return frame.size
     }
     
+    var bounds: CGRect {
+        return CGRect(origin: .zero, size: size)
+    }
+    
     final func addChild(node: IChartNode) {
         childNodes.append(node)
+    }
+    
+    final func removeAllChildren() {
+        childNodes.removeAll()
     }
     
     final func renderWithChildren(graphics: IGraphics) {
@@ -51,7 +61,7 @@ class ChartNode: IChartNode {
         graphics.fill(frame: rect, color: backgroundColor)
     }
 
-    final func setFrame(_ frame: CGRect) {
+    func setFrame(_ frame: CGRect) {
         self.frame = frame
     }
     
