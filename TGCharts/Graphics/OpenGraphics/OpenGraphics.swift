@@ -47,6 +47,15 @@ final class OpenGraphics: IGraphics {
         closeEnvironment()
     }
     
+    func pushOffset(_ offset: CGPoint) {
+        glPushMatrix()
+        glTranslatef(offset.x.to_float, offset.y.to_float, 0)
+    }
+    
+    func popOffset() {
+        glPopMatrix()
+    }
+    
     func render(drawingBlock: (IGraphics) -> Void) {
         EAGLContext.setCurrent(context)
         
@@ -60,6 +69,7 @@ final class OpenGraphics: IGraphics {
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
         
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         drawingBlock(self)
         
         glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
@@ -70,14 +80,27 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(nil)
     }
     
-    func setBackground(color: UIColor) {
-        let c = color.extractComponents()
-        glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
-        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
+    func fill(frame: CGRect, color: UIColor) {
+        guard let c = color.extractComponents() else { return }
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
+        
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        
+        var points = [CGPoint]()
+        points.append(CGPoint(x: frame.maxX, y: frame.minY)) // bottom-right
+        points.append(CGPoint(x: frame.maxX, y: frame.maxY)) // top-right
+        points.append(CGPoint(x: frame.minX, y: frame.minY)) // bottom-left
+        points.append(CGPoint(x: frame.minX, y: frame.maxY)) // top-left
+
+        let coords = convertPointsToCoords(points)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
+        glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, points.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
     }
     
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat) {
-        let c = color.extractComponents()
+        guard let c = color.extractComponents() else { return }
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         glLineWidth(width.to_float);
         
@@ -127,8 +150,6 @@ final class OpenGraphics: IGraphics {
             glTexImage2D(GL_TEXTURE_2D.to_enum, 0, GL_RGBA, renderSize.width.to_size, renderSize.height.to_size, 0, GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum, nil)
         }
         
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
-        
         EAGLContext.setCurrent(nil)
     }
     
@@ -148,6 +169,16 @@ final class OpenGraphics: IGraphics {
         renderTexture = 0
         
         EAGLContext.setCurrent(nil)
+    }
+    
+    private func convertPointsToCoords(_ points: [CGPoint]) -> [GLfloat] {
+        var coords = [GLfloat](repeating: 0, count: points.count * 2)
+        points.enumerated().forEach { index, point in
+            coords[index * 2 + 0] = point.x.to_float
+            coords[index * 2 + 1] = point.y.to_float
+        }
+        
+        return coords
     }
 }
 
@@ -197,9 +228,15 @@ fileprivate extension UIColor {
         var alpha: CGFloat = 0
     }
     
-    func extractComponents() -> Components {
+    func extractComponents() -> Components? {
         var c = Components()
         getRed(&c.red, green: &c.green, blue: &c.blue, alpha: &c.alpha)
-        return c
+        
+        if c.alpha > 0 {
+            return c
+        }
+        else {
+            return nil
+        }
     }
 }

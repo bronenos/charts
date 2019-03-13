@@ -11,6 +11,14 @@ import UIKit
 
 struct ChartConfig {
     var lines: [ChartConfigLine]
+    
+    init() {
+        lines = []
+    }
+    
+    init(lines: [ChartConfigLine]) {
+        self.lines = lines
+    }
 }
 
 struct ChartConfigLine {
@@ -21,6 +29,8 @@ struct ChartConfigLine {
 }
 
 struct ChartRange {
+    static let full = ChartRange(startPoint: 0, endPoint: 1.0)
+    
     let startPoint: CGFloat
     let endPoint: CGFloat
     

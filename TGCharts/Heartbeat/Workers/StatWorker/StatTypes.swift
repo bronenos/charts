@@ -20,6 +20,20 @@ struct StatChart {
     let axis: StatChartAxis
     let lines: [StatChartLine]
     
+    init() {
+        size = 0
+        axis = StatChartAxis(dates: [])
+        lines = []
+    }
+    
+    init(size: Int,
+         axis: StatChartAxis,
+         lines: [StatChartLine]) {
+        self.size = size
+        self.axis = axis
+        self.lines = lines
+    }
+    
     func visibleLines(config: ChartConfig) -> [StatChartLine] {
         return zip(lines, config.lines).compactMap { line, lineConfig in
             guard lineConfig.visible else { return nil }

@@ -49,7 +49,7 @@ class DesignBook: IDesignBook {
         case .darkAsphalt: return UIColor(red: 0.07, green: 0.10, blue: 0.13, alpha: 1.0)
         case .lightGray: return UIColor.lightGray
         case .darkGray: return UIColor.darkGray
-        case .lightSilver: return UIColor(red: 0.82, green: 0.82, blue: 0.84, alpha: 1.0)
+        case .lightSilver: return UIColor(red: 0.96, green: 0.98, blue: 1.0, alpha: 1.0)
         case .darkSilver: return UIColor(red: 0.77, green: 0.77, blue: 0.80, alpha: 1.0)
         case .lightBlue: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
         case .darkBlue: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
@@ -121,7 +121,7 @@ final class DarkDesignBook: DesignBook {
         case .sectionTitleForeground: return color(.lightSilver)
         case .chartIndexForeground: return color(.lightSilver)
         case .chartGridBackground: return color(.darkGray)
-        case .sliderActiveBackground: return color(.darkSilver)
+        case .sliderActiveBackground: return color(.black)
         case .sliderInactiveBackground: return color(.darkSilver)
         case .sliderControlBackground: return color(.lightSilver)
         case .sliderControlForeground: return color(.white)

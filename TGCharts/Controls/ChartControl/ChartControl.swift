@@ -16,8 +16,8 @@ protocol IChartControl: class {
     var config: ChartConfig { get }
     func link(to parentView: UIView)
     func unlink()
-    func setBackground(color: UIColor)
     func render()
+    func setBackgroundColor(_ color: UIColor)
     func toggleLine(key: String)
 }
 
@@ -29,13 +29,20 @@ final class ChartControl: IChartControl {
     private var parentView: UIView?
 
     private let graphics = obtainGraphicsForCurrentDevice()
-    private var focusedRange = ChartRange(startPoint: 0.15, endPoint: 0.55)
+    private let scene = ChartNode()
+    private let graphSliceNode = ChartGraphNode()
+    private let graphNavigationNode = ChartGraphNode()
+    private let sliderNode = ChartSliderNode()
     
-    private var backgroundColor = UIColor.white
+    private var range = ChartRange(startPoint: 0.15, endPoint: 0.5)
     
     init(chart: StatChart) {
         self.chart = chart
         self.config = ChartConfig(lines: chart.lines.map(startupConfigForLine))
+        
+        scene.addChild(node: graphSliceNode)
+        scene.addChild(node: graphNavigationNode)
+        graphNavigationNode.addChild(node: sliderNode)
     }
     
     func link(to parentView: UIView) {
@@ -51,25 +58,36 @@ final class ChartControl: IChartControl {
         self.parentView = nil
     }
     
-    func setBackground(color: UIColor) {
-        backgroundColor = color
-        render()
+    func render() {
+        guard let size = renderingSize else { return }
+        
+        let bounds = CGRect(origin: .zero, size: size)
+        let graphFrames = bounds.divided(atDistance: 40, from: .minYEdge)
+        
+        let graphSliceFrame = graphFrames.remainder
+        let graphNavigationFrame = graphFrames.slice
+        let sliderFrame = CGRect(x: size.width * range.startPoint, y: 0, width: size.width * range.distance, height: graphNavigationFrame.height)
+
+        scene.setFrame(bounds)
+        
+        graphSliceNode.setFrame(graphSliceFrame)
+        graphSliceNode.setChart(chart, config: config, range: range)
+        
+        graphNavigationNode.setFrame(graphNavigationFrame)
+        graphNavigationNode.setBackgroundColor(DesignBook.shared.resolve(colorAlias: .sliderInactiveBackground))
+        graphNavigationNode.setChart(chart, config: config, range: ChartRange.full)
+        
+        sliderNode.setFrame(sliderFrame)
+        sliderNode.setBackgroundColor(DesignBook.shared.resolve(colorAlias: .sliderControlBackground))
+
+        graphics.render { link in
+            scene.renderWithChildren(graphics: link)
+        }
     }
     
-    func render() {
-        guard let _ = renderingSize else { return }
-        
-        graphics.render { link in
-            link.setBackground(color: backgroundColor)
-            
-            let focusedIndices = obtainFocusedRangeIndices()
-            guard let edgeValues = calculateEdges(in: focusedIndices) else { return }
-            
-            chart.visibleLines(config: config).forEach { line in
-                let points = calculatePoints(line: line, in: focusedIndices, edges: edgeValues)
-                link.drawLine(points: points, color: line.color, width: 2)
-            }
-        }
+    func setBackgroundColor(_ color: UIColor) {
+        scene.setBackgroundColor(color)
+        render()
     }
     
     func toggleLine(key: String) {
@@ -82,42 +100,6 @@ final class ChartControl: IChartControl {
         return parentView?.bounds.size
     }
     
-    private func obtainFocusedRangeIndices() -> NSRange {
-        // calculate the focused indices using ceil-round rule
-        // and by one additional extra element for each side resulting in
-        // line could be drawn off-the-screen
-        
-        let numberOfPoints: Int = 1 + Int(CGFloat(chart.size) * focusedRange.distance + 1) + 1
-        let firstIndex = Int(CGFloat(chart.size) * focusedRange.startPoint)
-        return NSMakeRange(firstIndex, numberOfPoints)
-    }
-    
-    private func calculateEdges(in range: NSRange) -> ChartEdges? {
-        let sliceRange = (range.lowerBound ..< range.upperBound)
-        let lowerValuesPerLine = chart.visibleLines(config: config).compactMap { $0.values[sliceRange].min() }
-        let upperValuesPerLine = chart.visibleLines(config: config).compactMap { $0.values[sliceRange].max() }
-        
-        guard !lowerValuesPerLine.isEmpty else { return nil }
-        guard lowerValuesPerLine.count == upperValuesPerLine.count else { return nil }
-        
-        guard let lowerValue = lowerValuesPerLine.min() else { return nil }
-        guard let upperValue = upperValuesPerLine.max() else { return nil }
-        
-        return ChartEdges(start: lowerValue, end: upperValue)
-    }
-    
-    private func calculatePoints(line: StatChartLine, in range: NSRange, edges: ChartEdges) -> [CGPoint] {
-        guard let size = renderingSize else { return [] }
-        
-        let sliceRange = (range.lowerBound ..< range.upperBound)
-        let horizontalStep = size.width / CGFloat(range.length)
-        
-        return line.values[sliceRange].enumerated().map { index, value in
-            let x = CGFloat(index) * horizontalStep
-            let y = (CGFloat(value - edges.start) / CGFloat(edges.end - edges.start)) * size.height
-            return CGPoint(x: x, y: y)
-        }
-    }
 }
 
 fileprivate func startupConfigForLine(_ line: StatChartLine) -> ChartConfigLine {

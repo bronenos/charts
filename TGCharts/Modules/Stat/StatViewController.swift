@@ -70,7 +70,7 @@ final class StatViewController: BaseViewController, IStatView {
         dataSource.updateDesign()
         
         let chartBackground = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
-        chartControls.forEach { control in control.setBackground(color: chartBackground) }
+        chartControls.forEach { control in control.setBackgroundColor(chartBackground) }
     }
 
     private func getLayout(size: CGSize) -> Layout {

@@ -13,8 +13,10 @@ protocol IGraphics: class {
     var engineName: String { get }
     func link(to view: UIView)
     func unlink(from view: UIView)
+    func pushOffset(_ offset: CGPoint)
+    func popOffset()
     func render(drawingBlock: (IGraphics) -> Void)
-    func setBackground(color: UIColor)
+    func fill(frame: CGRect, color: UIColor)
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat)
 }
 
