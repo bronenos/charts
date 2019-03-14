@@ -15,7 +15,7 @@ protocol IStatView: class {
     func setDesignSwitcher(title: String)
 }
 
-final class StatViewController: BaseViewController, IStatView {
+final class StatViewController: BaseViewController, IStatView, IChartControlDelegate {
     var router: IStatRouter!
     weak var interactor: IStatInteractor!
     
@@ -40,7 +40,10 @@ final class StatViewController: BaseViewController, IStatView {
     }
     
     func setCharts(titlePrefix: String, charts: [StatChart]) {
+        chartControls.forEach { control in control.setDelegate(nil) }
         chartControls = charts.map(ChartControl.init)
+        chartControls.forEach { control in control.setDelegate(self) }
+        
         dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
     }
     
@@ -77,6 +80,15 @@ final class StatViewController: BaseViewController, IStatView {
             bottomLayoutGuide: bottomLayoutGuide
         )
     }
+    
+    func chartControlDidBeginInteraction() {
+        tableView.isScrollEnabled = false
+    }
+    
+    func chartControlDidEndInteraction() {
+        tableView.isScrollEnabled = true
+    }
+    
 }
 
 fileprivate struct Layout {

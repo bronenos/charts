@@ -31,6 +31,10 @@ final class OpenGraphics: IGraphics {
         return "OpenGL"
     }
     
+    func setDelegate(_ delegate: IGraphicsDelegate?) {
+        renderView.delegate = delegate
+    }
+    
     func link(to view: UIView) {
         guard !renderView.isDescendant(of: view) else { return }
         view.addSubview(renderView)

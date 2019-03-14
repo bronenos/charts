@@ -29,13 +29,13 @@ struct ChartConfigLine {
 }
 
 struct ChartRange {
-    static let full = ChartRange(startPoint: 0, endPoint: 1.0)
+    static let full = ChartRange(start: 0, end: 1.0)
     
-    let startPoint: CGFloat
-    let endPoint: CGFloat
+    let start: CGFloat
+    let end: CGFloat
     
     var distance: CGFloat {
-        return endPoint - startPoint
+        return end - start
     }
 }
 

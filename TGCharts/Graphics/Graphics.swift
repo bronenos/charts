@@ -11,6 +11,7 @@ import UIKit
 
 protocol IGraphics: class {
     var engineName: String { get }
+    func setDelegate(_ delegate: IGraphicsDelegate?)
     func link(to view: UIView)
     func unlink(from view: UIView)
     func pushOffset(_ offset: CGPoint)
@@ -19,6 +20,12 @@ protocol IGraphics: class {
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
     func drawLine(points: [CGPoint], color: UIColor, width: CGFloat)
+}
+
+protocol IGraphicsDelegate: class {
+    func interactionDidStart(at point: CGPoint)
+    func interactionDidMove(to point: CGPoint)
+    func interactionDidEnd(at point: CGPoint)
 }
 
 func obtainGraphicsForCurrentDevice() -> IGraphics {

@@ -12,27 +12,44 @@ import UIKit
 protocol IChartControl: class {
     var view: UIView & IChartView { get }
     var config: ChartConfig { get }
+    func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
     func unlink()
     func render()
     func toggleLine(key: String)
 }
 
-final class ChartControl: IChartControl {
+protocol IChartControlDelegate: class {
+    func chartControlDidBeginInteraction()
+    func chartControlDidEndInteraction()
+}
+
+final class ChartControl: IChartControl, IChartInteractorDelegate {
     private let chart: StatChart
     private(set) var config: ChartConfig
 
     let view: (UIView & IChartView) = ChartView()
     private var parentView: UIView?
+    private weak var delegate: IChartControlDelegate?
 
-    private let graphics = obtainGraphicsForCurrentDevice()
-    private let scene = ChartSceneNode()
-    
-    private var range = ChartRange(startPoint: 0.15, endPoint: 0.5)
+    private let graphics: IGraphics
+    private let scene: ChartSceneNode
+    private let interactor: IChartInteractor
     
     init(chart: StatChart) {
         self.chart = chart
         self.config = ChartConfig(lines: chart.lines.map(startupConfigForLine))
+        
+        graphics = obtainGraphicsForCurrentDevice()
+        scene = ChartSceneNode(tag: "scene")
+        interactor = ChartInteractor(scene: scene)
+        
+        graphics.setDelegate(interactor)
+        interactor.setDelegate(self)
+    }
+    
+    func setDelegate(_ delegate: IChartControlDelegate?) {
+        self.delegate = delegate
     }
     
     func link(to parentView: UIView) {
@@ -51,7 +68,7 @@ final class ChartControl: IChartControl {
     func render() {
         guard let size = renderingSize else { return }
         scene.setFrame(CGRect(origin: .zero, size: size))
-        scene.setChart(chart, config: config, range: range)
+        scene.setChart(chart, config: config, range: interactor.range)
         scene.applyDesign()
         graphics.render { link in scene.renderWithChildren(graphics: link)}
     }
@@ -64,6 +81,18 @@ final class ChartControl: IChartControl {
     
     private var renderingSize: CGSize? {
         return parentView?.bounds.size
+    }
+    
+    func interactorDidBegin() {
+        delegate?.chartControlDidBeginInteraction()
+    }
+    
+    func interactorDidEnd() {
+        delegate?.chartControlDidEndInteraction()
+    }
+    
+    func interactorDidRequestRender() {
+        render()
     }
 }
 
@@ -94,11 +123,15 @@ fileprivate extension ChartSceneNode {
             DesignBook.shared.resolve(colorAlias: .sliderInactiveBackground)
         )
         
-        navigatorNode.sliderNode.setControlBackgroundColor(
+        navigatorNode.sliderNode.setForegroundColor(
             DesignBook.shared.resolve(colorAlias: .sliderControlBackground)
         )
         
-        navigatorNode.sliderNode.setControlForegroundColor(
+        navigatorNode.sliderNode.leftArrowNode.setForegroundColor(
+            DesignBook.shared.resolve(colorAlias: .sliderControlForeground)
+        )
+        
+        navigatorNode.sliderNode.rightArrowNode.setForegroundColor(
             DesignBook.shared.resolve(colorAlias: .sliderControlForeground)
         )
     }

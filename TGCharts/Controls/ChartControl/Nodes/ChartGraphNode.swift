@@ -18,7 +18,11 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     
     private var chart = StatChart()
     private var config = ChartConfig()
-    private var range = ChartRange(startPoint: 0, endPoint: 1.0)
+    private var range = ChartRange(start: 0, end: 1.0)
+    
+    override init(tag: String?) {
+        super.init(tag: tag ?? "[graph]")
+    }
     
     override func setFrame(_ frame: CGRect) {
         super.setFrame(frame)
@@ -39,7 +43,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         guard let edgeValues = calculateEdges(in: focusedIndices) else { return }
         
         chart.visibleLines(config: config).forEach { line in
-            let figureNode = ChartFigureNode()
+            let figureNode = ChartFigureNode(tag: "graph-line")
             figureNode.setFrame(bounds)
             figureNode.setWidth(2)
             figureNode.setStrokeColor(line.color)
@@ -54,7 +58,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         // line could be drawn off-the-screen
         
         let numberOfPoints: Int = 1 + Int(CGFloat(chart.size) * range.distance + 1) + 1
-        let firstIndex = Int(CGFloat(chart.size) * range.startPoint)
+        let firstIndex = Int(CGFloat(chart.size) * range.start)
         let restNumber = min(chart.size - firstIndex, numberOfPoints)
         return NSMakeRange(firstIndex, restNumber)
     }

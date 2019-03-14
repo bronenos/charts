@@ -17,14 +17,14 @@ protocol IChartNavigatorNode: IChartNode {
 }
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
-    let canvasNode: IChartNode = ChartNode()
-    let graphNode: IChartGraphNode = ChartGraphNode()
-    let sliderNode: IChartSliderNode = ChartSliderNode()
+    let canvasNode: IChartNode = ChartNode(tag: "navigator-canvas")
+    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph")
+    let sliderNode: IChartSliderNode = ChartSliderNode(tag: "navigator-slider")
     
     private var range = ChartRange.full
     
-    override init() {
-        super.init()
+    override init(tag: String?) {
+        super.init(tag: tag ?? "[navigator]")
         
         addChild(node: canvasNode)
         addChild(node: graphNode)
@@ -40,12 +40,12 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange) {
         self.range = range
         
-        graphNode.setChart(chart, config: config, range: range)
+        graphNode.setChart(chart, config: config, range: ChartRange.full)
         update(range: range)
     }
     
     private func update(range: ChartRange) {
-        let canvasFrame = CGRect(x: size.width * range.startPoint, y: 0, width: size.width * range.distance, height: size.height)
+        let canvasFrame = CGRect(x: size.width * range.start, y: 0, width: size.width * range.distance, height: size.height)
         canvasNode.setFrame(canvasFrame)
         
         let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: 1)

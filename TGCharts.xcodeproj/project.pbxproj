@@ -15,6 +15,12 @@
 		D42B7A522239779B00733F2F /* ChartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A512239779B00733F2F /* ChartScene.swift */; };
 		D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A552239893E00733F2F /* ChartFigureNode.swift */; };
 		D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */; };
+		D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */; };
+		D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A0223A5A22002134ED /* ChartInteractor.swift */; };
+		D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */; };
+		D45B78A7223A610C002134ED /* ChartInteractorMoveScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */; };
+		D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A8223A673D002134ED /* CGPointExtensions.swift */; };
+		D45B78AB223A67D3002134ED /* CGVectorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */; };
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
@@ -64,6 +70,12 @@
 		D42B7A512239779B00733F2F /* ChartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartScene.swift; sourceTree = "<group>"; };
 		D42B7A552239893E00733F2F /* ChartFigureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartFigureNode.swift; sourceTree = "<group>"; };
 		D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRectExtensions.swift; sourceTree = "<group>"; };
+		D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSliderArrowNode.swift; sourceTree = "<group>"; };
+		D45B78A0223A5A22002134ED /* ChartInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractor.swift; sourceTree = "<group>"; };
+		D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractorScenario.swift; sourceTree = "<group>"; };
+		D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractorMoveScenario.swift; sourceTree = "<group>"; };
+		D45B78A8223A673D002134ED /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
+		D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtensions.swift; sourceTree = "<group>"; };
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -119,6 +131,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D45B78A3223A60B8002134ED /* Scenarios */ = {
+			isa = PBXGroup;
+			children = (
+				D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */,
+				D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */,
+			);
+			path = Scenarios;
+			sourceTree = "<group>";
+		};
 		D46182102234614F006B72A7 = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +281,8 @@
 			children = (
 				D46182892235C902006B72A7 /* UIColorExtensions.swift */,
 				D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */,
+				D45B78A8223A673D002134ED /* CGPointExtensions.swift */,
+				D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -305,6 +328,8 @@
 				D42658CF2236341000FB79AB /* ChartTypes.swift */,
 				D461828D223630A0006B72A7 /* ChartControl.swift */,
 				D461828F223630AE006B72A7 /* ChartView.swift */,
+				D45B78A0223A5A22002134ED /* ChartInteractor.swift */,
+				D45B78A3223A60B8002134ED /* Scenarios */,
 				D48EEF5A2237C6D300C232E6 /* Nodes */,
 			);
 			path = ChartControl;
@@ -336,6 +361,7 @@
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
+				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
 				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 			);
 			path = Nodes;
@@ -416,6 +442,7 @@
 			files = (
 				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
+				D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
 				D42B7A522239779B00733F2F /* ChartScene.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
@@ -441,8 +468,11 @@
 				D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */,
 				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
+				D45B78A7223A610C002134ED /* ChartInteractorMoveScenario.swift in Sources */,
+				D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */,
 				D46182812235A571006B72A7 /* JsonReader.swift in Sources */,
 				D46182472234D7B8006B72A7 /* BaseRouter.swift in Sources */,
+				D45B78AB223A67D3002134ED /* CGVectorExtensions.swift in Sources */,
 				D461828E223630A0006B72A7 /* ChartControl.swift in Sources */,
 				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
 				D42B7A4E22396D6800733F2F /* ChartSliderNode.swift in Sources */,
@@ -451,6 +481,8 @@
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
 				D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
+				D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */,
+				D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */,
 				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,

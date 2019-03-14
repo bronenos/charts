@@ -20,6 +20,10 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     private var strokeColor = UIColor.clear
     private var strokeWidth = CGFloat(0)
     
+    override init(tag: String?) {
+        super.init(tag: tag ?? "[figure]")
+    }
+    
     func setPoints(_ points: [CGPoint]) {
         drawingPoints = points
     }
