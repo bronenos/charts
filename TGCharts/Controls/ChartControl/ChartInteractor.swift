@@ -57,10 +57,26 @@ final class ChartInteractor: IChartInteractor {
             )
             
         case leftArrowTag:
-            scenario = nil
+            scenario = ChartInteractionScaleScenario(
+                sceneNode: scene,
+                sliderNode: sliderNode,
+                navigatorNode: navigatorNode,
+                startPoint: point,
+                startRange: range,
+                direction: .left,
+                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+            )
             
         case rightArrowTag:
-            scenario = nil
+            scenario = ChartInteractionScaleScenario(
+                sceneNode: scene,
+                sliderNode: sliderNode,
+                navigatorNode: navigatorNode,
+                startPoint: point,
+                startRange: range,
+                direction: .right,
+                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+            )
 
         default:
             scenario = nil

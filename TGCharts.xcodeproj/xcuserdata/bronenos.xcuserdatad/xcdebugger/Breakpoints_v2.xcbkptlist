@@ -11,11 +11,11 @@
             condition = "startPoint &gt; 15"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Controls/ChartControl/ChartInteractor.swift"
-            timestampString = "574256874.685711"
+            timestampString = "574273126.848577"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "106"
+            endingLineNumber = "106"
             landmarkName = "updateRange(_:)"
             landmarkType = "7">
          </BreakpointContent>

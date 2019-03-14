@@ -1,5 +1,5 @@
 //
-//  ChartInteractorMoveScenario.swift
+//  ChartInteractionScaleScenario.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 14/03/2019.
@@ -9,25 +9,35 @@
 import Foundation
 import UIKit
 
-final class ChartInteractorMoveScenario: IChartInteractorScenario {
+enum ChartInteractionScaleDirection {
+    case left
+    case right
+}
+
+final class ChartInteractionScaleScenario: IChartInteractorScenario {
     private let sliderNode: IChartNode
     private let navigatorNode: IChartNode
     private let startPoint: CGPoint
     private let originPoint: CGPoint
     private let startRange: ChartRange
+    private let direction: ChartInteractionScaleDirection
     private let rangeUpdateBlock: (ChartRange) -> Void
+    
+    private let minimalRangeDistance = CGFloat(0.1)
     
     init(sceneNode: IChartSceneNode,
          sliderNode: IChartNode,
          navigatorNode: IChartNode,
          startPoint: CGPoint,
          startRange: ChartRange,
+         direction: ChartInteractionScaleDirection,
          rangeUpdateBlock: @escaping (ChartRange) -> Void) {
         self.sliderNode = sliderNode
         self.navigatorNode = navigatorNode
         self.startPoint = startPoint
         self.originPoint = sceneNode.calculateFullOrigin(of: sliderNode) ?? .zero
         self.startRange = startRange
+        self.direction = direction
         self.rangeUpdateBlock = rangeUpdateBlock
     }
     
@@ -38,14 +48,17 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
         let vector = point - startPoint
         let moveFactor = vector.dx / navigatorNode.size.width
         
-        if moveFactor > 0 {
-            let end = min(1.0, startRange.end + moveFactor)
-            let range = ChartRange(start: end - startRange.distance, end: end)
+        switch direction {
+        case .left:
+            let limit = startRange.end - minimalRangeDistance
+            let start = max(0, min(limit, startRange.start + moveFactor))
+            let range = ChartRange(start: start, end: startRange.end)
             rangeUpdateBlock(range)
-        }
-        else {
-            let start = max(0, startRange.start + moveFactor)
-            let range = ChartRange(start: start, end: start + startRange.distance)
+
+        case .right:
+            let limit = startRange.start + minimalRangeDistance
+            let end = min(1.0, max(limit, startRange.end + moveFactor))
+            let range = ChartRange(start: startRange.start, end: end)
             rangeUpdateBlock(range)
         }
     }
@@ -53,3 +66,4 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
     func interactionDidEnd(at point: CGPoint) {
     }
 }
+
