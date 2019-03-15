@@ -45,8 +45,8 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     }
     
     private func update(range: ChartRange) {
-        let canvasLeftX = size.width * range.start.toFloat
-        let canvasWidth = size.width * range.distance.toFloat
+        let canvasLeftX = size.width * range.start
+        let canvasWidth = size.width * range.distance
         let canvasFrame = CGRect(x: canvasLeftX, y: 0, width: canvasWidth, height: size.height)
         canvasNode.setFrame(canvasFrame)
         

@@ -59,8 +59,6 @@
 		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
 		D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */; };
-		D4D0F25D223C050400F69F8C /* CGFloatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25C223C050400F69F8C /* CGFloatExtensions.swift */; };
-		D4D0F25F223C052900F69F8C /* DoubleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25E223C052900F69F8C /* DoubleExtensions.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 /* End PBXBuildFile section */
 
@@ -121,8 +119,6 @@
 		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
 		D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionScaleScenario.swift; sourceTree = "<group>"; };
-		D4D0F25C223C050400F69F8C /* CGFloatExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGFloatExtensions.swift; sourceTree = "<group>"; };
-		D4D0F25E223C052900F69F8C /* DoubleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleExtensions.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -290,8 +286,6 @@
 				D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */,
 				D45B78A8223A673D002134ED /* CGPointExtensions.swift */,
 				D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */,
-				D4D0F25C223C050400F69F8C /* CGFloatExtensions.swift */,
-				D4D0F25E223C052900F69F8C /* DoubleExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -453,7 +447,6 @@
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
-				D4D0F25D223C050400F69F8C /* CGFloatExtensions.swift in Sources */,
 				D42B7A522239779B00733F2F /* ChartScene.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
@@ -495,7 +488,6 @@
 				D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */,
 				D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */,
 				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
-				D4D0F25F223C052900F69F8C /* DoubleExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,

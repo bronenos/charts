@@ -34,9 +34,9 @@ struct ChartLineConfig {
 }
 
 struct ChartRange {
-    let start: Double
-    let end: Double
-    var distance: Double { return end - start }
+    let start: CGFloat
+    let end: CGFloat
+    var distance: CGFloat { return end - start }
 }
 
 struct ChartMargins {

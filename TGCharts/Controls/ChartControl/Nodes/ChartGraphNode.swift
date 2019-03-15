@@ -16,7 +16,7 @@ protocol IChartGraphNode: IChartFigureNode {
 final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     struct Meta {
         let indices: ClosedRange<Int>
-        let totalWidth: Double
+        let totalWidth: CGFloat
         let margins: ChartMargins
         let stepX: CGFloat
     }
@@ -65,16 +65,17 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         guard chart.length > 0 else { return nil }
         guard config.range.distance > 0 else { return nil }
         
-        let firstIndex = Int(floor(Double(chart.length - 1) * config.range.start))
-        let lastIndex = Int(ceil(Double(chart.length - 1) * config.range.end))
-        let indices = (firstIndex ... lastIndex)
-        let totalWidth = Double(size.width) / config.range.distance
-        let stepX = CGFloat(totalWidth / Double(chart.length - 1))
+        let lastIndex = CGFloat(chart.length - 1)
+        let leftIndex = Int(floor(lastIndex * config.range.start))
+        let rightIndex = Int(ceil(lastIndex * config.range.end))
+        let indices = (leftIndex ... rightIndex)
+        let totalWidth = size.width / config.range.distance
+        let stepX = totalWidth / lastIndex
         
-        let firstItemPosition = CGFloat(firstIndex) * stepX
+        let firstItemPosition = CGFloat(leftIndex) * stepX
         let frameLeftPosition = CGFloat(totalWidth * config.range.start)
 
-        let lastItemPosition = CGFloat(lastIndex) * stepX
+        let lastItemPosition = CGFloat(rightIndex) * stepX
         let frameRightPosition = CGFloat(totalWidth * config.range.end)
         
         return Meta(
@@ -99,7 +100,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
             let upperValue = CGFloat(visibleValues.max() ?? 0)
-            return ChartRange(start: Double(lowerValue), end: Double(upperValue))
+            return ChartRange(start: lowerValue, end: upperValue)
         }
         
         let fittingLowerValue = visibleEdges[indices].map({ $0.start }).min() ?? 0
@@ -118,7 +119,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         let sliceValues = line.values[meta.indices]
         return sliceValues.enumerated().map { index, value in
             let x = -meta.margins.left + CGFloat(index) * meta.stepX
-            let y = ((Double(value) - edge.start) / (edge.end - edge.start)) * Double(size.height)
+            let y = ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
             return CGPoint(x: x, y: CGFloat(y))
         }
     }

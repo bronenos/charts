@@ -23,7 +23,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
     private let direction: ChartInteractionScaleDirection
     private let rangeUpdateBlock: (ChartRange) -> Void
     
-    private let minimalRangeDistance = Double(0.1)
+    private let minimalRangeDistance = CGFloat(0.1)
     
     init(sceneNode: IChartSceneNode,
          sliderNode: IChartNode,
@@ -51,13 +51,13 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         switch direction {
         case .left:
             let limit = startRange.end - minimalRangeDistance
-            let start = max(0, min(limit, startRange.start + moveFactor.toDouble))
+            let start = max(0, min(limit, startRange.start + moveFactor))
             let range = ChartRange(start: start, end: startRange.end)
             rangeUpdateBlock(range)
 
         case .right:
             let limit = startRange.start + minimalRangeDistance
-            let end = min(1.0, max(limit, startRange.end + moveFactor.toDouble))
+            let end = min(1.0, max(limit, startRange.end + moveFactor))
             let range = ChartRange(start: startRange.start, end: end)
             rangeUpdateBlock(range)
         }
