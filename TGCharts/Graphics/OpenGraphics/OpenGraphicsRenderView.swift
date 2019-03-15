@@ -20,6 +20,7 @@ final class OpenGraphicsRenderView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         isExclusiveTouch = true
+        layer.contentsScale = UIScreen.main.scale
     }
     
     required init?(coder aDecoder: NSCoder) {

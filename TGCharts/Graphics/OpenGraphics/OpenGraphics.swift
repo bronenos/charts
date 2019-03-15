@@ -53,7 +53,7 @@ final class OpenGraphics: IGraphics {
     
     func pushOffset(_ offset: CGPoint) {
         glPushMatrix()
-        glTranslatef(offset.x.to_float, offset.y.to_float, 0)
+        glTranslatef(offset.x.scaled.to_float, offset.y.scaled.to_float, 0)
     }
     
     func popOffset() {
@@ -73,10 +73,6 @@ final class OpenGraphics: IGraphics {
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
         
-//        glEnable(GL_LINE_SMOOTH.to_enum)
-//        glHint(GL_LINE_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
-        
-        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
         drawingBlock(self)
         
 //        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE.to_enum, generalFrameBuffer)
@@ -89,56 +85,113 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(nil)
     }
     
+    func clear(color: UIColor) {
+        let c = color.extractComponents()
+        glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
+        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
+    }
+    
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat) {
-        guard let c = color.extractComponents() else { return }
-        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
-        glLineWidth(width.to_float)
+        let lastIndex = points.count - 1
+        guard lastIndex > 0 else { return }
+        
+        let innerSide = width * 0.3
+        let outerSide = innerSide + 0.35
+        let pointSize = outerSide * 1.75
+        let outerColor = color.withAlphaComponent(0)
+        
+        glEnable(GL_POINT_SMOOTH.to_enum)
+        glHint(GL_POINT_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
+        glPointSize(pointSize.scaled.to_float)
 
+        glEnable(GL_BLEND.to_enum)
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
+        
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        glEnableClientState(GL_COLOR_ARRAY.to_enum);
         
-        let coords = convertPointsToCoords(points)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
-        glDrawArrays(GL_LINE_STRIP.to_enum, 0, points.count.to_size)
+        for i in (0 ..< lastIndex) {
+            let pointFrom = points[i]
+            let pointTo = points[i + 1]
+
+            let horDistance = abs(pointTo.x - pointFrom.x)
+            let verDistance = abs(pointTo.y - pointFrom.y)
+            let totalDistance = sqrt(horDistance * horDistance + verDistance * verDistance)
+            guard totalDistance > 0 else { continue }
+
+            let horDirection = CGFloat(pointTo.y >= pointFrom.y ? -1 : 1)
+            let horMult = horDirection * (0.5 + cos(.pi / 2 * horDistance / totalDistance))
+            
+            let verDirection = CGFloat(pointTo.x >= pointFrom.x ? 1 : -1)
+            let verMult = verDirection * (0.5 + cos(.pi / 2 * verDistance / totalDistance))
+
+            let vertexPoints: [CGPoint] = [
+                pointFrom + CGVector(dx: outerSide * horMult, dy: outerSide * verMult),
+                pointTo + CGVector(dx: outerSide * horMult, dy: outerSide * verMult),
+                pointFrom + CGVector(dx: innerSide * horMult, dy: innerSide * verMult),
+                pointTo + CGVector(dx: innerSide * horMult, dy: innerSide * verMult),
+                pointFrom,
+                pointTo,
+                pointFrom + CGVector(dx: innerSide * -horMult, dy: innerSide * -verMult),
+                pointTo + CGVector(dx: innerSide * -horMult, dy: innerSide * -verMult),
+                pointFrom + CGVector(dx: outerSide * -horMult, dy: outerSide * -verMult),
+                pointTo + CGVector(dx: outerSide * -horMult, dy: outerSide * -verMult)
+            ]
+
+            let vertexColors: [UIColor] = [
+                outerColor,
+                outerColor,
+                color,
+                color,
+                color,
+                color,
+                color,
+                color,
+                outerColor,
+                outerColor
+            ]
+
+            let coords = convertPointsToValues(vertexPoints)
+            let colors = convertColorsToValues(vertexColors)
+            glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
+            glColorPointer(4, GL_FLOAT.to_enum, 0, colors)
+            glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
+            glDrawArrays(GL_POINTS.to_enum, 4, 2)
+        }
         
-        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum)
+        glDisableClientState(GL_COLOR_ARRAY.to_enum)
+        
+        glDisable(GL_POINT_SMOOTH.to_enum)
+        glDisable(GL_BLEND.to_enum)
     }
     
     func fill(frame: CGRect, color: UIColor) {
-        guard let c = color.extractComponents() else { return }
+        let c = color.extractComponents()
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
-        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        glEnable(GL_BLEND.to_enum)
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         
-        var points = [CGPoint]()
-        points.append(CGPoint(x: frame.maxX, y: frame.minY)) // bottom-right
-        points.append(CGPoint(x: frame.maxX, y: frame.maxY)) // top-right
-        points.append(CGPoint(x: frame.minX, y: frame.minY)) // bottom-left
-        points.append(CGPoint(x: frame.minX, y: frame.maxY)) // top-left
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum)
+        
+        let vertexPoints: [CGPoint] = [
+            CGPoint(x: frame.maxX, y: frame.minY), // bottom-right
+            CGPoint(x: frame.maxX, y: frame.maxY), // top-right
+            CGPoint(x: frame.minX, y: frame.minY), // bottom-left
+            CGPoint(x: frame.minX, y: frame.maxY) // top-left
+        ]
 
-        let coords = convertPointsToCoords(points)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
-        glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, points.count.to_size)
-        
-        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
-    }
-    
-    func drawLine(points: [CGPoint], color: UIColor, width: CGFloat) {
-        guard let c = color.extractComponents() else { return }
-        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
-        glLineWidth(width.to_float)
-        
-        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
-        
-        var coords = [GLfloat](repeating: 0, count: points.count * 2)
-        points.enumerated().forEach { index, point in
-            coords[index * 2 + 0] = point.x.to_float
-            coords[index * 2 + 1] = point.y.to_float
-        }
+        let coords = convertPointsToValues(
+            vertexPoints
+        )
         
         glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
-        glDrawArrays(GL_LINE_STRIP.to_enum, 0, points.count.to_size)
+        glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
         
-        glDisableClientState(GL_VERTEX_ARRAY.to_enum);
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum)
+        
+        glDisable(GL_BLEND.to_enum)
     }
     
     private func setupEnvironment() {
@@ -174,8 +227,6 @@ final class OpenGraphics: IGraphics {
             glTexImage2D(GL_TEXTURE_2D.to_enum, 0, GL_RGBA, renderSize.width.to_size, renderSize.height.to_size, 0, GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum, nil)
         }
         
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
-        
         EAGLContext.setCurrent(nil)
     }
     
@@ -197,14 +248,44 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(nil)
     }
     
-    private func convertPointsToCoords(_ points: [CGPoint]) -> [GLfloat] {
-        var coords = [GLfloat](repeating: 0, count: points.count * 2)
-        points.enumerated().forEach { index, point in
-            coords[index * 2 + 0] = point.x.to_float
-            coords[index * 2 + 1] = point.y.to_float
+    private func convertPointsToValues(_ points: [CGPoint]) -> [GLfloat] {
+        var values = [GLfloat](repeating: 0, count: points.count * 2)
+        var index = 0
+        
+        points.forEach { point in
+            values[index] = point.x.scaled.to_float
+            index += 1
+            
+            values[index] = point.y.scaled.to_float
+            index += 1
         }
         
-        return coords
+        return values
+    }
+    
+    private func convertColorsToValues(_ colors: [UIColor]) -> [GLfloat] {
+        var values = [GLfloat](repeating: 0, count: colors.count * 4)
+        var index = 0
+        
+        func _extractColorComponents(_ color: UIColor) -> UIColor.Components {
+            return color.extractComponents()
+        }
+
+        colors.map(_extractColorComponents).forEach { components in
+            values[index] = components.red.to_float
+            index += 1
+            
+            values[index] = components.green.to_float
+            index += 1
+            
+            values[index] = components.blue.to_float
+            index += 1
+            
+            values[index] = components.alpha.to_float
+            index += 1
+        }
+        
+        return values
     }
 }
 
@@ -233,6 +314,10 @@ fileprivate extension Int32 {
 }
 
 fileprivate extension CGFloat {
+    var scaled: CGFloat {
+        return self * UIScreen.main.scale
+    }
+    
     var to_float: GLfloat {
         return GLfloat(self)
     }
@@ -254,15 +339,9 @@ fileprivate extension UIColor {
         var alpha: CGFloat = 0
     }
     
-    func extractComponents() -> Components? {
+    func extractComponents() -> Components {
         var c = Components()
         getRed(&c.red, green: &c.green, blue: &c.blue, alpha: &c.alpha)
-        
-        if c.alpha > 0 {
-            return c
-        }
-        else {
-            return nil
-        }
+        return c
     }
 }
