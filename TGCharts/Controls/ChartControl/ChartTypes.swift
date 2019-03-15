@@ -15,7 +15,7 @@ struct ChartConfig {
     
     init() {
         lines = []
-        range = ChartRange.full
+        range = ChartRange(start: 0, end: 1.0)
     }
     
     init(lines: [ChartLineConfig], range: ChartRange) {
@@ -24,7 +24,7 @@ struct ChartConfig {
     }
     
     func fullRanged() -> ChartConfig {
-        return ChartConfig(lines: lines, range: ChartRange.full)
+        return ChartConfig(lines: lines, range: ChartRange(start: 0, end: 1.0))
     }
 }
 
@@ -34,8 +34,13 @@ struct ChartLineConfig {
 }
 
 struct ChartRange {
-    static let full = ChartRange(start: 0, end: 1.0)
-    let start: CGFloat
-    let end: CGFloat
-    var distance: CGFloat { return end - start }
+    let start: Double
+    let end: Double
+    var distance: Double { return end - start }
+}
+
+struct ChartMargins {
+    let left: CGFloat
+    let right: CGFloat
+    var total: CGFloat { return left + right }
 }

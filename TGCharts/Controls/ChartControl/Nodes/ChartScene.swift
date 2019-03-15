@@ -19,7 +19,7 @@ protocol IChartSceneDelegate: class {
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
-    let graphNode: IChartGraphNode = ChartGraphNode(tag: "graph")
+    let graphNode: IChartGraphNode = ChartGraphNode(tag: "graph", width: 2)
     let navigatorNode: IChartNavigatorNode = ChartNavigatorNode(tag: "navigator")
     
     override init(tag: String?) {

@@ -18,10 +18,10 @@ protocol IChartNavigatorNode: IChartNode {
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     let canvasNode: IChartNode = ChartNode(tag: "navigator-canvas")
-    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph")
+    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph", width: 1)
     let sliderNode: IChartSliderNode = ChartSliderNode(tag: "navigator-slider")
     
-    private var range = ChartRange.full
+    private var range = ChartRange(start: 0, end: 1.0)
     
     override init(tag: String?) {
         super.init(tag: tag ?? "[navigator]")
@@ -45,7 +45,9 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     }
     
     private func update(range: ChartRange) {
-        let canvasFrame = CGRect(x: size.width * range.start, y: 0, width: size.width * range.distance, height: size.height)
+        let canvasLeftX = size.width * range.start.toFloat
+        let canvasWidth = size.width * range.distance.toFloat
+        let canvasFrame = CGRect(x: canvasLeftX, y: 0, width: canvasWidth, height: size.height)
         canvasNode.setFrame(canvasFrame)
         
         let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: 1)

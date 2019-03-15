@@ -39,12 +39,12 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
         let moveFactor = vector.dx / navigatorNode.size.width
         
         if moveFactor > 0 {
-            let end = min(1.0, startRange.end + moveFactor)
+            let end = min(1.0, startRange.end + moveFactor.toDouble)
             let range = ChartRange(start: end - startRange.distance, end: end)
             rangeUpdateBlock(range)
         }
         else {
-            let start = max(0, startRange.start + moveFactor)
+            let start = max(0, startRange.start + moveFactor.toDouble)
             let range = ChartRange(start: start, end: start + startRange.distance)
             rangeUpdateBlock(range)
         }

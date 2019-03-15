@@ -14,12 +14,23 @@ protocol IChartGraphNode: IChartFigureNode {
 }
 
 final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
+    struct Meta {
+        let indices: ClosedRange<Int>
+        let totalWidth: Double
+        let margins: ChartMargins
+        let stepX: CGFloat
+    }
+    
+    private let width: CGFloat
+    
     private var figureNodes = [ChartFigureNode]()
     
     private var chart = Chart()
     private var config = ChartConfig()
     
-    override init(tag: String?) {
+    init(tag: String?, width: CGFloat) {
+        self.width = width
+        
         super.init(tag: tag ?? "[graph]")
     }
     
@@ -37,31 +48,47 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     private func update() {
         removeAllChildren()
         
-        let indices = obtainFocusedRangeIndices()
-        let slice = calculateSlice(indices: indices)
+        guard let meta = obtainMetaForRange() else { return }
+        let slice = calculateSlice(indices: meta.indices)
         
         slice.lines.forEach { line in
             let figureNode = ChartFigureNode(tag: "graph-line")
             figureNode.setFrame(bounds)
-            figureNode.setWidth(2)
+            figureNode.setWidth(width)
             figureNode.setStrokeColor(line.color)
-            figureNode.setPoints(calculatePoints(line: line, edge: slice.edge, in: indices))
+            figureNode.setPoints(calculatePoints(line: line, edge: slice.edge, with: meta))
             addChild(node: figureNode)
         }
     }
     
-    private func obtainFocusedRangeIndices() -> NSRange {
-        // calculate the focused indices using ceil-round rule
-        // and by one additional extra element for each side resulting in
-        // line could be drawn off-the-screen
+    private func obtainMetaForRange() -> Meta? {
+        guard chart.length > 0 else { return nil }
+        guard config.range.distance > 0 else { return nil }
         
-        let numberOfPoints = Int(ceil(CGFloat(chart.length) * config.range.distance))
-        let firstIndex = Int(floor(CGFloat(chart.length) * config.range.start))
-        let restNumber = min(chart.length - firstIndex, numberOfPoints)
-        return NSMakeRange(firstIndex, restNumber)
+        let firstIndex = Int(floor(Double(chart.length - 1) * config.range.start))
+        let lastIndex = Int(ceil(Double(chart.length - 1) * config.range.end))
+        let indices = (firstIndex ... lastIndex)
+        let totalWidth = Double(size.width) / config.range.distance
+        let stepX = CGFloat(totalWidth / Double(chart.length - 1))
+        
+        let firstItemPosition = CGFloat(firstIndex) * stepX
+        let frameLeftPosition = CGFloat(totalWidth * config.range.start)
+
+        let lastItemPosition = CGFloat(lastIndex) * stepX
+        let frameRightPosition = CGFloat(totalWidth * config.range.end)
+        
+        return Meta(
+            indices: indices,
+            totalWidth: totalWidth,
+            margins: ChartMargins(
+                left: frameLeftPosition - firstItemPosition,
+                right: lastItemPosition - frameRightPosition
+            ),
+            stepX: stepX
+        )
     }
     
-    func calculateSlice(indices: NSRange) -> ChartSlice {
+    private func calculateSlice(indices: ClosedRange<Int>) -> ChartSlice {
         let visibleLines: [ChartLine] = zip(chart.lines, config.lines).compactMap { line, lineConfig in
             guard lineConfig.visible else { return nil }
             return line
@@ -72,12 +99,11 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
             let upperValue = CGFloat(visibleValues.max() ?? 0)
-            return ChartRange(start: lowerValue, end: upperValue)
+            return ChartRange(start: Double(lowerValue), end: Double(upperValue))
         }
         
-        let visibleRange = (indices.lowerBound ..< indices.upperBound)
-        let fittingLowerValue = visibleEdges[visibleRange].map({ $0.start }).min() ?? 0
-        let fittingUpperValue = visibleEdges[visibleRange].map({ $0.end }).max() ?? 0
+        let fittingLowerValue = visibleEdges[indices].map({ $0.start }).min() ?? 0
+        let fittingUpperValue = visibleEdges[indices].map({ $0.end }).max() ?? 0
         let fittingEdge = ChartRange(start: fittingLowerValue, end: fittingUpperValue)
 
         return ChartSlice(
@@ -86,17 +112,14 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         )
     }
     
-    private func calculatePoints(line: ChartLine, edge: ChartRange, in range: NSRange) -> [CGPoint] {
+    private func calculatePoints(line: ChartLine, edge: ChartRange, with meta: Meta) -> [CGPoint] {
         guard size != .zero else { return [] }
         
-        let sliceRange = (range.lowerBound ..< range.upperBound)
-        let horizontalStep = size.width / CGFloat(range.length)
-        
-        let sliceValues = line.values[sliceRange]
+        let sliceValues = line.values[meta.indices]
         return sliceValues.enumerated().map { index, value in
-            let x = CGFloat(index) * horizontalStep
-            let y = ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
-            return CGPoint(x: x, y: y)
+            let x = -meta.margins.left + CGFloat(index) * meta.stepX
+            let y = ((Double(value) - edge.start) / (edge.end - edge.start)) * Double(size.height)
+            return CGPoint(x: x, y: CGFloat(y))
         }
     }
 }
