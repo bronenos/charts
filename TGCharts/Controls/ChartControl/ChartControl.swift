@@ -11,6 +11,7 @@ import UIKit
 
 protocol IChartControl: class {
     var view: UIView & IChartView { get }
+    var chart: Chart { get }
     var config: ChartConfig { get }
     func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
@@ -25,7 +26,7 @@ protocol IChartControlDelegate: class {
 }
 
 final class ChartControl: IChartControl, IChartInteractorDelegate {
-    private let chart: StatChart
+    let chart: Chart
     private(set) var config: ChartConfig
 
     let view: (UIView & IChartView) = ChartView()
@@ -36,13 +37,15 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     private let scene: ChartSceneNode
     private let interactor: IChartInteractor
     
-    init(chart: StatChart) {
+    private let startupRange = ChartRange(start: 0.75, end: 1.0)
+    
+    init(chart: Chart) {
         self.chart = chart
-        self.config = ChartConfig(lines: chart.lines.map(startupConfigForLine))
+        self.config = startupConfig(chart: chart, range: startupRange)
         
         graphics = obtainGraphicsForCurrentDevice()
         scene = ChartSceneNode(tag: "scene")
-        interactor = ChartInteractor(scene: scene)
+        interactor = ChartInteractor(scene: scene, range: startupRange)
         
         graphics.setDelegate(interactor)
         interactor.setDelegate(self)
@@ -67,8 +70,9 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     
     func render() {
         guard let size = renderingSize else { return }
+        
         scene.setFrame(CGRect(origin: .zero, size: size))
-        scene.setChart(chart, config: config, range: interactor.range)
+        scene.setChart(chart, config: config)
         scene.applyDesign()
         graphics.render { link in scene.renderWithChildren(graphics: link)}
     }
@@ -92,16 +96,17 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     }
     
     func interactorDidRequestRender() {
+        config.range = interactor.range
         render()
     }
 }
 
-fileprivate func startupConfigForLine(_ line: StatChartLine) -> ChartConfigLine {
-    return ChartConfigLine(
-        key: line.key,
-        name: line.name,
-        color: line.color,
-        visible: true
+fileprivate func startupConfig(chart: Chart, range: ChartRange) -> ChartConfig {
+    return ChartConfig(
+        lines: chart.lines.map { line in
+            ChartLineConfig(key: line.key, visible: true)
+        },
+        range: range
     )
 }
 

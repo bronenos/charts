@@ -12,47 +12,42 @@ import UIKit
 enum StatLoadingState {
     case unknown
     case waiting
-    case ready([StatChart])
+    case ready([Chart])
 }
 
-struct StatChart {
-    let size: Int
-    let axis: StatChartAxis
-    let lines: [StatChartLine]
+struct Chart {
+    let length: Int
+    let lines: [ChartLine]
+    let axis: [ChartAxisItem]
     
     init() {
-        size = 0
-        axis = StatChartAxis(dates: [])
+        length = 0
+        axis = []
         lines = []
     }
     
     init(size: Int,
-         axis: StatChartAxis,
-         lines: [StatChartLine]) {
-        self.size = size
+         axis: [ChartAxisItem],
+         lines: [ChartLine]) {
+        self.length = size
         self.axis = axis
         self.lines = lines
     }
-    
-    func visibleLines(config: ChartConfig) -> [StatChartLine] {
-        return zip(lines, config.lines).compactMap { line, lineConfig in
-            guard lineConfig.visible else { return nil }
-            return line
-        }
-    }
 }
 
-struct StatChartPresentingState {
-    var visibleLines: [String]
+struct ChartAxisItem {
+    let date: Date
+    let values: [String: Int]
 }
 
-struct StatChartAxis {
-    let dates: [Date]
-}
-
-struct StatChartLine {
+struct ChartLine {
     let key: String
     let name: String
     let color: UIColor
     let values: [Int]
+}
+
+struct ChartSlice {
+    let lines: [ChartLine]
+    let edge: ChartRange
 }

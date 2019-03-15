@@ -10,36 +10,32 @@ import Foundation
 import UIKit
 
 struct ChartConfig {
-    var lines: [ChartConfigLine]
+    var lines: [ChartLineConfig]
+    var range: ChartRange
     
     init() {
         lines = []
+        range = ChartRange.full
     }
     
-    init(lines: [ChartConfigLine]) {
+    init(lines: [ChartLineConfig], range: ChartRange) {
         self.lines = lines
+        self.range = range
+    }
+    
+    func fullRanged() -> ChartConfig {
+        return ChartConfig(lines: lines, range: ChartRange.full)
     }
 }
 
-struct ChartConfigLine {
+struct ChartLineConfig {
     let key: String
-    let name: String
-    let color: UIColor
     var visible: Bool
 }
 
 struct ChartRange {
     static let full = ChartRange(start: 0, end: 1.0)
-    
     let start: CGFloat
     let end: CGFloat
-    
-    var distance: CGFloat {
-        return end - start
-    }
-}
-
-struct ChartEdges {
-    let start: Int
-    let end: Int
+    var distance: CGFloat { return end - start }
 }

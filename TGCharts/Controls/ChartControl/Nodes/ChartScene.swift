@@ -12,7 +12,7 @@ import UIKit
 protocol IChartSceneNode: IChartNode {
     var graphNode: IChartGraphNode { get }
     var navigatorNode: IChartNavigatorNode { get }
-    func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange)
+    func setChart(_ chart: Chart, config: ChartConfig)
 }
 
 protocol IChartSceneDelegate: class {
@@ -42,8 +42,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         return super.node(at: flippedPoint)
     }
     
-    func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange) {
-        graphNode.setChart(chart, config: config, range: range)
-        navigatorNode.setChart(chart, config: config, range: range)
+    func setChart(_ chart: Chart, config: ChartConfig) {
+        graphNode.setChart(chart, config: config)
+        navigatorNode.setChart(chart, config: config)
     }
 }

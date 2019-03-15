@@ -61,7 +61,7 @@ final class StatWorker: IStatWorker {
         }
     }
     
-    private func storeAndBroadcast(charts: [StatChart]) {
+    private func storeAndBroadcast(charts: [Chart]) {
         state = .ready(charts)
         stateObservable.broadcast(state)
     }

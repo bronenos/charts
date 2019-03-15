@@ -13,7 +13,7 @@ protocol IChartNavigatorNode: IChartNode {
     var canvasNode: IChartNode { get }
     var graphNode: IChartGraphNode { get }
     var sliderNode: IChartSliderNode { get }
-    func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange)
+    func setChart(_ chart: Chart, config: ChartConfig)
 }
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
@@ -37,11 +37,11 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
         update(range: range)
     }
     
-    func setChart(_ chart: StatChart, config: ChartConfig, range: ChartRange) {
-        self.range = range
+    func setChart(_ chart: Chart, config: ChartConfig) {
+        self.range = config.range
         
-        graphNode.setChart(chart, config: config, range: ChartRange.full)
-        update(range: range)
+        graphNode.setChart(chart, config: config.fullRanged())
+        update(range: config.range)
     }
     
     private func update(range: ChartRange) {

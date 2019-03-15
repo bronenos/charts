@@ -135,8 +135,9 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
             populateChartControl(control: chartControl, intoCell: cell)
             
         case sectionBelongsToAnyChart(indexPath.section) && !indexPath.isFirstRow:
+            let line = chartControls[indexPath.section].chart.lines[indexPath.row - 1]
             let lineConfig = chartControls[indexPath.section].config.lines[indexPath.row - 1]
-            populateChartLineControl(config: lineConfig, intoCell: cell)
+            populateChartLineControl(line: line, config: lineConfig, intoCell: cell)
             
         case !sectionBelongsToAnyChart(indexPath.section) && indexPath.isFirstRow:
             populateSwitchDesignCell(intoCell: cell)
@@ -224,17 +225,17 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         return UITableViewCell(style: .default, reuseIdentifier: optionCellReuseID)
     }
     
-    private func populateChartLineControl(config: ChartConfigLine, intoCell cell: UITableViewCell) {
+    private func populateChartLineControl(line: ChartLine, config: ChartLineConfig, intoCell cell: UITableViewCell) {
         let selectedBackgroundView = UIView()
         selectedBackgroundView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementFocusedBackground)
         
         cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
         cell.selectedBackgroundView = selectedBackgroundView
         cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
-        cell.textLabel?.text = config.name
+        cell.textLabel?.text = line.name
         cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .optionForeground)
         cell.textLabel?.textAlignment = .left
-        cell.imageView?.image = generateLineIcon(color: config.color)
+        cell.imageView?.image = generateLineIcon(color: line.color)
         cell.accessoryType = config.visible ? .checkmark : .none
     }
     

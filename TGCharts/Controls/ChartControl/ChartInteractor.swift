@@ -21,8 +21,8 @@ protocol IChartInteractorDelegate: class {
 }
 
 final class ChartInteractor: IChartInteractor {
-    private(set) var range = ChartRange(start: 0.75, end: 1.0)
     private var scene: IChartSceneNode
+    private(set) var range: ChartRange
     private weak var delegate: IChartInteractorDelegate?
     
     private let navigatorTag = "navigator"
@@ -32,8 +32,9 @@ final class ChartInteractor: IChartInteractor {
     
     private var scenario: IChartInteractorScenario?
 
-    init(scene: IChartSceneNode) {
+    init(scene: IChartSceneNode, range: ChartRange) {
         self.scene = scene
+        self.range = range
     }
     
     func setDelegate(_ delegate: IChartInteractorDelegate?) {
@@ -100,9 +101,5 @@ final class ChartInteractor: IChartInteractor {
     private func updateRange(_ range: ChartRange) {
         self.range = range
         delegate?.interactorDidRequestRender()
-        
-        let startPoint = Int(range.start * 100)
-        let endPoint = Int(range.end * 100)
-        print("\(#function) -> range[\(startPoint) -- \(endPoint)]")
     }
 }
