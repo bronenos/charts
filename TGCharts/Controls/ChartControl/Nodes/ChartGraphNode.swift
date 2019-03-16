@@ -15,7 +15,8 @@ protocol IChartGraphNode: IChartFigureNode {
 
 final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     struct Meta {
-        let indices: ClosedRange<Int>
+        let renderedIndices: ClosedRange<Int>
+        let visibleIndices: ClosedRange<Int>
         let totalWidth: CGFloat
         let margins: ChartMargins
         let stepX: CGFloat
@@ -49,7 +50,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         removeAllChildren()
         
         guard let meta = obtainMetaForRange() else { return }
-        let slice = calculateSlice(indices: meta.indices)
+        let slice = calculateSlice(meta: meta)
         
         slice.lines.forEach { line in
             let figureNode = ChartFigureNode(tag: "graph-line")
@@ -66,30 +67,34 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         guard config.range.distance > 0 else { return nil }
         
         let lastIndex = CGFloat(chart.length - 1)
-        let leftIndex = Int(floor(lastIndex * config.range.start))
-        let rightIndex = Int(ceil(lastIndex * config.range.end))
-        let indices = (leftIndex ... rightIndex)
+        let leftRenderedIndex = Int(floor(lastIndex * config.range.start))
+        let rightRenderedIndex = Int(ceil(lastIndex * config.range.end))
+        let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
+        let leftVisibleIndex = Int(ceil(lastIndex * config.range.start))
+        let rightVisibleIndex = Int(floor(lastIndex * config.range.end))
+        let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
         let totalWidth = size.width / config.range.distance
         let stepX = totalWidth / lastIndex
         
-        let firstItemPosition = CGFloat(leftIndex) * stepX
+        let leftRenderedItemPosition = CGFloat(leftRenderedIndex) * stepX
         let frameLeftPosition = CGFloat(totalWidth * config.range.start)
 
-        let lastItemPosition = CGFloat(rightIndex) * stepX
+        let rightRenderedItemPosition = CGFloat(rightRenderedIndex) * stepX
         let frameRightPosition = CGFloat(totalWidth * config.range.end)
         
         return Meta(
-            indices: indices,
+            renderedIndices: renderedIndices,
+            visibleIndices: visibleIndices,
             totalWidth: totalWidth,
             margins: ChartMargins(
-                left: frameLeftPosition - firstItemPosition,
-                right: lastItemPosition - frameRightPosition
+                left: frameLeftPosition - leftRenderedItemPosition,
+                right: rightRenderedItemPosition - frameRightPosition
             ),
             stepX: stepX
         )
     }
     
-    private func calculateSlice(indices: ClosedRange<Int>) -> ChartSlice {
+    private func calculateSlice(meta: Meta) -> ChartSlice {
         let visibleLines: [ChartLine] = zip(chart.lines, config.lines).compactMap { line, lineConfig in
             guard lineConfig.visible else { return nil }
             return line
@@ -103,8 +108,8 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             return ChartRange(start: lowerValue, end: upperValue)
         }
         
-        let fittingLowerValue = visibleEdges[indices].map({ $0.start }).min() ?? 0
-        let fittingUpperValue = visibleEdges[indices].map({ $0.end }).max() ?? 0
+        let fittingLowerValue = visibleEdges[meta.visibleIndices].map({ $0.start }).min() ?? 0
+        let fittingUpperValue = visibleEdges[meta.visibleIndices].map({ $0.end }).max() ?? 0
         let fittingEdge = ChartRange(start: fittingLowerValue, end: fittingUpperValue)
 
         return ChartSlice(
@@ -116,7 +121,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     private func calculatePoints(line: ChartLine, edge: ChartRange, with meta: Meta) -> [CGPoint] {
         guard size != .zero else { return [] }
         
-        let sliceValues = line.values[meta.indices]
+        let sliceValues = line.values[meta.renderedIndices]
         return sliceValues.enumerated().map { index, value in
             let x = -meta.margins.left + CGFloat(index) * meta.stepX
             let y = ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
