@@ -67,12 +67,15 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         guard config.range.distance > 0 else { return nil }
         
         let lastIndex = CGFloat(chart.length - 1)
+        
         let leftRenderedIndex = Int(floor(lastIndex * config.range.start))
         let rightRenderedIndex = Int(ceil(lastIndex * config.range.end))
         let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
+        
         let leftVisibleIndex = Int(ceil(lastIndex * config.range.start))
         let rightVisibleIndex = Int(floor(lastIndex * config.range.end))
         let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
+        
         let totalWidth = size.width / config.range.distance
         let stepX = totalWidth / lastIndex
         
