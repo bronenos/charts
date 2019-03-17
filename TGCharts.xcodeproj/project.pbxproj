@@ -58,6 +58,10 @@
 		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
 		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
+		D4BE0CAD223D8FAC001DEE03 /* ChartTimelineNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */; };
+		D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */; };
+		D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */; };
+		D4BE0CB3223DB6ED001DEE03 /* GraphicsTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */; };
 		D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 /* End PBXBuildFile section */
@@ -118,6 +122,10 @@
 		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
 		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
+		D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTimelineNode.swift; sourceTree = "<group>"; };
+		D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSlicableNode.swift; sourceTree = "<group>"; };
+		D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLabelNode.swift; sourceTree = "<group>"; };
+		D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicsTexture.swift; sourceTree = "<group>"; };
 		D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionScaleScenario.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -342,6 +350,7 @@
 			isa = PBXGroup;
 			children = (
 				D48EEF532236EF0B00C232E6 /* Graphics.swift */,
+				D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */,
 				D48EEF552236F0AA00C232E6 /* OpenGraphics */,
 			);
 			path = Graphics;
@@ -361,7 +370,10 @@
 			children = (
 				D42B7A4B223952E800733F2F /* ChartNode.swift */,
 				D42B7A512239779B00733F2F /* ChartScene.swift */,
+				D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */,
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
+				D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */,
+				D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */,
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
 				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
@@ -459,12 +471,15 @@
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D4F4610B2238C60B00EDDF90 /* global.swift in Sources */,
+				D4BE0CB3223DB6ED001DEE03 /* GraphicsTexture.swift in Sources */,
 				D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */,
 				D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */,
 				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
+				D4BE0CAD223D8FAC001DEE03 /* ChartTimelineNode.swift in Sources */,
 				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
+				D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */,
 				D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
 				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,
@@ -484,6 +499,7 @@
 				D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
 				D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */,
+				D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
 				D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */,
 				D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */,
@@ -571,7 +587,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -627,7 +643,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

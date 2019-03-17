@@ -39,12 +39,12 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     
     private let startupRange = ChartRange(start: 0.75, end: 1.0)
     
-    init(chart: Chart) {
+    init(chart: Chart, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = startupConfig(chart: chart, range: startupRange)
         
         graphics = obtainGraphicsForCurrentDevice()
-        scene = ChartSceneNode(tag: "scene")
+        scene = ChartSceneNode(tag: "scene", formattingProvider: formattingProvider)
         interactor = ChartInteractor(scene: scene, range: startupRange)
         
         graphics.setDelegate(interactor)

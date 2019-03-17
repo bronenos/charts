@@ -20,6 +20,9 @@ protocol IGraphics: class {
     func clear(color: UIColor)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
+    func storeTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?
+    func drawTexture(_ texture: GraphicsTextureRef, in frame: CGRect)
+    func discardTexture(_ texture: GraphicsTextureRef)
 }
 
 protocol IGraphicsDelegate: class {

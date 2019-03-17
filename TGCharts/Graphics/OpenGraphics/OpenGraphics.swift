@@ -10,6 +10,13 @@ import Foundation
 import UIKit
 
 final class OpenGraphics: IGraphics {
+    private struct TextureMeta {
+        let textureID: GLuint
+        let pointSize: CGSize
+        let scale: CGSize
+        let alignment: NSTextAlignment
+    }
+    
     private let renderView = OpenGraphicsRenderView()
     
     private let context: EAGLContext
@@ -18,6 +25,7 @@ final class OpenGraphics: IGraphics {
     private var generalFrameBuffer = GLuint(0)
     private var renderBuffer = GLuint(0)
     private var renderTexture = GLuint(0)
+    private var storingTextures = [UUID: TextureMeta]()
     
     init(context: EAGLContext) {
         self.context = context
@@ -53,7 +61,7 @@ final class OpenGraphics: IGraphics {
     
     func pushOffset(_ offset: CGPoint) {
         glPushMatrix()
-        glTranslatef(offset.x.scaled.to_float, offset.y.scaled.to_float, 0)
+        glTranslatef(offset.x.scaled().to_float, offset.y.scaled().to_float, 0)
     }
     
     func popOffset() {
@@ -79,8 +87,9 @@ final class OpenGraphics: IGraphics {
 //        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE.to_enum, msaaFrameBuffer)
 //        glResolveMultisampleFramebufferAPPLE()
         
+        glBindTexture(GL_TEXTURE_2D.to_enum, renderTexture)
         glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
-        context.presentRenderbuffer(GL_RENDERBUFFER.to_int)
+        context.presentRenderbuffer(GL_RENDERBUFFER.toInt)
         
         EAGLContext.setCurrent(nil)
     }
@@ -102,10 +111,9 @@ final class OpenGraphics: IGraphics {
         
         glEnable(GL_POINT_SMOOTH.to_enum)
         glHint(GL_POINT_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
-        glPointSize(pointSize.scaled.to_float)
+        glPointSize(pointSize.scaled().to_float)
 
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         glEnableClientState(GL_COLOR_ARRAY.to_enum);
@@ -151,10 +159,10 @@ final class OpenGraphics: IGraphics {
                 outerColor
             ]
 
-            let coords = convertPointsToValues(vertexPoints)
-            let colors = convertColorsToValues(vertexColors)
-            glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
-            glColorPointer(4, GL_FLOAT.to_enum, 0, colors)
+            let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
+            let colorsCoords = convertColorsToValues(vertexColors)
+            glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+            glColorPointer(4, GL_FLOAT.to_enum, 0, colorsCoords)
             glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
             glDrawArrays(GL_POINTS.to_enum, 4, 2)
         }
@@ -171,27 +179,131 @@ final class OpenGraphics: IGraphics {
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         
         glEnableClientState(GL_VERTEX_ARRAY.to_enum)
         
         let vertexPoints: [CGPoint] = [
-            CGPoint(x: frame.maxX, y: frame.minY), // bottom-right
-            CGPoint(x: frame.maxX, y: frame.maxY), // top-right
-            CGPoint(x: frame.minX, y: frame.minY), // bottom-left
-            CGPoint(x: frame.minX, y: frame.maxY) // top-left
+            frame.topLeftPoint,
+            frame.bottomLeftPoint,
+            frame.topRightPoint,
+            frame.bottomRightPoint
         ]
 
-        let coords = convertPointsToValues(
-            vertexPoints
-        )
-        
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, coords)
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
         glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
         
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
         
         glDisable(GL_BLEND.to_enum)
+    }
+    
+    func storeTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef? {
+        var textureID = GLuint(0)
+        glGenTextures(1, &textureID)
+        guard textureID > 0 else { return nil }
+        
+        glBindTexture(GL_TEXTURE_2D.to_enum, textureID)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MIN_FILTER.to_enum, GL_LINEAR.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MAG_FILTER.to_enum, GL_LINEAR.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_S.to_enum, GL_CLAMP_TO_EDGE.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_T.to_enum, GL_CLAMP_TO_EDGE.to_float)
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT.to_enum, 1)
+        glTexImage2D(
+            GL_TEXTURE_2D.to_enum, 0, GL_RGBA.to_int,
+            meta.textureSize.width.to_size, meta.textureSize.height.to_size, 0,
+            GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum,
+            meta.bytes
+        )
+
+        let uuid = UUID()
+        storingTextures[uuid] = TextureMeta(
+            textureID: textureID,
+            pointSize: meta.pointSize,
+            scale: CGSize(
+                width: meta.pixelSize.width / meta.textureSize.width,
+                height: meta.pixelSize.height / meta.textureSize.height
+            ),
+            alignment: meta.alignment
+        )
+        
+        return GraphicsTextureRef(textureUUID: uuid, graphics: self)
+    }
+    
+    func drawTexture(_ texture: GraphicsTextureRef, in frame: CGRect) {
+        guard let meta = storingTextures[texture.textureUUID] else { return }
+        
+        let c = UIColor.white.extractComponents()
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
+        
+        glEnable(GL_BLEND.to_enum)
+
+        glBindTexture(GL_TEXTURE_2D.to_enum, meta.textureID)
+        glEnable(GL_TEXTURE_2D.to_enum)
+
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY.to_enum)
+        
+        let topMargin = (frame.height - min(frame.height, meta.pointSize.height)) * 0.5
+        let bottomMargin = topMargin
+        let leftMargin, rightMargin: CGFloat
+        
+        switch meta.alignment {
+        case .left:
+            leftMargin = 0
+            rightMargin = frame.width - meta.pointSize.width - leftMargin
+            
+        default:
+            abort()
+        }
+
+        let alignedFrame = frame.inset(
+            by: UIEdgeInsets(top: topMargin, left: leftMargin, bottom: bottomMargin, right: rightMargin)
+        )
+
+        let vertexPoints: [CGPoint] = [
+            alignedFrame.topLeftPoint,
+            alignedFrame.bottomLeftPoint,
+            alignedFrame.topRightPoint,
+            alignedFrame.bottomRightPoint
+        ]
+        
+        let textureScaling = CGRect(
+            x: 0,
+            y: 1.0 - meta.scale.height,
+            width: meta.scale.width,
+            height: meta.scale.height
+        )
+        
+        let texturePoints: [CGPoint] = [
+            textureScaling.bottomLeftPoint,
+            textureScaling.topLeftPoint,
+            textureScaling.bottomRightPoint,
+            textureScaling.topRightPoint
+        ]
+        
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
+        let textureCoords = convertPointsToValues(texturePoints, scalable: false)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+        glTexCoordPointer(2, GL_FLOAT.to_enum, 0, textureCoords)
+        glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum)
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY.to_enum)
+
+        glBindTexture(GL_TEXTURE_2D.to_enum, 0)
+        glDisable(GL_TEXTURE_2D.to_enum)
+        
+        glDisable(GL_BLEND.to_enum)
+    }
+    
+    func discardTexture(_ texture: GraphicsTextureRef) {
+        guard let meta = storingTextures[texture.textureUUID] else { return }
+        var textureID = meta.textureID
+        
+        glBindTexture(GL_TEXTURE_2D.to_enum, 0)
+        glDeleteTextures(1, &textureID)
     }
     
     private func setupEnvironment() {
@@ -208,7 +320,7 @@ final class OpenGraphics: IGraphics {
         glGenRenderbuffers(1, &renderBuffer)
         if renderBuffer > 0 {
             glBindRenderbuffer(GL_RENDERBUFFER.to_enum, renderBuffer)
-            context.renderbufferStorage(GL_RENDERBUFFER.to_int, from: renderView.drawableLayer)
+            context.renderbufferStorage(GL_RENDERBUFFER.toInt, from: renderView.drawableLayer)
         }
         
         glGenFramebuffers(1, &generalFrameBuffer)
@@ -226,6 +338,9 @@ final class OpenGraphics: IGraphics {
             glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_T.to_enum, GL_CLAMP_TO_EDGE.to_float)
             glTexImage2D(GL_TEXTURE_2D.to_enum, 0, GL_RGBA, renderSize.width.to_size, renderSize.height.to_size, 0, GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum, nil)
         }
+        
+        glEnable(GL_BLEND.to_enum)
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
         
         EAGLContext.setCurrent(nil)
     }
@@ -248,16 +363,25 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(nil)
     }
     
-    private func convertPointsToValues(_ points: [CGPoint]) -> [GLfloat] {
+    private func convertPointsToValues(_ points: [CGPoint], scalable: Bool) -> [GLfloat] {
         var values = [GLfloat](repeating: 0, count: points.count * 2)
         var index = 0
         
         points.forEach { point in
-            values[index] = point.x.scaled.to_float
-            index += 1
-            
-            values[index] = point.y.scaled.to_float
-            index += 1
+            if scalable {
+                values[index] = point.x.scaled().to_float
+                index += 1
+                
+                values[index] = point.y.scaled().to_float
+                index += 1
+            }
+            else {
+                values[index] = point.x.to_float
+                index += 1
+                
+                values[index] = point.y.to_float
+                index += 1
+            }
         }
         
         return values
@@ -290,14 +414,22 @@ final class OpenGraphics: IGraphics {
 }
 
 fileprivate extension Int {
+    var scaled: Int {
+        return self * Int(UIScreen.main.scale)
+    }
+    
     var to_size: GLsizei {
         return GLsizei(self)
     }
 }
 
 fileprivate extension Int32 {
-    var to_int: Int {
+    var toInt: Int {
         return Int(self)
+    }
+    
+    var to_int: GLint {
+        return GLint(self)
     }
     
     var to_float: GLfloat {
@@ -314,7 +446,7 @@ fileprivate extension Int32 {
 }
 
 fileprivate extension CGFloat {
-    var scaled: CGFloat {
+    func scaled() -> CGFloat {
         return self * UIScreen.main.scale
     }
     

@@ -9,19 +9,10 @@
 import Foundation
 import UIKit
 
-protocol IChartGraphNode: IChartFigureNode {
-    func setChart(_ chart: Chart, config: ChartConfig)
+protocol IChartGraphNode: IChartFigureNode, IChartSlicableNode {
 }
 
 final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
-    struct Meta {
-        let renderedIndices: ClosedRange<Int>
-        let visibleIndices: ClosedRange<Int>
-        let totalWidth: CGFloat
-        let margins: ChartMargins
-        let stepX: CGFloat
-    }
-    
     private let width: CGFloat
     
     private var figureNodes = [ChartFigureNode]()
@@ -49,7 +40,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     private func update() {
         removeAllChildren()
         
-        guard let meta = obtainMetaForRange() else { return }
+        guard let meta = obtainMeta(chart: chart, config: config) else { return }
         let slice = calculateSlice(meta: meta)
         
         slice.lines.forEach { line in
@@ -57,47 +48,12 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             figureNode.setFrame(bounds)
             figureNode.setWidth(width)
             figureNode.setStrokeColor(line.color)
-            figureNode.setPoints(calculatePoints(line: line, edge: slice.edge, with: meta))
+            figureNode.setPoints(slicePoints(line: line, edge: slice.edge, with: meta))
             addChild(node: figureNode)
         }
     }
     
-    private func obtainMetaForRange() -> Meta? {
-        guard chart.length > 0 else { return nil }
-        guard config.range.distance > 0 else { return nil }
-        
-        let lastIndex = CGFloat(chart.length - 1)
-        
-        let leftRenderedIndex = Int(floor(lastIndex * config.range.start))
-        let rightRenderedIndex = Int(ceil(lastIndex * config.range.end))
-        let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
-        
-        let leftVisibleIndex = Int(ceil(lastIndex * config.range.start))
-        let rightVisibleIndex = Int(floor(lastIndex * config.range.end))
-        let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
-        
-        let totalWidth = size.width / config.range.distance
-        let stepX = totalWidth / lastIndex
-        
-        let leftRenderedItemPosition = CGFloat(leftRenderedIndex) * stepX
-        let frameLeftPosition = CGFloat(totalWidth * config.range.start)
-
-        let rightRenderedItemPosition = CGFloat(rightRenderedIndex) * stepX
-        let frameRightPosition = CGFloat(totalWidth * config.range.end)
-        
-        return Meta(
-            renderedIndices: renderedIndices,
-            visibleIndices: visibleIndices,
-            totalWidth: totalWidth,
-            margins: ChartMargins(
-                left: frameLeftPosition - leftRenderedItemPosition,
-                right: rightRenderedItemPosition - frameRightPosition
-            ),
-            stepX: stepX
-        )
-    }
-    
-    private func calculateSlice(meta: Meta) -> ChartSlice {
+    private func calculateSlice(meta: ChartSliceMeta) -> ChartSlice {
         let visibleLines: [ChartLine] = zip(chart.lines, config.lines).compactMap { line, lineConfig in
             guard lineConfig.visible else { return nil }
             return line
@@ -121,7 +77,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         )
     }
     
-    private func calculatePoints(line: ChartLine, edge: ChartRange, with meta: Meta) -> [CGPoint] {
+    private func slicePoints(line: ChartLine, edge: ChartRange, with meta: ChartSliceMeta) -> [CGPoint] {
         guard size != .zero else { return [] }
         
         let sliceValues = line.values[meta.renderedIndices]
