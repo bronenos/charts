@@ -38,18 +38,18 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     func setChart(_ chart: Chart, config: ChartConfig) {
         self.range = config.range
         
-        graphNode.setChart(chart, config: config.fullRanged())
+        graphNode.setChart(chart, config: config.fullRanged(), sideOverlap: 0)
         update(range: config.range)
     }
     
     private func update(range: ChartRange) {
-        let canvasLeftX = size.width * range.start
-        let canvasWidth = size.width * range.distance
-        let canvasFrame = CGRect(x: canvasLeftX, y: 0, width: canvasWidth, height: size.height)
-        canvasNode.frame = canvasFrame
-        sliderNode.frame = canvasFrame
+        let sliderLeftX = size.width * range.start - sliderNode.horizontalGap
+        let sliderWidth = size.width * range.distance + sliderNode.horizontalGap * 2
+        let sliderFrame = CGRect(x: sliderLeftX, y: 0, width: sliderWidth, height: size.height)
+        canvasNode.frame = sliderFrame
+        sliderNode.frame = sliderFrame
         
-        let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: 1)
+        let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: sliderNode.verticalGap)
         graphNode.frame = graphFrame
     }
 }

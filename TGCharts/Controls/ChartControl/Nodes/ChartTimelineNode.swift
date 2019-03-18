@@ -19,6 +19,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     
     private var chart = Chart()
     private var config = ChartConfig()
+    private var sideOverlap = CGFloat(0)
     
     init(tag: String?, formattingProvider: IFormattingProvider) {
         self.formattingProvider = formattingProvider
@@ -30,26 +31,27 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         didSet { update() }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig) {
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
         self.chart = chart
         self.config = config
+        self.sideOverlap = sideOverlap
         update()
     }
     
     private func update() {
         removeAllChildren()
         
-        guard let meta = obtainMeta(chart: chart, config: config) else { return }
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
         guard let firstRenderedIndex = meta.renderedIndices.first else { return }
         
         let dateWidth = size.width / 7
-        let additionalNumberOfIndices = min(firstRenderedIndex, Int(ceil(dateWidth / meta.stepX)))
+        let additionalNumberOfIndices = 0 // min(firstRenderedIndex, Int(ceil(dateWidth / meta.stepX)))
         let firstEnumeratedIndex = firstRenderedIndex - additionalNumberOfIndices
         
         var leftAnchor = CGFloat.infinity
         chart.axis[firstEnumeratedIndex...].enumerated().reversed().forEach { index, item in
             let rect = CGRect(
-                x: CGFloat(-additionalNumberOfIndices) * meta.stepX - meta.margins.left + meta.stepX * CGFloat(index),
+                x: -meta.margins.left + meta.stepX * CGFloat(index - additionalNumberOfIndices) - dateWidth,
                 y: 0,
                 width: dateWidth,
                 height: size.height
@@ -68,7 +70,10 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             dateNode.content = content
             addChild(node: dateNode)
             
-            if rect.maxX <= leftAnchor {
+            if index == 0, firstEnumeratedIndex == 0, rect.minX < 0 {
+                dateNode.alpha = 0
+            }
+            else if rect.maxX <= leftAnchor {
                 dateNode.alpha = 1.0
                 leftAnchor = rect.minX
             }

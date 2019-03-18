@@ -10,16 +10,18 @@ import Foundation
 import UIKit
 
 protocol IChartSliderNode: IChartNode {
+    var horizontalGap: CGFloat { get }
+    var verticalGap: CGFloat { get }
     var leftArrowNode: ChartSliderArrowNode { get }
     var rightArrowNode: ChartSliderArrowNode { get }
 }
 
 final class ChartSliderNode: ChartNode, IChartSliderNode {
+    let horizontalGap = CGFloat(10)
+    let verticalGap = CGFloat(1)
+    
     let leftArrowNode = ChartSliderArrowNode(tag: "slider-left-arrow", direction: .left)
     let rightArrowNode = ChartSliderArrowNode(tag: "slider-right-arrow", direction: .right)
-    
-    private let horizontalGap = CGFloat(10)
-    private let verticalGap = CGFloat(1)
     
     override init(tag: String?) {
         super.init(tag: tag ?? "[slider]")

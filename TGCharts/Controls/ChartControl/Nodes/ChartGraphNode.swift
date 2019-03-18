@@ -19,6 +19,7 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
     
     private var chart = Chart()
     private var config = ChartConfig()
+    private var sideOverlap = CGFloat(0)
     
     init(tag: String?, width: CGFloat) {
         self.width = width
@@ -30,16 +31,17 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         didSet { update() }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig) {
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
         self.chart = chart
         self.config = config
+        self.sideOverlap = sideOverlap
         update()
     }
     
     private func update() {
         removeAllChildren()
         
-        guard let meta = obtainMeta(chart: chart, config: config) else { return }
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
         let slice = calculateSlice(meta: meta)
         
         slice.lines.forEach { line in

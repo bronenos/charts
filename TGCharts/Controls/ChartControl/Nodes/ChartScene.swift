@@ -53,8 +53,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {
-        graphNode.setChart(chart, config: config)
-        timelineNode.setChart(chart, config: config)
+        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap)
+        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap)
         navigatorNode.setChart(chart, config: config)
     }
     
@@ -67,21 +67,27 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
 }
 
 fileprivate struct Layout {
+    static let sideGap = CGFloat(15)
+    
     let bounds: CGRect
     
+    private let sideGap = Layout.sideGap
     private let timelineHeight = CGFloat(25)
     private let navigatorHeight = CGFloat(40)
     
     var graphNodeFrame: CGRect {
         let height = bounds.height - timelineFrame.maxY
-        return CGRect(x: 0, y: timelineFrame.maxY, width: bounds.width, height: height)
+        let base = CGRect(x: 0, y: timelineFrame.maxY, width: bounds.width, height: height)
+        return base.insetBy(dx: sideGap, dy: 0)
     }
     
     var timelineFrame: CGRect {
-        return CGRect(x: 0, y: navigatorFrame.maxY, width: bounds.width, height: timelineHeight)
+        let base = CGRect(x: 0, y: navigatorFrame.maxY, width: bounds.width, height: timelineHeight)
+        return base.insetBy(dx: sideGap, dy: 0)
     }
     
     var navigatorFrame: CGRect {
-        return CGRect(x: 0, y: 0, width: bounds.width, height: navigatorHeight)
+        let base = CGRect(x: 0, y: 0, width: bounds.width, height: navigatorHeight)
+        return base.insetBy(dx: sideGap, dy: 0)
     }
 }

@@ -18,27 +18,28 @@ struct ChartSliceMeta {
 }
 
 protocol IChartSlicableNode: IChartNode {
-    func setChart(_ chart: Chart, config: ChartConfig)
-    func obtainMeta(chart: Chart, config: ChartConfig) -> ChartSliceMeta?
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat)
+    func obtainMeta(chart: Chart, config: ChartConfig, sideOverlap: CGFloat) -> ChartSliceMeta?
 }
 
 extension IChartSlicableNode {
-    func obtainMeta(chart: Chart, config: ChartConfig) -> ChartSliceMeta? {
+    func obtainMeta(chart: Chart, config: ChartConfig, sideOverlap: CGFloat) -> ChartSliceMeta? {
         guard chart.length > 0 else { return nil }
         guard config.range.distance > 0 else { return nil }
         
         let lastIndex = CGFloat(chart.length - 1)
+        let totalWidth = size.width / config.range.distance
+        let stepX = totalWidth / lastIndex
         
-        let leftRenderedIndex = Int(floor(lastIndex * config.range.start))
-        let rightRenderedIndex = Int(ceil(lastIndex * config.range.end))
+        let sideIndices = ceil(sideOverlap / stepX)
+        
+        let leftRenderedIndex = Int(floor(max(0, lastIndex * config.range.start - sideIndices)))
+        let rightRenderedIndex = Int(ceil(min(lastIndex, lastIndex * config.range.end + sideIndices)))
         let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
         
         let leftVisibleIndex = Int(ceil(lastIndex * config.range.start))
         let rightVisibleIndex = Int(floor(lastIndex * config.range.end))
         let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
-        
-        let totalWidth = size.width / config.range.distance
-        let stepX = totalWidth / lastIndex
         
         let leftRenderedItemPosition = CGFloat(leftRenderedIndex) * stepX
         let frameLeftPosition = CGFloat(totalWidth * config.range.start)
