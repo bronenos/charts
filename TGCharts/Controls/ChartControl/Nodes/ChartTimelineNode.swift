@@ -26,9 +26,8 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         super.init(tag: tag ?? "[timeline]")
     }
     
-    override func setFrame(_ frame: CGRect) {
-        super.setFrame(frame)
-        update()
+    override var frame: CGRect {
+        didSet { update() }
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {
@@ -59,8 +58,8 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             )
             
             let dateNode = ChartLabelNode(tag: "date")
-            dateNode.setFrame(rect)
-            dateNode.setContent(content)
+            dateNode.frame = rect
+            dateNode.content = content
             addChild(node: dateNode)
         }
     }

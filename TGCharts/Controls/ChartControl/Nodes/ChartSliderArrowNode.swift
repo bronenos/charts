@@ -25,17 +25,15 @@ final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
         
         super.init(tag: tag ?? "[slider-arrow]")
         
-        setWidth(1)
+        strokeWidth = 1
     }
     
-    override func setFrame(_ frame: CGRect) {
-        super.setFrame(frame)
-        setPoints(calculatePoints())
+    override var frame: CGRect {
+        didSet { points = calculatePoints() }
     }
     
-    override func setForegroundColor(_ color: UIColor) {
-        super.setForegroundColor(color)
-        setStrokeColor(color)
+    override var foregroundColor: UIColor {
+        didSet { strokeColor = foregroundColor }
     }
     
     private func calculatePoints() -> [CGPoint] {

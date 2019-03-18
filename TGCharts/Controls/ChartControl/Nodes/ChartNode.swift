@@ -11,18 +11,19 @@ import UIKit
 
 protocol IChartNode: class {
     var tag: String { get }
+    var frame: CGRect { get set }
+    var bounds: CGRect { get }
     var origin: CGPoint { get }
     var size: CGSize { get }
-    var bounds: CGRect { get }
+    var alpha: CGFloat { get set }
+    var backgroundColor: UIColor { get set }
+    var foregroundColor: UIColor { get set }
     var parentNode: IChartNode? { get }
     func addChild(node: IChartNode)
     func assignToParent(node: IChartNode?)
     func removeAllChildren()
     func renderWithChildren(graphics: IGraphics)
     func render(graphics: IGraphics)
-    func setFrame(_ frame: CGRect)
-    func setBackgroundColor(_ color: UIColor)
-    func setForegroundColor(_ color: UIColor)
     func node(at point: CGPoint) -> IChartNode?
     func node(by tag: String) -> IChartNode?
     func calculateFullOrigin(of node: IChartNode) -> CGPoint?
@@ -31,21 +32,23 @@ protocol IChartNode: class {
 class ChartNode: IChartNode {
     let tag: String
     
-    private var frame = CGRect.zero
+    var frame = CGRect.zero
+    var alpha = CGFloat(1.0)
+    var backgroundColor = UIColor.clear
+    var foregroundColor = UIColor.clear
+    
     private var childNodes = [IChartNode]()
-    private(set) var backgroundColor = UIColor.clear
-    private(set) var foregroundColor = UIColor.clear
 
+    var bounds: CGRect {
+        return CGRect(origin: .zero, size: size)
+    }
+    
     var origin: CGPoint {
         return frame.origin
     }
     
     var size: CGSize {
         return frame.size
-    }
-    
-    var bounds: CGRect {
-        return CGRect(origin: .zero, size: size)
     }
     
     private(set) weak var parentNode: IChartNode?
@@ -83,18 +86,6 @@ class ChartNode: IChartNode {
         graphics.fill(frame: rect, color: backgroundColor)
     }
 
-    func setFrame(_ frame: CGRect) {
-        self.frame = frame
-    }
-    
-    final func setBackgroundColor(_ color: UIColor) {
-        backgroundColor = color
-    }
-    
-    func setForegroundColor(_ color: UIColor) {
-        foregroundColor = color
-    }
-    
     func node(at point: CGPoint) -> IChartNode? {
         for childNode in childNodes.reversed() {
             let childPoint = CGPoint(point - childNode.origin)

@@ -26,9 +26,8 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         super.init(tag: tag ?? "[graph]")
     }
     
-    override func setFrame(_ frame: CGRect) {
-        super.setFrame(frame)
-        update()
+    override var frame: CGRect {
+        didSet { update() }
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {
@@ -45,10 +44,10 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
         
         slice.lines.forEach { line in
             let figureNode = ChartFigureNode(tag: "graph-line")
-            figureNode.setFrame(bounds)
-            figureNode.setWidth(width)
-            figureNode.setStrokeColor(line.color)
-            figureNode.setPoints(slicePoints(line: line, edge: slice.edge, with: meta))
+            figureNode.frame = bounds
+            figureNode.points = slicePoints(line: line, edge: slice.edge, with: meta)
+            figureNode.strokeWidth = width
+            figureNode.strokeColor = line.color
             addChild(node: figureNode)
         }
     }

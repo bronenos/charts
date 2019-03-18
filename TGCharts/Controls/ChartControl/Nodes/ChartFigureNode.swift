@@ -10,35 +10,23 @@ import Foundation
 import UIKit
 
 protocol IChartFigureNode: IChartNode {
-    func setPoints(_ points: [CGPoint])
-    func setStrokeColor(_ color: UIColor)
-    func setWidth(_ width: CGFloat)
+    var points: [CGPoint] { get set }
+    var strokeWidth: CGFloat { get set }
+    var strokeColor: UIColor { get set }
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
-    private var drawingPoints = [CGPoint]()
-    private var strokeColor = UIColor.clear
-    private var strokeWidth = CGFloat(0)
-    
+    var points = [CGPoint]()
+    var strokeWidth = CGFloat(0)
+    var strokeColor = UIColor.clear
+
     override init(tag: String?) {
         super.init(tag: tag ?? "[figure]")
-    }
-    
-    func setPoints(_ points: [CGPoint]) {
-        drawingPoints = points
-    }
-    
-    func setStrokeColor(_ color: UIColor) {
-        strokeColor = color
-    }
-    
-    func setWidth(_ width: CGFloat) {
-        strokeWidth = width
     }
     
     override func render(graphics: IGraphics) {
         super.render(graphics: graphics)
         
-        graphics.stroke(points: drawingPoints, color: strokeColor, width: strokeWidth)
+        graphics.stroke(points: points, color: strokeColor, width: strokeWidth)
     }
 }

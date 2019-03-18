@@ -36,13 +36,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         addChild(node: navigatorNode)
     }
     
-    override func setFrame(_ frame: CGRect) {
-        super.setFrame(frame)
-        
-        let layout = Layout(bounds: bounds)
-        graphNode.setFrame(layout.graphNodeFrame)
-        timelineNode.setFrame(layout.timelineFrame)
-        navigatorNode.setFrame(layout.navigatorFrame)
+    override var frame: CGRect {
+        didSet { layoutChildren() }
     }
     
     override func node(at point: CGPoint) -> IChartNode? {
@@ -59,6 +54,13 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         graphNode.setChart(chart, config: config)
         timelineNode.setChart(chart, config: config)
         navigatorNode.setChart(chart, config: config)
+    }
+    
+    private func layoutChildren() {
+        let layout = Layout(bounds: bounds)
+        graphNode.frame = layout.graphNodeFrame
+        timelineNode.frame = layout.timelineFrame
+        navigatorNode.frame = layout.navigatorFrame
     }
 }
 

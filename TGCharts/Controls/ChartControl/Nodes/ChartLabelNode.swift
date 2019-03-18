@@ -18,16 +18,13 @@ struct ChartLabelNodeContent {
 }
 
 protocol IChartLabelNode: IChartNode {
-    func setContent(_ content: ChartLabelNodeContent)
+    var content: ChartLabelNodeContent? { get set }
 }
 
 final class ChartLabelNode: ChartNode, IChartLabelNode {
-    private var content: ChartLabelNodeContent?
-    private var textureRef: GraphicsTextureRef?
+    var content: ChartLabelNodeContent?
     
-    func setContent(_ content: ChartLabelNodeContent) {
-        self.content = content
-    }
+    private var textureRef: GraphicsTextureRef?
     
     override func render(graphics: IGraphics) {
         super.render(graphics: graphics)

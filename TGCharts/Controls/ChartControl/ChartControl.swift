@@ -71,7 +71,7 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     func render() {
         guard let size = renderingSize else { return }
         
-        scene.setFrame(CGRect(origin: .zero, size: size))
+        scene.frame = CGRect(origin: .zero, size: size)
         scene.setChart(chart, config: config)
         scene.applyDesign()
         graphics.render { link in scene.renderWithChildren(graphics: link)}
@@ -112,31 +112,31 @@ fileprivate func startupConfig(chart: Chart, range: ChartRange) -> ChartConfig {
 
 fileprivate extension ChartSceneNode {
     func applyDesign() {
-        setBackgroundColor(
+        backgroundColor = (
             DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
         )
         
-        navigatorNode.setBackgroundColor(
+        navigatorNode.backgroundColor = (
             DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
         )
         
-        navigatorNode.canvasNode.setBackgroundColor(
+        navigatorNode.backgroundColor = (
             DesignBook.shared.resolve(colorAlias: .sliderActiveBackground)
         )
         
-        navigatorNode.graphNode.setBackgroundColor(
+        navigatorNode.graphNode.backgroundColor = (
             DesignBook.shared.resolve(colorAlias: .sliderInactiveBackground)
         )
         
-        navigatorNode.sliderNode.setForegroundColor(
+        navigatorNode.sliderNode.foregroundColor = (
             DesignBook.shared.resolve(colorAlias: .sliderControlBackground)
         )
         
-        navigatorNode.sliderNode.leftArrowNode.setForegroundColor(
+        navigatorNode.sliderNode.leftArrowNode.foregroundColor = (
             DesignBook.shared.resolve(colorAlias: .sliderControlForeground)
         )
         
-        navigatorNode.sliderNode.rightArrowNode.setForegroundColor(
+        navigatorNode.sliderNode.rightArrowNode.foregroundColor = (
             DesignBook.shared.resolve(colorAlias: .sliderControlForeground)
         )
     }

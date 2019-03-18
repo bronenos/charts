@@ -31,10 +31,8 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
         addChild(node: sliderNode)
     }
     
-    override func setFrame(_ frame: CGRect) {
-        super.setFrame(frame)
-        
-        update(range: range)
+    override var frame: CGRect {
+        didSet { update(range: range) }
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {
@@ -48,12 +46,10 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
         let canvasLeftX = size.width * range.start
         let canvasWidth = size.width * range.distance
         let canvasFrame = CGRect(x: canvasLeftX, y: 0, width: canvasWidth, height: size.height)
-        canvasNode.setFrame(canvasFrame)
+        canvasNode.frame = canvasFrame
+        sliderNode.frame = canvasFrame
         
         let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: 1)
-        graphNode.setFrame(graphFrame)
-        
-        let sliderFrame = canvasFrame
-        sliderNode.setFrame(sliderFrame)
+        graphNode.frame = graphFrame
     }
 }
