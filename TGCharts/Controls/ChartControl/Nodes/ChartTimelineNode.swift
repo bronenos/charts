@@ -40,12 +40,18 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         removeAllChildren()
         
         guard let meta = obtainMeta(chart: chart, config: config) else { return }
+        guard let firstRenderedIndex = meta.renderedIndices.first else { return }
         
-        chart.axis[meta.renderedIndices].enumerated().forEach { index, item in
+        let dateWidth = size.width / 7
+        let additionalNumberOfIndices = min(firstRenderedIndex, Int(ceil(dateWidth / meta.stepX)))
+        let firstEnumeratedIndex = firstRenderedIndex - additionalNumberOfIndices
+        
+        var leftAnchor = CGFloat.infinity
+        chart.axis[firstEnumeratedIndex...].enumerated().reversed().forEach { index, item in
             let rect = CGRect(
-                x: -meta.margins.left + meta.stepX * CGFloat(index),
+                x: CGFloat(-additionalNumberOfIndices) * meta.stepX - meta.margins.left + meta.stepX * CGFloat(index),
                 y: 0,
-                width: meta.stepX,
+                width: dateWidth,
                 height: size.height
             )
             
@@ -53,7 +59,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
                 text: formattingProvider.format(date: item.date, style: .shortDate),
                 color: DesignBook.shared.resolve(colorAlias: .chartIndexForeground),
                 font: UIFont.systemFont(ofSize: 8),
-                alignment: .left,
+                alignment: .right,
                 limitedToBounds: false
             )
             
@@ -61,6 +67,14 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             dateNode.frame = rect
             dateNode.content = content
             addChild(node: dateNode)
+            
+            if rect.maxX <= leftAnchor {
+                dateNode.alpha = 1.0
+                leftAnchor = rect.minX
+            }
+            else {
+                dateNode.alpha = 0
+            }
         }
     }
 }

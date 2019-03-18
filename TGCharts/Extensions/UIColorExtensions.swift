@@ -33,4 +33,10 @@ extension UIColor {
             self.init(white: 0, alpha: 1.0)
         }
     }
+    
+    var isTransparent: Bool {
+        var alpha = CGFloat(0)
+        getRed(nil, green: nil, blue: nil, alpha: &alpha)
+        return (alpha == 0)
+    }
 }

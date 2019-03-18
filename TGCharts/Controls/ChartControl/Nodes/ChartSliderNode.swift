@@ -32,8 +32,8 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
         didSet { layoutChildren() }
     }
     
-    override func render(graphics: IGraphics) {
-        super.render(graphics: graphics)
+    override func render(graphics: IGraphics) -> Bool {
+        guard super.render(graphics: graphics) else { return false }
         
         let leftGapFrame = bounds.divided(atDistance: horizontalGap, from: .minXEdge).slice
         graphics.fill(frame: leftGapFrame, color: foregroundColor)
@@ -46,6 +46,8 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
         
         let topGapFrame = bounds.divided(atDistance: verticalGap, from: .maxYEdge).slice
         graphics.fill(frame: topGapFrame, color: foregroundColor)
+        
+        return true
     }
     
     private func layoutChildren() {

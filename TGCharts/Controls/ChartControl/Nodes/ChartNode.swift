@@ -23,7 +23,7 @@ protocol IChartNode: class {
     func assignToParent(node: IChartNode?)
     func removeAllChildren()
     func renderWithChildren(graphics: IGraphics)
-    func render(graphics: IGraphics)
+    func render(graphics: IGraphics) -> Bool
     func node(at point: CGPoint) -> IChartNode?
     func node(by tag: String) -> IChartNode?
     func calculateFullOrigin(of node: IChartNode) -> CGPoint?
@@ -72,7 +72,7 @@ class ChartNode: IChartNode {
     }
     
     final func renderWithChildren(graphics: IGraphics) {
-        render(graphics: graphics)
+        guard render(graphics: graphics) else { return }
         
         childNodes.forEach { childNode in
             graphics.pushOffset(childNode.origin)
@@ -81,9 +81,12 @@ class ChartNode: IChartNode {
         }
     }
     
-    func render(graphics: IGraphics) {
+    func render(graphics: IGraphics) -> Bool {
+        guard alpha > 0 else { return false }
+        
         let rect = CGRect(origin: .zero, size: size)
         graphics.fill(frame: rect, color: backgroundColor)
+        return true
     }
 
     func node(at point: CGPoint) -> IChartNode? {

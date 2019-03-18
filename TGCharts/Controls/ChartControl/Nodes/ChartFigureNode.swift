@@ -24,9 +24,10 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         super.init(tag: tag ?? "[figure]")
     }
     
-    override func render(graphics: IGraphics) {
-        super.render(graphics: graphics)
+    override func render(graphics: IGraphics) -> Bool {
+        guard super.render(graphics: graphics) else { return false }
         
         graphics.stroke(points: points, color: strokeColor, width: strokeWidth)
+        return true
     }
 }

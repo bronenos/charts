@@ -19,6 +19,7 @@ struct ChartLabelNodeContent {
 
 protocol IChartLabelNode: IChartNode {
     var content: ChartLabelNodeContent? { get set }
+    func calculateSize() -> CGSize
 }
 
 final class ChartLabelNode: ChartNode, IChartLabelNode {
@@ -26,8 +27,8 @@ final class ChartLabelNode: ChartNode, IChartLabelNode {
     
     private var textureRef: GraphicsTextureRef?
     
-    override func render(graphics: IGraphics) {
-        super.render(graphics: graphics)
+    override func render(graphics: IGraphics) -> Bool {
+        guard super.render(graphics: graphics) else { return false }
         
         if let ref = textureRef {
             graphics.drawTexture(ref, in: bounds)
@@ -36,22 +37,14 @@ final class ChartLabelNode: ChartNode, IChartLabelNode {
             graphics.drawTexture(ref, in: bounds)
             textureRef = ref
         }
+        
+        return true
     }
     
-    private func generateTextureMeta() -> GraphicsTextureMeta? {
-        guard size != .zero else { return nil }
-        guard let content = content else { return nil }
+    func calculateSize() -> CGSize {
+        guard let content = content else { return .zero }
+        guard let string = constructAttributedString() else { return .zero }
         
-        let style = NSMutableParagraphStyle()
-        style.alignment = content.alignment
-        
-        let attributes: [NSAttributedString.Key: Any] = [
-            NSAttributedString.Key.foregroundColor: content.color,
-            NSAttributedString.Key.font: content.font,
-            NSAttributedString.Key.paragraphStyle: style
-        ]
-        
-        let string = NSMutableAttributedString(string: content.text, attributes: attributes)
         let drawingBounds = string.boundingRect(
             with: CGSize(
                 width: content.limitedToBounds ? size.width : .infinity,
@@ -61,6 +54,30 @@ final class ChartLabelNode: ChartNode, IChartLabelNode {
             context: nil
         )
         
+        return drawingBounds.size
+    }
+    
+    private func constructAttributedString() -> NSAttributedString? {
+        guard let content = content else { return nil }
+        
+        let style = NSMutableParagraphStyle()
+        style.alignment = content.alignment
+        
+        return NSMutableAttributedString(
+            string: content.text,
+            attributes: [
+                NSAttributedString.Key.foregroundColor: content.color,
+                NSAttributedString.Key.font: content.font,
+                NSAttributedString.Key.paragraphStyle: style
+            ]
+        )
+    }
+    
+    private func generateTextureMeta() -> GraphicsTextureMeta? {
+        guard let content = content else { return nil }
+        guard let string = constructAttributedString() else { return nil }
+        
+        let drawingBounds = CGRect(origin: .zero, size: calculateSize())
         let image = UIGraphicsImageRenderer(bounds: drawingBounds).image { context in
             string.draw(in: drawingBounds)
         }

@@ -45,9 +45,11 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         return super.node(at: flippedPoint)
     }
     
-    override func render(graphics: IGraphics) {
+    override func render(graphics: IGraphics) -> Bool {
         graphics.clear(color: backgroundColor)
-        super.render(graphics: graphics)
+        
+        guard super.render(graphics: graphics) else { return false }
+        return true
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {

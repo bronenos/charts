@@ -252,8 +252,12 @@ final class OpenGraphics: IGraphics {
         switch meta.alignment {
         case .left:
             leftMargin = 0
-            rightMargin = frame.width - meta.pointSize.width - leftMargin
+            rightMargin = frame.width - meta.pointSize.width
             
+        case .right:
+            rightMargin = 0
+            leftMargin = frame.width - meta.pointSize.width
+
         default:
             abort()
         }
