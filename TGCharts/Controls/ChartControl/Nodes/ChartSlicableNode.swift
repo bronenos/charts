@@ -50,10 +50,6 @@ extension IChartSlicableNode {
         let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
         let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
         
-        if config.range.distance < 0.5 {
-            print("")
-        }
-        
         let leftOverlappingIndex: CGFloat?
         if leftVisibleIndex > leftRenderedIndex {
             let leftVirtualPosition = leftRenderedPosition + stepX

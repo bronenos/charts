@@ -58,6 +58,8 @@
 		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
 		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
+		D4AECB0E224156D300AE5D89 /* ChartPointerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0D224156D300AE5D89 /* ChartPointerNode.swift */; };
+		D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */; };
 		D4BE0CAD223D8FAC001DEE03 /* ChartTimelineNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */; };
 		D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */; };
 		D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */; };
@@ -122,6 +124,8 @@
 		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
 		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
+		D4AECB0D224156D300AE5D89 /* ChartPointerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerNode.swift; sourceTree = "<group>"; };
+		D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionPointScenario.swift; sourceTree = "<group>"; };
 		D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTimelineNode.swift; sourceTree = "<group>"; };
 		D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSlicableNode.swift; sourceTree = "<group>"; };
 		D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLabelNode.swift; sourceTree = "<group>"; };
@@ -147,6 +151,7 @@
 				D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */,
 				D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */,
 				D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */,
+				D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */,
 			);
 			path = Scenarios;
 			sourceTree = "<group>";
@@ -377,6 +382,7 @@
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
 				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
+				D4AECB0D224156D300AE5D89 /* ChartPointerNode.swift */,
 				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 			);
 			path = Nodes;
@@ -471,6 +477,7 @@
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D4F4610B2238C60B00EDDF90 /* global.swift in Sources */,
+				D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */,
 				D4BE0CB3223DB6ED001DEE03 /* GraphicsTexture.swift in Sources */,
 				D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */,
 				D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */,
@@ -507,6 +514,7 @@
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,
+				D4AECB0E224156D300AE5D89 /* ChartPointerNode.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

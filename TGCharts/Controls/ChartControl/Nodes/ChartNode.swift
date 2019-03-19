@@ -18,13 +18,15 @@ protocol IChartNode: class {
     var alpha: CGFloat { get set }
     var backgroundColor: UIColor { get set }
     var foregroundColor: UIColor { get set }
+    var isInteractable: Bool { get set }
     var parentNode: IChartNode? { get }
     func addChild(node: IChartNode)
     func assignToParent(node: IChartNode?)
+    func removeFromParent()
     func removeAllChildren()
     func renderWithChildren(graphics: IGraphics)
     func render(graphics: IGraphics) -> Bool
-    func node(at point: CGPoint) -> IChartNode?
+    func node(at point: CGPoint, interactable: Bool) -> IChartNode?
     func node(by tag: String) -> IChartNode?
     func calculateFullOrigin(of node: IChartNode) -> CGPoint?
 }
@@ -36,7 +38,8 @@ class ChartNode: IChartNode {
     var alpha = CGFloat(1.0)
     var backgroundColor = UIColor.clear
     var foregroundColor = UIColor.clear
-    
+    var isInteractable = true
+
     private var childNodes = [IChartNode]()
 
     var bounds: CGRect {
@@ -66,6 +69,16 @@ class ChartNode: IChartNode {
         parentNode = node
     }
     
+    final func removeChild(node: IChartNode) {
+        childNodes = childNodes.filter { $0 !== node }
+        node.assignToParent(node: nil)
+    }
+    
+    final func removeFromParent() {
+        guard let parentNode = parentNode as? ChartLabelNode else { return }
+        parentNode.removeChild(node: self)
+    }
+    
     final func removeAllChildren() {
         childNodes.forEach { $0.assignToParent(node: nil) }
         childNodes.removeAll()
@@ -89,14 +102,14 @@ class ChartNode: IChartNode {
         return true
     }
 
-    func node(at point: CGPoint) -> IChartNode? {
+    func node(at point: CGPoint, interactable: Bool) -> IChartNode? {
         for childNode in childNodes.reversed() {
             let childPoint = CGPoint(point - childNode.origin)
-            guard let foundNode = childNode.node(at: childPoint) else { continue }
+            guard let foundNode = childNode.node(at: childPoint, interactable: interactable) else { continue }
             return foundNode
         }
         
-        if bounds.contains(point) {
+        if bounds.contains(point), (isInteractable || !interactable) {
             return self
         }
         

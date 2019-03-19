@@ -100,6 +100,28 @@ final class OpenGraphics: IGraphics {
         glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
     }
     
+    func place(points: [CGPoint], color: UIColor, width: CGFloat) {
+        let c = color.extractComponents()
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
+        
+        glEnable(GL_POINT_SMOOTH.to_enum)
+        glHint(GL_POINT_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
+        glPointSize(width.scaled().to_float)
+        
+        glEnable(GL_BLEND.to_enum)
+        
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum);
+        
+        let vertexCoords = convertPointsToValues(points, scalable: true)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+        glDrawArrays(GL_POINTS.to_enum, 0, points.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum)
+        
+        glDisable(GL_POINT_SMOOTH.to_enum)
+        glDisable(GL_BLEND.to_enum)
+    }
+    
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat) {
         let lastIndex = points.count - 1
         guard lastIndex > 0 else { return }

@@ -33,6 +33,13 @@ struct Chart {
         self.axis = axis
         self.lines = lines
     }
+    
+    func visibleLines(config: ChartConfig) -> [ChartLine] {
+        return zip(lines, config.lines).compactMap { line, lineConfig in
+            guard lineConfig.visible else { return nil }
+            return line
+        }
+    }
 }
 
 struct ChartAxisItem {

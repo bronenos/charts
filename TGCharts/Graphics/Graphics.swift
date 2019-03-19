@@ -18,6 +18,7 @@ protocol IGraphics: class {
     func popOffset()
     func render(drawingBlock: (IGraphics) -> Void)
     func clear(color: UIColor)
+    func place(points: [CGPoint], color: UIColor, width: CGFloat)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
     func storeTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?

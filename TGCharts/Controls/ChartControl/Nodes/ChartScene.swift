@@ -40,9 +40,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         didSet { layoutChildren() }
     }
     
-    override func node(at point: CGPoint) -> IChartNode? {
+    override func node(at point: CGPoint, interactable: Bool) -> IChartNode? {
         let flippedPoint = CGPoint(x: point.x, y: size.height - point.y)
-        return super.node(at: flippedPoint)
+        return super.node(at: flippedPoint, interactable: interactable)
     }
     
     override func render(graphics: IGraphics) -> Bool {

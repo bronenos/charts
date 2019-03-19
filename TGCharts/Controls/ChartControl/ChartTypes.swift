@@ -12,19 +12,26 @@ import UIKit
 struct ChartConfig {
     var lines: [ChartLineConfig]
     var range: ChartRange
+    var pointer: CGFloat?
     
     init() {
         lines = []
         range = ChartRange(start: 0, end: 1.0)
+        pointer = nil
     }
     
-    init(lines: [ChartLineConfig], range: ChartRange) {
+    init(lines: [ChartLineConfig], range: ChartRange, pointer: CGFloat?) {
         self.lines = lines
         self.range = range
+        self.pointer = pointer
     }
     
     func fullRanged() -> ChartConfig {
-        return ChartConfig(lines: lines, range: ChartRange(start: 0, end: 1.0))
+        return ChartConfig(
+            lines: lines,
+            range: ChartRange(start: 0, end: 1.0),
+            pointer: pointer
+        )
     }
 }
 

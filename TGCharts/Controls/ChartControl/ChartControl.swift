@@ -95,8 +95,9 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
         delegate?.chartControlDidEndInteraction()
     }
     
-    func interactorDidRequestRender() {
+    func interactorDidInformToUpdate() {
         config.range = interactor.range
+        config.pointer = interactor.pointer
         render()
     }
 }
@@ -106,7 +107,8 @@ fileprivate func startupConfig(chart: Chart, range: ChartRange) -> ChartConfig {
         lines: chart.lines.map { line in
             ChartLineConfig(key: line.key, visible: true)
         },
-        range: range
+        range: range,
+        pointer: nil
     )
 }
 

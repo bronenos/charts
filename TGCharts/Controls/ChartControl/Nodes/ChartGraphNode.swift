@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-protocol IChartGraphNode: IChartFigureNode, IChartSlicableNode {
+protocol IChartGraphNode: IChartSlicableNode {
 }
 
-final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
+final class ChartGraphNode: ChartNode, IChartGraphNode {
     private let width: CGFloat
     
     private var figureNodes = [ChartFigureNode]()
@@ -48,19 +48,17 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             let figureNode = ChartFigureNode(tag: "graph-line")
             figureNode.frame = bounds
             figureNode.points = slicePoints(line: line, edge: slice.edge, with: meta)
-            figureNode.strokeWidth = width
-            figureNode.strokeColor = line.color
+            figureNode.width = width
+            figureNode.color = line.color
+            figureNode.isInteractable = false
             addChild(node: figureNode)
         }
     }
     
     private func calculateSlice(meta: ChartSliceMeta) -> ChartSlice {
-        let visibleLines: [ChartLine] = zip(chart.lines, config.lines).compactMap { line, lineConfig in
-            guard lineConfig.visible else { return nil }
-            return line
-        }
-        
+        let visibleLines = chart.visibleLines(config: config)
         let visibleLineKeys = visibleLines.map { $0.key }
+        
         let visibleEdges: [ChartRange] = chart.axis.map { item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
