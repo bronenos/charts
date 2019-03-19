@@ -49,7 +49,13 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         let firstEnumeratedIndex = firstRenderedIndex - additionalNumberOfIndices
         
         var leftAnchor = CGFloat.infinity
-        chart.axis[firstEnumeratedIndex...].enumerated().reversed().forEach { index, item in
+        var skippingStep: Int?
+        
+        let axialSlice = chart.axis[firstEnumeratedIndex...].enumerated().reversed()
+        let lastAxialIndex = axialSlice.count - 1
+        guard lastAxialIndex >= 0 else { return }
+
+        axialSlice.forEach { index, item in
             let rect = CGRect(
                 x: -meta.margins.left + meta.stepX * CGFloat(index - additionalNumberOfIndices) - dateWidth,
                 y: 0,
@@ -70,12 +76,48 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             dateNode.content = content
             addChild(node: dateNode)
             
-            if index == 0, firstEnumeratedIndex == 0, rect.minX < 0 {
+            if index == 0, rect.minX < 0 {
                 dateNode.alpha = 0
             }
             else if rect.maxX <= leftAnchor {
+                adjustBySkippingStep(
+                    dateNode: dateNode,
+                    leftAnchor: &leftAnchor,
+                    index: index,
+                    lastAxialIndex: lastAxialIndex,
+                    skippingStep: &skippingStep
+                )
+            }
+            else {
+                dateNode.alpha = 0
+            }
+        }
+    }
+    
+    private func adjustBySkippingStep(dateNode: IChartNode,
+                                      leftAnchor: inout CGFloat,
+                                      index: Int,
+                                      lastAxialIndex: Int,
+                                      skippingStep: inout Int?) {
+        if index == lastAxialIndex {
+            dateNode.alpha = 1.0
+            leftAnchor = dateNode.frame.minX
+        }
+        else if let step = skippingStep {
+            if ((lastAxialIndex - index) % step) == 0 {
                 dateNode.alpha = 1.0
-                leftAnchor = rect.minX
+                leftAnchor = dateNode.frame.minX
+            }
+            else {
+                dateNode.alpha = 0
+            }
+        }
+        else {
+            let step = lastAxialIndex - index
+            if step.nonzeroBitCount == 1 {
+                skippingStep = step
+                dateNode.alpha = 1.0
+                leftAnchor = dateNode.frame.minX
             }
             else {
                 dateNode.alpha = 0
