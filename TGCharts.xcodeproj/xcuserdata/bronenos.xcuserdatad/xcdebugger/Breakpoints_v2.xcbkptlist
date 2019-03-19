@@ -6,16 +6,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "TGCharts/Controls/ChartControl/Nodes/ChartTimelineNode.swift"
-            timestampString = "574617743.751724"
+            filePath = "TGCharts/Controls/ChartControl/Nodes/ChartSlicableNode.swift"
+            timestampString = "574666352.952112"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
-            landmarkName = "update()"
+            startingLineNumber = "54"
+            endingLineNumber = "54"
+            landmarkName = "obtainMeta(chart:config:sideOverlap:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

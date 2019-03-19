@@ -68,8 +68,50 @@ final class ChartGraphNode: ChartFigureNode, IChartGraphNode {
             return ChartRange(start: lowerValue, end: upperValue)
         }
         
-        let fittingLowerValue = visibleEdges[meta.visibleIndices].map({ $0.start }).min() ?? 0
-        let fittingUpperValue = visibleEdges[meta.visibleIndices].map({ $0.end }).max() ?? 0
+        let leftOverlappingEdge: ChartRange? = meta.leftOverlappingIndex.flatMap { index in
+            let baseIndex = Int(floor(index))
+            let growingPercent = index - CGFloat(baseIndex)
+            
+            guard baseIndex < chart.length - 1 else {
+                return nil
+            }
+            
+            let values: [CGFloat] = visibleLines.map { line in
+                let baseValue = CGFloat(line.values[baseIndex])
+                let growingValue = CGFloat(line.values[baseIndex + 1])
+                return baseValue + (growingValue - baseValue) * growingPercent
+            }
+            
+            let lowerValue = CGFloat(values.min() ?? 0)
+            let upperValue = CGFloat(values.max() ?? 0)
+            return ChartRange(start: lowerValue, end: upperValue)
+        }
+        
+        let rightOverlappingEdge: ChartRange? = meta.rightOverlappingIndex.flatMap { index in
+            let baseIndex = Int(floor(index))
+            let growingPercent = index - CGFloat(baseIndex)
+            
+            guard baseIndex < chart.length - 1 else {
+                return nil
+            }
+            
+            let values: [CGFloat] = visibleLines.map { line in
+                let baseValue = CGFloat(line.values[baseIndex])
+                let growingValue = CGFloat(line.values[baseIndex + 1])
+                return baseValue + (growingValue - baseValue) * growingPercent
+            }
+            
+            let lowerValue = CGFloat(values.min() ?? 0)
+            let upperValue = CGFloat(values.max() ?? 0)
+            return ChartRange(start: lowerValue, end: upperValue)
+        }
+        
+        let visibleEdgesSlice = visibleEdges[meta.visibleIndices]
+        let overlappingEdges = [leftOverlappingEdge, rightOverlappingEdge].compactMap({ $0 })
+        let edges = visibleEdgesSlice + overlappingEdges
+        
+        let fittingLowerValue = edges.map({ $0.start }).min() ?? 0
+        let fittingUpperValue = edges.map({ $0.end }).max() ?? 0
         let fittingEdge = ChartRange(start: fittingLowerValue, end: fittingUpperValue)
 
         return ChartSlice(

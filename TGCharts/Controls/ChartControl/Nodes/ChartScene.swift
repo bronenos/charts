@@ -76,7 +76,7 @@ fileprivate struct Layout {
     private let navigatorHeight = CGFloat(40)
     
     var graphNodeFrame: CGRect {
-        let height = bounds.height - timelineFrame.maxY
+        let height = bounds.height - timelineFrame.maxY - 5
         let base = CGRect(x: 0, y: timelineFrame.maxY, width: bounds.width, height: height)
         return base.insetBy(dx: sideGap, dy: 0)
     }

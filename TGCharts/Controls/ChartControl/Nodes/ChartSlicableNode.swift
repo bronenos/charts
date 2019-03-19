@@ -12,6 +12,8 @@ import UIKit
 struct ChartSliceMeta {
     let renderedIndices: ClosedRange<Int>
     let visibleIndices: ClosedRange<Int>
+    let leftOverlappingIndex: CGFloat?
+    let rightOverlappingIndex: CGFloat?
     let totalWidth: CGFloat
     let margins: ChartMargins
     let stepX: CGFloat
@@ -33,27 +35,54 @@ extension IChartSlicableNode {
         
         let sideIndices = ceil(sideOverlap / stepX)
         
+        let leftFramePosition = CGFloat(totalWidth * config.range.start)
         let leftRenderedIndex = Int(floor(max(0, lastIndex * config.range.start - sideIndices)))
+        let leftRenderedPosition = CGFloat(leftRenderedIndex) * stepX
+        let leftVisiblePosition = max(0, leftFramePosition - sideOverlap)
+        let leftVisibleIndex = Int(ceil(leftVisiblePosition / stepX))
+
+        let rightFramePosition = CGFloat(totalWidth * config.range.end)
         let rightRenderedIndex = Int(ceil(min(lastIndex, lastIndex * config.range.end + sideIndices)))
+        let rightRenderedPosition = CGFloat(rightRenderedIndex) * stepX
+        let rightVisiblePosition = min(totalWidth, rightFramePosition + sideOverlap)
+        let rightVisibleIndex = Int(floor(rightVisiblePosition / stepX))
+
         let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)
-        
-        let leftVisibleIndex = Int(ceil(lastIndex * config.range.start))
-        let rightVisibleIndex = Int(floor(lastIndex * config.range.end))
         let visibleIndices = (leftVisibleIndex ... rightVisibleIndex)
         
-        let leftRenderedItemPosition = CGFloat(leftRenderedIndex) * stepX
-        let frameLeftPosition = CGFloat(totalWidth * config.range.start)
+        if config.range.distance < 0.5 {
+            print("")
+        }
         
-        let rightRenderedItemPosition = CGFloat(rightRenderedIndex) * stepX
-        let frameRightPosition = CGFloat(totalWidth * config.range.end)
+        let leftOverlappingIndex: CGFloat?
+        if leftVisibleIndex > leftRenderedIndex {
+            let leftVirtualPosition = leftRenderedPosition + stepX
+            let coef = (leftVisiblePosition - leftRenderedPosition) / (leftVirtualPosition - leftRenderedPosition)
+            leftOverlappingIndex = CGFloat(leftRenderedIndex) + coef
+        }
+        else {
+            leftOverlappingIndex = nil
+        }
         
+        let rightOverlappingIndex: CGFloat?
+        if rightVisibleIndex < rightRenderedIndex {
+            let rightVirtualPosition = rightRenderedPosition - stepX
+            let coef = (rightVisiblePosition - rightVirtualPosition) / (rightRenderedPosition - rightVirtualPosition)
+            rightOverlappingIndex = CGFloat(rightRenderedIndex - 1) + coef
+        }
+        else {
+            rightOverlappingIndex = nil
+        }
+
         return ChartSliceMeta(
             renderedIndices: renderedIndices,
             visibleIndices: visibleIndices,
+            leftOverlappingIndex: leftOverlappingIndex,
+            rightOverlappingIndex: rightOverlappingIndex,
             totalWidth: totalWidth,
             margins: ChartMargins(
-                left: frameLeftPosition - leftRenderedItemPosition,
-                right: rightRenderedItemPosition - frameRightPosition
+                left: leftFramePosition - leftRenderedPosition,
+                right: rightRenderedPosition - rightFramePosition
             ),
             stepX: stepX
         )
