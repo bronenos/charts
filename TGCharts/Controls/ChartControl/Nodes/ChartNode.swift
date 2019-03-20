@@ -9,6 +9,11 @@
 import Foundation
 import UIKit
 
+enum ChartNodeTarget {
+    case front
+    case back
+}
+
 protocol IChartNode: class {
     var tag: String { get }
     var frame: CGRect { get set }
@@ -21,6 +26,7 @@ protocol IChartNode: class {
     var isInteractable: Bool { get set }
     var parentNode: IChartNode? { get }
     func addChild(node: IChartNode)
+    func addChild(node: IChartNode, target: ChartNodeTarget)
     func assignToParent(node: IChartNode?)
     func removeFromParent()
     func removeAllChildren()
@@ -61,7 +67,15 @@ class ChartNode: IChartNode {
     }
     
     final func addChild(node: IChartNode) {
-        childNodes.append(node)
+        addChild(node: node, target: .front)
+    }
+    
+    final func addChild(node: IChartNode, target: ChartNodeTarget) {
+        switch target {
+        case .front: childNodes.append(node)
+        case .back: childNodes.insert(node, at: 0)
+        }
+        
         node.assignToParent(node: self)
     }
     

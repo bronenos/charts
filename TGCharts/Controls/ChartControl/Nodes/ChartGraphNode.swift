@@ -12,14 +12,19 @@ import UIKit
 protocol IChartGraphNode: IChartSlicableNode {
 }
 
-final class ChartGraphNode: ChartNode, IChartGraphNode {
+class ChartGraphNode: ChartNode, IChartGraphNode {
+    struct LineMeta {
+        let line: ChartLine
+        let points: [CGPoint]
+    }
+    
     private let width: CGFloat
     
     private var figureNodes = [ChartFigureNode]()
     
-    private var chart = Chart()
-    private var config = ChartConfig()
-    private var sideOverlap = CGFloat(0)
+    private(set) var chart = Chart()
+    private(set) var config = ChartConfig()
+    private(set) var sideOverlap = CGFloat(0)
     
     init(tag: String?, width: CGFloat) {
         self.width = width
@@ -38,26 +43,31 @@ final class ChartGraphNode: ChartNode, IChartGraphNode {
         update()
     }
     
-    private func update() {
-        removeAllChildren()
-        
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
-        let slice = calculateSlice(meta: meta)
-        
-        slice.lines.forEach { line in
+    func update(meta: ChartSliceMeta, edge: ChartRange, lineMetas: [LineMeta]) {
+        lineMetas.forEach { lineMeta in
             let figureNode = ChartFigureNode(tag: "graph-line")
+            figureNode.figure = .joinedLines
             figureNode.frame = bounds
-            figureNode.points = slicePoints(line: line, edge: slice.edge, with: meta)
+            figureNode.points = lineMeta.points
             figureNode.width = width
-            figureNode.color = line.color
+            figureNode.color = lineMeta.line.color
             figureNode.isInteractable = false
             addChild(node: figureNode)
         }
     }
     
-    private func calculateSlice(meta: ChartSliceMeta) -> ChartSlice {
-        let visibleLines = chart.visibleLines(config: config)
-        let visibleLineKeys = visibleLines.map { $0.key }
+    private func update() {
+        removeAllChildren()
+        
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
+        let lines = chart.visibleLines(config: config)
+        let edge = calculateEdge(lines: lines, meta: meta)
+        let lineMetas = lines.map { LineMeta(line: $0, points: slicePoints(line: $0, edge: edge, with: meta)) }
+        update(meta: meta, edge: edge, lineMetas: lineMetas)
+    }
+    
+    private func calculateEdge(lines: [ChartLine], meta: ChartSliceMeta) -> ChartRange {
+        let visibleLineKeys = lines.map { $0.key }
         
         let visibleEdges: [ChartRange] = chart.axis.map { item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
@@ -74,7 +84,7 @@ final class ChartGraphNode: ChartNode, IChartGraphNode {
                 return nil
             }
             
-            let values: [CGFloat] = visibleLines.map { line in
+            let values: [CGFloat] = lines.map { line in
                 let baseValue = CGFloat(line.values[baseIndex])
                 let growingValue = CGFloat(line.values[baseIndex + 1])
                 return baseValue + (growingValue - baseValue) * growingPercent
@@ -93,7 +103,7 @@ final class ChartGraphNode: ChartNode, IChartGraphNode {
                 return nil
             }
             
-            let values: [CGFloat] = visibleLines.map { line in
+            let values: [CGFloat] = lines.map { line in
                 let baseValue = CGFloat(line.values[baseIndex])
                 let growingValue = CGFloat(line.values[baseIndex + 1])
                 return baseValue + (growingValue - baseValue) * growingPercent
@@ -112,13 +122,10 @@ final class ChartGraphNode: ChartNode, IChartGraphNode {
         let fittingUpperValue = edges.map({ $0.end }).max() ?? 0
         let fittingEdge = ChartRange(start: fittingLowerValue, end: fittingUpperValue)
 
-        return ChartSlice(
-            lines: visibleLines,
-            edge: fittingEdge
-        )
+        return fittingEdge
     }
     
-    private func slicePoints(line: ChartLine, edge: ChartRange, with meta: ChartSliceMeta) -> [CGPoint] {
+    func slicePoints(line: ChartLine, edge: ChartRange, with meta: ChartSliceMeta) -> [CGPoint] {
         guard size != .zero else { return [] }
         
         let sliceValues = line.values[meta.renderedIndices]

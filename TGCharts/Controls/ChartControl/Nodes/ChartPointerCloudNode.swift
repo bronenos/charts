@@ -1,5 +1,5 @@
 //
-//  ChartPointerNode.swift
+//  ChartPointerCloudNode.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 19/03/2019.
@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-protocol IChartPointerNode: IChartNode {
+protocol IChartPointerCloudNode: IChartNode {
     var overlayNode: IChartFigureNode { get }
     var dateNode: IChartLabelNode { get }
     var yearNode: IChartLabelNode { get }
@@ -17,7 +17,7 @@ protocol IChartPointerNode: IChartNode {
     func setDate(_ date: Date, lines: [ChartLine], index: Int)
 }
 
-final class ChartPointerNode: ChartNode, IChartPointerNode {
+final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
     private let formattingProvider: IFormattingProvider
     
     let overlayNode: IChartFigureNode = ChartFigureNode(tag: "pointer-overlay")

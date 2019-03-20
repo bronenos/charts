@@ -10,8 +10,7 @@ import Foundation
 import UIKit
 
 protocol IChartSceneNode: IChartNode {
-    var graphNode: IChartGraphNode { get }
-    var pointerNode: IChartPointerNode { get }
+    var graphNode: IChartMainGraphNode { get }
     var timelineNode: IChartTimelineNode { get }
     var navigatorNode: IChartNavigatorNode { get }
     func setChart(_ chart: Chart, config: ChartConfig)
@@ -21,23 +20,20 @@ protocol IChartSceneDelegate: class {
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
-    let graphNode: IChartGraphNode
-    let pointerNode: IChartPointerNode
+    let graphNode: IChartMainGraphNode
     let timelineNode: IChartTimelineNode
     let navigatorNode: IChartNavigatorNode
     
     private var config = ChartConfig(lines: [], range: ChartRange(start: 0, end: 0), pointer: nil)
     
     init(tag: String?, formattingProvider: IFormattingProvider) {
-        graphNode = ChartGraphNode(tag: "graph", width: 2)
-        pointerNode = ChartPointerNode(tag: "pointer", formattingProvider: formattingProvider)
+        graphNode = ChartMainGraphNode(tag: "graph", width: 2, formattingProvider: formattingProvider)
         timelineNode = ChartTimelineNode(tag: "timeline", formattingProvider: formattingProvider)
         navigatorNode = ChartNavigatorNode(tag: "navigator")
 
         super.init(tag: tag ?? "[scene]")
         
         addChild(node: graphNode)
-        addChild(node: pointerNode)
         addChild(node: timelineNode)
         addChild(node: navigatorNode)
     }
@@ -65,25 +61,12 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap)
         navigatorNode.setChart(chart, config: config)
         
-        if let pointer = config.pointer {
-            let index = Int(CGFloat(chart.length - 1) * pointer)
-            let date = chart.axis[index].date
-            let lines = chart.visibleLines(config: config)
-            
-            pointerNode.setDate(date, lines: lines, index: index)
-            pointerNode.alpha = 1.0
-        }
-        else {
-            pointerNode.alpha = 0
-        }
-        
         layoutChildren()
     }
     
     private func layoutChildren() {
         let layout = Layout(bounds: bounds, config: config)
         graphNode.frame = layout.graphNodeFrame
-        pointerNode.frame = layout.pointerNodeFrame
         timelineNode.frame = layout.timelineFrame
         navigatorNode.frame = layout.navigatorFrame
     }
@@ -104,18 +87,6 @@ fileprivate struct Layout {
         let height = bounds.height - timelineFrame.maxY - 5
         let base = CGRect(x: 0, y: timelineFrame.maxY, width: bounds.width, height: height)
         return base.insetBy(dx: sideGap, dy: 0)
-    }
-    
-    var pointerNodeFrame: CGRect {
-        if let pointer = config.pointer {
-            let clamped = (pointer - config.range.start) / config.range.distance
-            let topY = timelineFrame.maxY
-            let leftX = sideGap + (graphNodeFrame.width - pointerWidth) * clamped
-            return CGRect(x: leftX, y: topY, width: pointerWidth, height: graphNodeFrame.height)
-        }
-        else {
-            return .zero
-        }
     }
     
     var timelineFrame: CGRect {
