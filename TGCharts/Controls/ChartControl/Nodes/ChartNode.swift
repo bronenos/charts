@@ -75,7 +75,7 @@ class ChartNode: IChartNode {
     }
     
     final func removeFromParent() {
-        guard let parentNode = parentNode as? ChartLabelNode else { return }
+        guard let parentNode = parentNode as? ChartNode else { return }
         parentNode.removeChild(node: self)
     }
     

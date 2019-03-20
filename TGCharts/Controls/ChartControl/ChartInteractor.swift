@@ -115,7 +115,7 @@ final class ChartInteractor: IChartInteractor {
     }
     
     private func updatePointer(_ pointer: CGFloat?) {
-        self.pointer = pointer
+        self.pointer = pointer.flatMap { max(0, min(1.0, range.start + range.distance * $0)) }
         delegate?.interactorDidInformToUpdate()
     }
 }

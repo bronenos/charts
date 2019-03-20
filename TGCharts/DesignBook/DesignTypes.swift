@@ -43,6 +43,7 @@ enum DesignBookColorAlias {
     case sectionTitleForeground
     case chartIndexForeground
     case chartGridBackground
+    case chartPointerForeground
     case sliderActiveBackground
     case sliderInactiveBackground
     case sliderControlBackground

@@ -23,7 +23,9 @@ protocol IChartLabelNode: IChartNode {
 }
 
 final class ChartLabelNode: ChartNode, IChartLabelNode {
-    var content: ChartLabelNodeContent?
+    var content: ChartLabelNodeContent? {
+        didSet { textureRef = nil }
+    }
     
     private var textureRef: GraphicsTextureRef?
     

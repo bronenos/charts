@@ -70,13 +70,13 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         
         graphics.place(
             points: [
-                bounds.topLeftPoint + CGVector(dx: radius, dy: -radius),
-                bounds.topRightPoint + CGVector(dx: -radius, dy: -radius),
-                bounds.bottomLeftPoint + CGVector(dx: radius, dy: radius),
-                bounds.bottomRightPoint + CGVector(dx: -radius, dy: radius),
+                bounds.topLeftPoint + CGVector(dx: radius, dy: radius),
+                bounds.topRightPoint + CGVector(dx: -radius, dy: radius),
+                bounds.bottomLeftPoint + CGVector(dx: radius, dy: -radius),
+                bounds.bottomRightPoint + CGVector(dx: -radius, dy: -radius),
             ],
             color: color,
-            width: radius
+            width: radius * 2
         )
     }
 }

@@ -9,27 +9,22 @@
 import Foundation
 import UIKit
 
-protocol IChartPointerNode {
+protocol IChartPointerNode: IChartNode {
     var overlayNode: IChartFigureNode { get }
     var dateNode: IChartLabelNode { get }
     var yearNode: IChartLabelNode { get }
     var valuesFont: UIFont { get set }
-    func pointAt(_ point: CGFloat)
+    func setDate(_ date: Date, lines: [ChartLine], index: Int)
 }
 
 final class ChartPointerNode: ChartNode, IChartPointerNode {
+    private let formattingProvider: IFormattingProvider
+    
     let overlayNode: IChartFigureNode = ChartFigureNode(tag: "pointer-overlay")
     let dateNode: IChartLabelNode = ChartLabelNode(tag: "pointer-date")
     let yearNode: IChartLabelNode = ChartLabelNode(tag: "pointer-year")
     var valuesFont = UIFont.systemFont(ofSize: 12)
 
-    private let formattingProvider: IFormattingProvider
-    
-    private var chart = Chart()
-    private var config = ChartConfig()
-    private var sideOverlap = CGFloat(0)
-    private var point = CGFloat(0)
-    
     private var valueNodes = [IChartLabelNode]()
     
     init(tag: String, formattingProvider: IFormattingProvider) {
@@ -37,46 +32,35 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
         
         super.init(tag: tag)
         
+        overlayNode.figure = .roundedSquare
+        overlayNode.color = DesignBook.shared.resolve(colorAlias: .chartGridBackground)
+        overlayNode.radius = 4
+        
         addChild(node: overlayNode)
         overlayNode.addChild(node: dateNode)
         overlayNode.addChild(node: yearNode)
     }
     
     override var frame: CGRect {
-        didSet { update() }
+        didSet { layoutChildren() }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
-        self.chart = chart
-        self.config = config
-        self.sideOverlap = sideOverlap
-        update()
-    }
-    
-    func pointAt(_ point: CGFloat) {
-        self.point = point
-        update()
-    }
-    
-    private func update() {
-        let index = Int(round(point))
-        let item = chart.axis[index]
-        
+    func setDate(_ date: Date, lines: [ChartLine], index: Int) {
         valueNodes.forEach { $0.removeFromParent() }
-        valueNodes = chart.visibleLines(config: config).compactMap { constructValueNode(item: item, line: $0) }
+        valueNodes = lines.map { constructValueNode(line: $0, index: index) }
         valueNodes.forEach { overlayNode.addChild(node: $0) }
         
         dateNode.content = ChartLabelNodeContent(
-            text: "\(formattingProvider.format(date: item.date, style: .shortDate))",
-            color: UIColor.black,
-            font: UIFont.systemFont(ofSize: 12),
+            text: "\(formattingProvider.format(date: date, style: .shortDate))",
+            color: DesignBook.shared.resolve(colorAlias: .chartPointerForeground),
+            font: UIFont.boldSystemFont(ofSize: 12),
             alignment: .left,
             limitedToBounds: false
         )
         
         yearNode.content = ChartLabelNodeContent(
-            text: "\(formattingProvider.format(date: item.date, style: .justYear))",
-            color: UIColor.black,
+            text: "\(formattingProvider.format(date: date, style: .justYear))",
+            color: DesignBook.shared.resolve(colorAlias: .chartPointerForeground),
             font: UIFont.systemFont(ofSize: 12),
             alignment: .left,
             limitedToBounds: false
@@ -100,11 +84,9 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
         zip(valueNodes, layout.valueNodeFrames).forEach { node, nodeFrame in node.frame = nodeFrame }
     }
     
-    private func constructValueNode(item: ChartAxisItem, line: ChartLine) -> IChartLabelNode? {
-        guard let value = item.values[line.key] else { return nil }
-        
+    private func constructValueNode(line: ChartLine, index: Int) -> IChartLabelNode {
         let content = ChartLabelNodeContent(
-            text: "\(value)",
+            text: "\(line.values[index])",
             color: line.color,
             font: UIFont.systemFont(ofSize: 12),
             alignment: .right,
@@ -132,7 +114,7 @@ fileprivate struct Layout {
         let leftLaneHeight = dateNode.calculateSize().height + verGap + yearNode.calculateSize().height
         let rightLaneHeight = valuesHeight + CGFloat(valueNodes.count) * verGap
         let height = verGap + max(leftLaneHeight, rightLaneHeight) + verGap
-        return CGRect(x: 0, y: 0, width: bounds.width, height: height)
+        return CGRect(x: 0, y: bounds.height - height, width: bounds.width, height: height)
     }
     
     var dateNodeFrame: CGRect {
