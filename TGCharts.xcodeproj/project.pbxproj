@@ -160,6 +160,16 @@
 			path = Scenarios;
 			sourceTree = "<group>";
 		};
+		D45D92702244393C004E136C /* Basic */ = {
+			isa = PBXGroup;
+			children = (
+				D42B7A4B223952E800733F2F /* ChartNode.swift */,
+				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
+				D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */,
+			);
+			path = Basic;
+			sourceTree = "<group>";
+		};
 		D46182102234614F006B72A7 = {
 			isa = PBXGroup;
 			children = (
@@ -377,19 +387,17 @@
 		D48EEF5A2237C6D300C232E6 /* Nodes */ = {
 			isa = PBXGroup;
 			children = (
-				D42B7A4B223952E800733F2F /* ChartNode.swift */,
 				D42B7A512239779B00733F2F /* ChartScene.swift */,
+				D45D92702244393C004E136C /* Basic */,
 				D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */,
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
 				D44F5F022242352500110F0A /* ChartMainGraphNode.swift */,
 				D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */,
-				D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */,
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
 				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
 				D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */,
 				D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */,
-				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 			);
 			path = Nodes;
 			sourceTree = "<group>";
