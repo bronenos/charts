@@ -56,6 +56,11 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
+    final func calculateY(value: Int, edge: ChartRange) -> CGFloat {
+        guard size.height > 0 else { return 0 }
+        return ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
+    }
+    
     private func update() {
         removeAllChildren()
         
@@ -125,13 +130,13 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         return fittingEdge
     }
     
-    func slicePoints(line: ChartLine, edge: ChartRange, with meta: ChartSliceMeta) -> [CGPoint] {
+    private func slicePoints(line: ChartLine, edge: ChartRange, with meta: ChartSliceMeta) -> [CGPoint] {
         guard size != .zero else { return [] }
         
         let sliceValues = line.values[meta.renderedIndices]
         return sliceValues.enumerated().map { index, value in
             let x = -meta.margins.left + CGFloat(index) * meta.stepX
-            let y = ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
+            let y = calculateY(value: value, edge: edge)
             return CGPoint(x: x, y: CGFloat(y))
         }
     }

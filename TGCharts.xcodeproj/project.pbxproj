@@ -22,6 +22,7 @@
 		D45B78A7223A610C002134ED /* ChartInteractorMoveScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */; };
 		D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A8223A673D002134ED /* CGPointExtensions.swift */; };
 		D45B78AB223A67D3002134ED /* CGVectorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */; };
+		D45D926F224411EB004E136C /* ChartVerticalStepNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */; };
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
@@ -85,6 +86,7 @@
 		D45B78A6223A610C002134ED /* ChartInteractorMoveScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractorMoveScenario.swift; sourceTree = "<group>"; };
 		D45B78A8223A673D002134ED /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtensions.swift; sourceTree = "<group>"; };
+		D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartVerticalStepNode.swift; sourceTree = "<group>"; };
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -386,6 +388,7 @@
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
 				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
 				D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */,
+				D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */,
 				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 			);
 			path = Nodes;
@@ -498,6 +501,7 @@
 				D46182512234D99B006B72A7 /* BaseNavigationController.swift in Sources */,
 				D461823922346690006B72A7 /* HeartbeatProviders.swift in Sources */,
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
+				D45D926F224411EB004E136C /* ChartVerticalStepNode.swift in Sources */,
 				D45B78A7223A610C002134ED /* ChartInteractorMoveScenario.swift in Sources */,
 				D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */,
 				D46182812235A571006B72A7 /* JsonReader.swift in Sources */,
