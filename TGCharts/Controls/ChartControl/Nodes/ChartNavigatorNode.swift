@@ -42,6 +42,12 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
         update(range: config.range)
     }
     
+    override func render(graphics: IGraphics) -> Bool {
+        backgroundColor = DesignBook.shared.color(.navigatorBackground)
+        
+        return super.render(graphics: graphics)
+    }
+    
     private func update(range: ChartRange) {
         let sliderLeftX = size.width * range.start - sliderNode.horizontalGap
         let sliderWidth = size.width * range.distance + sliderNode.horizontalGap * 2

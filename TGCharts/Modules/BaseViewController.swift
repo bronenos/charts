@@ -34,6 +34,6 @@ class BaseViewController: UIViewController, DesignBookUpdatable {
     }
     
     func updateDesign() {
-        view.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
+        view.backgroundColor = DesignBook.shared.color(.spaceBackground)
     }
 }

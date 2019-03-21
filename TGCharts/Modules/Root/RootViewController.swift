@@ -18,7 +18,7 @@ final class RootViewController: BaseNavigationController, IRootView {
     
     override func updateDesign() {
         super.updateDesign()
-        navigationBar.barTintColor = DesignBook.shared.resolve(colorAlias: .navigationBackground)
+        navigationBar.barTintColor = DesignBook.shared.color(.primaryBackground)
         navigationBar.titleTextAttributes = DesignBook.shared.resolveNavigationTitleAttributes()
         setNeedsStatusBarAppearanceUpdate()
     }

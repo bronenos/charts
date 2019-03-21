@@ -70,7 +70,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     override func updateDesign() {
         super.updateDesign()
         
-        tableView.backgroundColor = DesignBook.shared.resolve(colorAlias: .generalBackground)
+        tableView.backgroundColor = DesignBook.shared.color(.spaceBackground)
         dataSource.updateDesign()
     }
 

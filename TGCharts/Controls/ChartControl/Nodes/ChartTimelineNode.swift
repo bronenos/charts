@@ -65,7 +65,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             
             let content = ChartLabelNodeContent(
                 text: formattingProvider.format(date: item.date, style: .shortDate),
-                color: DesignBook.shared.resolve(colorAlias: .chartIndexForeground),
+                color: DesignBook.shared.color(.chartIndexForeground),
                 font: UIFont.systemFont(ofSize: 8),
                 alignment: .right,
                 limitedToBounds: false

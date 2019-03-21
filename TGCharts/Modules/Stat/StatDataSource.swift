@@ -66,7 +66,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
             
             let label = StatSectionHeader()
             label.text = "\(title) \(section + 1)/\(chartControls.count)".uppercased()
-            label.textColor = DesignBook.shared.resolve(colorAlias: .sectionTitleForeground)
+            label.textColor = DesignBook.shared.color(.secondaryForeground)
             label.font = DesignBook.shared.font(size: 13, weight: .light)
             return label
             
@@ -227,13 +227,13 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     private func populateChartLineControl(line: ChartLine, config: ChartLineConfig, intoCell cell: UITableViewCell) {
         let selectedBackgroundView = UIView()
-        selectedBackgroundView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementFocusedBackground)
+        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.primaryBackground)
         
-        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.selectedBackgroundView = selectedBackgroundView
-        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.contentView.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.textLabel?.text = line.name
-        cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .optionForeground)
+        cell.textLabel?.textColor = DesignBook.shared.color(.primaryForeground)
         cell.textLabel?.textAlignment = .left
         cell.imageView?.image = generateLineIcon(color: line.color)
         cell.accessoryType = config.visible ? .checkmark : .none
@@ -249,14 +249,14 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     private func populateSwitchDesignCell(intoCell cell: UITableViewCell) {
         let selectedBackgroundView = UIView()
-        selectedBackgroundView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementFocusedBackground)
+        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.primaryBackground)
         
-        cell.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.selectedBackgroundView = selectedBackgroundView
-        cell.contentView.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
-        cell.textLabel?.backgroundColor = DesignBook.shared.resolve(colorAlias: .elementRegularBackground)
+        cell.contentView.backgroundColor = DesignBook.shared.color(.primaryBackground)
+        cell.textLabel?.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.textLabel?.text = designSwitcherTitle
-        cell.textLabel?.textColor = DesignBook.shared.resolve(colorAlias: .actionForeground)
+        cell.textLabel?.textColor = DesignBook.shared.color(.actionForeground)
         cell.textLabel?.textAlignment = .center
     }
     

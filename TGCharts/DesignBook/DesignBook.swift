@@ -17,7 +17,6 @@ protocol IDesignBook: class {
     var styleObservable: BroadcastObservable<DesignBookStyle> { get }
     func color(_ color: DesignBookColor) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
-    func resolve(colorAlias: DesignBookColorAlias) -> UIColor
     func resolveStatusBarStyle() -> UIStatusBarStyle
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key: Any]
 }
@@ -41,19 +40,7 @@ class DesignBook: IDesignBook {
     }
     
     func color(_ color: DesignBookColor) -> UIColor {
-        switch color {
-        case .black: return UIColor.black
-        case .white: return UIColor.white
-        case .background: return UIColor.groupTableViewBackground
-        case .lightAsphalt: return UIColor(red: 0.10, green: 0.14, blue: 0.19, alpha: 1.0)
-        case .darkAsphalt: return UIColor(red: 0.07, green: 0.10, blue: 0.13, alpha: 1.0)
-        case .lightGray: return UIColor.lightGray
-        case .darkGray: return UIColor.darkGray
-        case .lightSilver: return UIColor(red: 0.96, green: 0.98, blue: 1.0, alpha: 1.0)
-        case .darkSilver: return UIColor(red: 0.77, green: 0.77, blue: 0.80, alpha: 1.0)
-        case .lightBlue: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
-        case .darkBlue: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
-        }
+        abort()
     }
     
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont {
@@ -64,16 +51,12 @@ class DesignBook: IDesignBook {
         }
     }
     
-    func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
-        preconditionFailure("Must use the specific subclass")
-    }
-    
     func resolveStatusBarStyle() -> UIStatusBarStyle {
         preconditionFailure("Must use the specific subclass")
     }
     
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key : Any] {
-        return [.foregroundColor: resolve(colorAlias: .navigationForeground)]
+        return [.foregroundColor: color(.primaryForeground)]
     }
 }
 
@@ -82,23 +65,21 @@ final class LightDesignBook: DesignBook {
         return .light
     }
     
-    override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
-        switch colorAlias {
-        case .generalBackground: return color(.background)
-        case .elementRegularBackground: return color(.white)
-        case .elementFocusedBackground: return color(.lightGray)
-        case .navigationBackground: return color(.white)
-        case .navigationForeground: return color(.black)
-        case .sectionTitleForeground: return color(.darkGray)
-        case .chartIndexForeground: return color(.lightGray)
-        case .chartGridBackground: return color(.lightGray)
-        case .chartPointerForeground: return color(.black)
-        case .sliderActiveBackground: return color(.white)
-        case .sliderInactiveBackground: return color(.lightSilver)
-        case .sliderControlBackground: return color(.darkSilver)
-        case .sliderControlForeground: return color(.lightSilver)
-        case .optionForeground: return color(.black)
-        case .actionForeground: return color(.darkBlue)
+    override func color(_ color: DesignBookColor) -> UIColor {
+        switch color {
+        case .spaceBackground: return UIColor(red: 0.92, green: 0.92, blue: 0.95, alpha: 1.0)
+        case .primaryBackground: return UIColor.white
+        case .primaryForeground: return UIColor.black
+        case .secondaryForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
+        case .chartIndexForeground: return UIColor(red: 0.52, green: 0.55, blue: 0.57, alpha: 1.0)
+        case .chartPointerStepperLineStroke: return UIColor(red: 0.94, green: 0.94, blue: 0.94, alpha: 1.0)
+        case .chartPointerFocusedLineStroke: return UIColor(red: 0.77, green: 0.78, blue: 0.78, alpha: 1.0)
+        case .chartPointerCloudBackground: return UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
+        case .chartPointerCloudForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
+        case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
+        case .sliderBackground: return UIColor(red: 0.75, green: 0.79, blue: 0.84, alpha: 1.0)
+        case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        case .actionForeground: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
         }
     }
     
@@ -112,23 +93,21 @@ final class DarkDesignBook: DesignBook {
         return .dark
     }
     
-    override func resolve(colorAlias: DesignBookColorAlias) -> UIColor {
-        switch colorAlias {
-        case .generalBackground: return color(.darkAsphalt)
-        case .elementRegularBackground: return color(.lightAsphalt)
-        case .elementFocusedBackground: return color(.darkGray)
-        case .navigationBackground: return color(.lightAsphalt)
-        case .navigationForeground: return color(.white)
-        case .sectionTitleForeground: return color(.lightSilver)
-        case .chartIndexForeground: return color(.lightSilver)
-        case .chartGridBackground: return color(.darkGray)
-        case .chartPointerForeground: return color(.white)
-        case .sliderActiveBackground: return color(.black)
-        case .sliderInactiveBackground: return color(.darkSilver)
-        case .sliderControlBackground: return color(.lightSilver)
-        case .sliderControlForeground: return color(.white)
-        case .optionForeground: return color(.white)
-        case .actionForeground: return color(.lightBlue)
+    override func color(_ color: DesignBookColor) -> UIColor {
+        switch color {
+        case .spaceBackground: return UIColor(red: 0.07, green: 0.10, blue: 0.13, alpha: 1.0)
+        case .primaryBackground: return UIColor(red: 0.10, green: 0.14, blue: 0.19, alpha: 1.0)
+        case .primaryForeground: return UIColor.white
+        case .secondaryForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
+        case .chartIndexForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
+        case .chartPointerStepperLineStroke: return UIColor(red: 0.08, green: 0.11, blue: 0.15, alpha: 1.0)
+        case .chartPointerFocusedLineStroke: return UIColor(red: 0.06, green: 0.08, blue: 0.11, alpha: 1.0)
+        case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
+        case .chartPointerCloudForeground: return UIColor.white
+        case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
+        case .sliderBackground: return UIColor(red: 0.16, green: 0.21, blue: 28, alpha: 1.0)
+        case .sliderForeground: return UIColor.white
+        case .actionForeground: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
         }
     }
     

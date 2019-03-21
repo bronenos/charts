@@ -33,7 +33,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         super.init(tag: tag)
         
         overlayNode.figure = .roundedSquare
-        overlayNode.color = DesignBook.shared.resolve(colorAlias: .chartGridBackground)
+        overlayNode.color = DesignBook.shared.color(.chartPointerCloudBackground)
         overlayNode.radius = 4
         
         addChild(node: overlayNode)
@@ -52,7 +52,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         
         dateNode.content = ChartLabelNodeContent(
             text: "\(formattingProvider.format(date: date, style: .shortDate))",
-            color: DesignBook.shared.resolve(colorAlias: .chartPointerForeground),
+            color: DesignBook.shared.color(.chartPointerCloudForeground),
             font: UIFont.boldSystemFont(ofSize: 12),
             alignment: .left,
             limitedToBounds: false
@@ -60,7 +60,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         
         yearNode.content = ChartLabelNodeContent(
             text: "\(formattingProvider.format(date: date, style: .justYear))",
-            color: DesignBook.shared.resolve(colorAlias: .chartPointerForeground),
+            color: DesignBook.shared.color(.chartPointerCloudForeground),
             font: UIFont.systemFont(ofSize: 12),
             alignment: .left,
             limitedToBounds: false

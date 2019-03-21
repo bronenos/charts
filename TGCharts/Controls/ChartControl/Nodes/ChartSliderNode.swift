@@ -26,7 +26,13 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
     override init(tag: String?) {
         super.init(tag: tag ?? "[slider]")
         
+        foregroundColor = DesignBook.shared.color(.sliderBackground)
+        
+        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
         addChild(node: leftArrowNode)
+        
+        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
+        rightArrowNode.foregroundColor = UIColor.white
         addChild(node: rightArrowNode)
     }
     
