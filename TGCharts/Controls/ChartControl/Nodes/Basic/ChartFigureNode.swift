@@ -24,14 +24,47 @@ protocol IChartFigureNode: IChartNode {
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
-    var figure = ChartFigure.joinedLines
-    var points = [CGPoint]()
-    var width = CGFloat(0)
-    var color = UIColor.clear
-    var radius = CGFloat(0)
-
-    override init(tag: String?) {
-        super.init(tag: tag ?? "[figure]")
+    override init(tag: String?, cachable: Bool) {
+        super.init(tag: tag ?? "[figure]", cachable: cachable)
+    }
+    
+    deinit {
+        parentNode?.removeFromParent()
+    }
+    
+    var figure = ChartFigure.joinedLines {
+        didSet {
+            guard figure != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var points = [CGPoint]() {
+        didSet {
+            guard points != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var width = CGFloat(0) {
+        didSet {
+            guard width != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var color = UIColor.clear {
+        didSet {
+            guard color != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var radius = CGFloat(0) {
+        didSet {
+            guard radius != oldValue else { return }
+            dirtify()
+        }
     }
     
     override func render(graphics: IGraphics) -> Bool {

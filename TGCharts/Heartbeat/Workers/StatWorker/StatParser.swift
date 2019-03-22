@@ -33,14 +33,14 @@ final class StatParser: IStatParser {
         guard lines.allSatisfy({ $0.values.count == numberOfDates }) else { return nil }
         
         return Chart(
-            size: numberOfDates,
+            length: numberOfDates,
+            lines: lines,
             axis: dates.enumerated().map { index, date in
                 ChartAxisItem(
                     date: date,
                     values: calculateValues(lines: lines, index: index)
                 )
-            },
-            lines: lines
+            }
         )
     }
     

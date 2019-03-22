@@ -9,20 +9,27 @@
 import Foundation
 import UIKit
 
+enum ChartVerticalStep {
+    case value
+    case line
+}
+
 protocol IChartVerticalStepNode: IChartNode {
     var value: String { get set }
+    var color: UIColor { get set }
 }
 
 final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
-    private let valueNode: IChartLabelNode = ChartLabelNode(tag: "step-value")
-    private let underlineNode: IChartNode = ChartNode(tag: "step-underline")
+    private let valueNode: IChartLabelNode = ChartLabelNode(tag: "step-value", cachable: false)
+    private let underlineNode: IChartNode = ChartNode(tag: "step-underline", cachable: false)
     
-    override init(tag: String) {
-        super.init(tag: tag)
+    init(tag: String, step: ChartVerticalStep) {
+        super.init(tag: tag, cachable: false)
         
-        addChild(node: valueNode)
-        
-        addChild(node: underlineNode)
+        switch step {
+        case .value: addChild(node: valueNode)
+        case .line: addChild(node: underlineNode)
+        }
     }
     
     override var frame: CGRect {
@@ -31,12 +38,14 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
     
     var value = String() {
         didSet {
+            guard value != oldValue else { return }
+            
             valueNode.content = ChartLabelNodeContent(
                 text: value,
                 color: DesignBook.shared.color(.chartIndexForeground),
                 font: UIFont.systemFont(ofSize: 12),
                 alignment: .left,
-                limitedToBounds: true
+                limitedToBounds: false
             )
             
             layoutChildren()
@@ -44,8 +53,16 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
     }
     
     var color: UIColor {
-        get { return underlineNode.backgroundColor }
-        set { underlineNode.backgroundColor = newValue }
+        get {
+            return underlineNode.backgroundColor
+        }
+        set {
+            guard newValue != underlineNode.backgroundColor else { return }
+            
+            underlineNode.backgroundColor = newValue
+            
+            layoutChildren()
+        }
     }
     
     private func layoutChildren() {

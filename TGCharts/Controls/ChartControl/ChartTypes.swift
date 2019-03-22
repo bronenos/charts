@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct ChartConfig {
+struct ChartConfig: Equatable {
     var lines: [ChartLineConfig]
     var range: ChartRange
     var pointer: CGFloat?
@@ -33,17 +33,37 @@ struct ChartConfig {
             pointer: pointer
         )
     }
+    
+    static func ==(lhs: ChartConfig, rhs: ChartConfig) -> Bool {
+        guard lhs.lines == rhs.lines else { return false }
+        guard lhs.range == rhs.range else { return false }
+        guard lhs.pointer == rhs.pointer else { return false }
+        return true
+    }
 }
 
-struct ChartLineConfig {
+struct ChartLineConfig: Equatable {
     let key: String
     var visible: Bool
+    
+    static func ==(lhs: ChartLineConfig, rhs: ChartLineConfig) -> Bool {
+        guard lhs.key == rhs.key else { return false }
+        guard lhs.visible == rhs.visible else { return false }
+        return true
+    }
 }
 
-struct ChartRange {
+struct ChartRange: Equatable {
     let start: CGFloat
     let end: CGFloat
     var distance: CGFloat { return end - start }
+    
+    static func ==(lhs: ChartRange, rhs: ChartRange) -> Bool {
+        guard lhs.start == rhs.start else { return false }
+        guard lhs.end == rhs.end else { return false }
+        guard lhs.distance == rhs.distance else { return false }
+        return true
+    }
 }
 
 struct ChartMargins {

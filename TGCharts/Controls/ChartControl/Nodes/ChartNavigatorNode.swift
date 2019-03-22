@@ -10,21 +10,18 @@ import Foundation
 import UIKit
 
 protocol IChartNavigatorNode: IChartNode {
-    var canvasNode: IChartNode { get }
-    var graphNode: IChartGraphNode { get }
-    var sliderNode: IChartSliderNode { get }
     func setChart(_ chart: Chart, config: ChartConfig)
 }
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
-    let canvasNode: IChartNode = ChartNode(tag: "navigator-canvas")
-    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph", width: 1)
+    let canvasNode: IChartNode = ChartNode(tag: "navigator-canvas", cachable: false)
+    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph", width: 1, cachable: true)
     let sliderNode: IChartSliderNode = ChartSliderNode(tag: "navigator-slider")
     
     private var range = ChartRange(start: 0, end: 1.0)
     
-    override init(tag: String?) {
-        super.init(tag: tag ?? "[navigator]")
+    init(tag: String?) {
+        super.init(tag: tag ?? "[navigator]", cachable: false)
         
         addChild(node: canvasNode)
         addChild(node: graphNode)

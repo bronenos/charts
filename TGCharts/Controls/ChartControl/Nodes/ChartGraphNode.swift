@@ -20,20 +20,39 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     private let width: CGFloat
     
-    private var figureNodes = [ChartFigureNode]()
+    private var lineNodes = [String: ChartFigureNode]()
     
-    private(set) var chart = Chart()
-    private(set) var config = ChartConfig()
-    private(set) var sideOverlap = CGFloat(0)
+    private(set) var chart = Chart() {
+        didSet {
+            guard chart != oldValue else { return }
+            dirtify()
+        }
+    }
     
-    init(tag: String?, width: CGFloat) {
+    private(set) var config = ChartConfig() {
+        didSet {
+            guard config != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    private(set) var sideOverlap = CGFloat(0) {
+        didSet {
+            guard sideOverlap != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    init(tag: String?, width: CGFloat, cachable: Bool) {
         self.width = width
         
-        super.init(tag: tag ?? "[graph]")
+        super.init(tag: tag ?? "[graph]", cachable: cachable)
     }
     
     override var frame: CGRect {
-        didSet { update() }
+        didSet {
+            update()
+        }
     }
     
     func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
@@ -44,15 +63,29 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func update(meta: ChartSliceMeta, edge: ChartRange, lineMetas: [LineMeta]) {
+        let usefulKeys = lineMetas.map { $0.line.key }
+        let uselessKeys = Set<String>(lineNodes.keys).subtracting(usefulKeys)
+        
         lineMetas.forEach { lineMeta in
-            let figureNode = ChartFigureNode(tag: "graph-line")
-            figureNode.figure = .joinedLines
-            figureNode.frame = bounds
-            figureNode.points = lineMeta.points
-            figureNode.width = width
-            figureNode.color = lineMeta.line.color
-            figureNode.isInteractable = false
-            addChild(node: figureNode)
+            if let node = lineNodes[lineMeta.line.key] {
+                node.points = lineMeta.points
+            }
+            else {
+                let node = ChartFigureNode(tag: "graph-line", cachable: cachable)
+                lineNodes[lineMeta.line.key] = node
+                
+                node.figure = .joinedLines
+                node.frame = bounds
+                node.points = lineMeta.points
+                node.width = width
+                node.color = lineMeta.line.color
+                node.isInteractable = false
+                addChild(node: node)
+            }
+        }
+        
+        uselessKeys.forEach { key in
+            lineNodes.removeValue(forKey: key)?.removeFromParent()
         }
     }
     
@@ -62,9 +95,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     private func update() {
-        removeAllChildren()
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+            lineNodes.forEach { $0.value.removeFromParent() }
+            lineNodes.removeAll()
+            return
+        }
         
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
         let lines = chart.visibleLines(config: config)
         let edge = calculateEdge(lines: lines, meta: meta)
         let lineMetas = lines.map { LineMeta(line: $0, points: slicePoints(line: $0, edge: edge, with: meta)) }

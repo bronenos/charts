@@ -21,8 +21,11 @@ protocol IGraphics: class {
     func place(points: [CGPoint], color: UIColor, width: CGFloat)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
-    func storeTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?
-    func drawTexture(_ texture: GraphicsTextureRef, in frame: CGRect)
+    func requestNodeTexture(size: CGSize) -> GraphicsTextureRef?
+    func flushNodeTexture(_ texture: GraphicsTextureRef)
+    func drawNodeTexture(_ texture: GraphicsTextureRef)
+    func storeLabelTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?
+    func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect)
     func discardTexture(_ texture: GraphicsTextureRef)
 }
 
@@ -39,4 +42,20 @@ func obtainGraphicsForCurrentDevice() -> IGraphics {
     else {
         abort()
     }
+}
+
+func calculateCoveringDuoPower(value: Int) -> Int {
+    for i in (0 ..< 32).indices.reversed() {
+        let bit = ((value & (1 << i)) > 0)
+        guard bit else { continue }
+        
+        if value.nonzeroBitCount > 1 {
+            return (1 << (i + 1))
+        }
+        else {
+            return (1 << i)
+        }
+    }
+    
+    return 1
 }

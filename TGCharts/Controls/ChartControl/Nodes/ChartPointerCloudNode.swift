@@ -15,14 +15,15 @@ protocol IChartPointerCloudNode: IChartNode {
     var yearNode: IChartLabelNode { get }
     var valuesFont: UIFont { get set }
     func setDate(_ date: Date, lines: [ChartLine], index: Int)
+    func calculateSize() -> CGSize
 }
 
 final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
     private let formattingProvider: IFormattingProvider
     
-    let overlayNode: IChartFigureNode = ChartFigureNode(tag: "pointer-overlay")
-    let dateNode: IChartLabelNode = ChartLabelNode(tag: "pointer-date")
-    let yearNode: IChartLabelNode = ChartLabelNode(tag: "pointer-year")
+    let overlayNode: IChartFigureNode = ChartFigureNode(tag: "pointer-overlay", cachable: false)
+    let dateNode: IChartLabelNode = ChartLabelNode(tag: "pointer-date", cachable: false)
+    let yearNode: IChartLabelNode = ChartLabelNode(tag: "pointer-year", cachable: false)
     var valuesFont = UIFont.systemFont(ofSize: 12)
 
     private var valueNodes = [IChartLabelNode]()
@@ -30,7 +31,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
     init(tag: String, formattingProvider: IFormattingProvider) {
         self.formattingProvider = formattingProvider
         
-        super.init(tag: tag)
+        super.init(tag: tag, cachable: false)
         
         overlayNode.figure = .roundedSquare
         overlayNode.color = DesignBook.shared.color(.chartPointerCloudBackground)
@@ -69,6 +70,18 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         layoutChildren()
     }
     
+    func calculateSize() -> CGSize {
+        let layout = Layout(
+            bounds: bounds,
+            overlayNode: overlayNode,
+            dateNode: dateNode,
+            yearNode: yearNode,
+            valueNodes: valueNodes
+        )
+        
+        return layout.totalSize
+    }
+    
     private func layoutChildren() {
         let layout = Layout(
             bounds: bounds,
@@ -93,7 +106,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
             limitedToBounds: false
         )
         
-        let valueNode = ChartLabelNode(tag: "pointer-value")
+        let valueNode = ChartLabelNode(tag: "pointer-value", cachable: false)
         valueNode.content = content
         return valueNode
     }
@@ -111,32 +124,43 @@ fileprivate struct Layout {
     private let innerGap = CGFloat(15)
     
     var overlayNodeFrame: CGRect {
-        let leftLaneHeight = dateNode.calculateSize().height + verGap + yearNode.calculateSize().height
-        let rightLaneHeight = valuesHeight + CGFloat(valueNodes.count) * verGap
+        let leftLaneHeight = dateNode.calculateSize().height + yearNode.calculateSize().height
+        let rightLaneHeight = valuesHeight
         let height = verGap + max(leftLaneHeight, rightLaneHeight) + verGap
         return CGRect(x: 0, y: bounds.height - height, width: bounds.width, height: height)
     }
     
     var dateNodeFrame: CGRect {
         let size = dateNode.calculateSize()
-        return CGRect(x: horGap, y: verGap, width: size.width, height: size.height)
+        let topY = overlayNodeFrame.height - verGap - size.height
+        return CGRect(x: horGap, y: topY, width: size.width, height: size.height)
     }
 
     var yearNodeFrame: CGRect {
         let size = yearNode.calculateSize()
-        let topY = dateNodeFrame.maxY + verGap
+        let topY = dateNodeFrame.minY - size.height
         return CGRect(x: horGap, y: topY, width: size.width, height: size.height)
     }
     
     var valueNodeFrames: [CGRect] {
         var topY = verGap
-        return valueNodes.map { node in
+        return valueNodes.reversed().map { node in
             let size = node.calculateSize()
-            defer { topY += size.height + verGap }
+            defer { topY += size.height }
             
             let leftX = bounds.width - horGap - size.width
             return CGRect(x: leftX, y: topY, width: size.width, height: size.height)
         }
+    }
+    
+    var totalSize: CGSize {
+        return CGSize(
+            width: contentWidth,
+            height: verGap + max(
+                dateNodeFrame.maxY,
+                valueNodeFrames.last?.maxY ?? 0
+            )
+        )
     }
     
     private var valuesNodeSizes: [CGSize] {

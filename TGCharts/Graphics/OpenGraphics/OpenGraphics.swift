@@ -10,8 +10,15 @@ import Foundation
 import UIKit
 
 final class OpenGraphics: IGraphics {
-    private struct TextureMeta {
-        let textureID: GLuint
+    private struct NodeMeta {
+        let frameBuffer: GLuint
+        let texture: GLuint
+        let pointSize: CGSize
+        let scale: CGSize
+    }
+    
+    private struct LabelMeta {
+        let texture: GLuint
         let pointSize: CGSize
         let scale: CGSize
         let alignment: NSTextAlignment
@@ -22,11 +29,11 @@ final class OpenGraphics: IGraphics {
     private let context: EAGLContext
     private var renderSize = CGSize.zero
     private var renderScale = CGFloat(0)
-    private var generalFrameBuffer = GLuint(0)
+    private var frameBuffer = GLuint(0)
     private var renderBuffer = GLuint(0)
-    private var renderTexture = GLuint(0)
-    private var storingTextures = [UUID: TextureMeta]()
-    
+    private var nodeMetas = [UUID: NodeMeta]()
+    private var labelMetas = [UUID: LabelMeta]()
+
     init(context: EAGLContext) {
         self.context = context
     }
@@ -71,7 +78,7 @@ final class OpenGraphics: IGraphics {
     func render(drawingBlock: (IGraphics) -> Void) {
         EAGLContext.setCurrent(context)
         
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, renderBuffer)
+        glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
         glViewport(0, 0, renderSize.width.to_size, renderSize.height.to_size)
         
         glMatrixMode(GL_PROJECTION.to_enum)
@@ -82,13 +89,6 @@ final class OpenGraphics: IGraphics {
         glLoadIdentity()
         
         drawingBlock(self)
-        
-//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE.to_enum, generalFrameBuffer)
-//        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE.to_enum, msaaFrameBuffer)
-//        glResolveMultisampleFramebufferAPPLE()
-        
-        glBindTexture(GL_TEXTURE_2D.to_enum, renderTexture)
-        glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, renderTexture, 0)
         context.presentRenderbuffer(GL_RENDERBUFFER.toInt)
         
         EAGLContext.setCurrent(nil)
@@ -220,7 +220,128 @@ final class OpenGraphics: IGraphics {
         glDisable(GL_BLEND.to_enum)
     }
     
-    func storeTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef? {
+    func requestNodeTexture(size: CGSize) -> GraphicsTextureRef? {
+        var textureID = GLuint(0)
+        glGenTextures(1, &textureID)
+        guard textureID > 0 else { return nil }
+        
+        glBindTexture(GL_TEXTURE_2D.to_enum, textureID)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MIN_FILTER.to_enum, GL_LINEAR.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MAG_FILTER.to_enum, GL_LINEAR.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_S.to_enum, GL_CLAMP_TO_EDGE.to_float)
+        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_T.to_enum, GL_CLAMP_TO_EDGE.to_float)
+        
+        let renderWidth = size.width * renderScale
+        let renderHeight = size.height * renderScale
+        let textureWidth = calculateCoveringDuoPower(value: Int(renderWidth))
+        let textureHeight = calculateCoveringDuoPower(value: Int(renderHeight))
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT.to_enum, 1)
+        glTexImage2D(
+            GL_TEXTURE_2D.to_enum, 0, GL_RGBA.to_int,
+            textureWidth.to_size, textureHeight.to_size, 0,
+            GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum,
+            nil
+        )
+        
+        var textureFrameBuffer = GLuint(0)
+        glGenFramebuffers(1, &textureFrameBuffer)
+        guard textureFrameBuffer > 0 else { return nil }
+
+        glBindFramebuffer(GL_FRAMEBUFFER.to_enum, textureFrameBuffer)
+        glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, textureID, 0)
+        glViewport(0, 0, renderWidth.to_size, renderHeight.to_size)
+        
+        glMatrixMode(GL_PROJECTION.to_enum)
+        glPushMatrix()
+        glLoadIdentity()
+        glOrthof(0, renderWidth.to_float, 0, renderHeight.to_float, -1, 1)
+        
+        glMatrixMode(GL_MODELVIEW.to_enum)
+        glPushMatrix()
+        glLoadIdentity()
+        glScalef(1, -1, 1)
+        glTranslatef(0, -renderHeight.to_float, 0)
+
+        clear(color: UIColor.clear)
+        
+        let uuid = UUID()
+        nodeMetas[uuid] = NodeMeta(
+            frameBuffer: textureFrameBuffer,
+            texture: textureID,
+            pointSize: size,
+            scale: CGSize(
+                width: renderWidth / CGFloat(textureWidth),
+                height: renderHeight / CGFloat(textureHeight)
+            )
+        )
+        
+        return GraphicsTextureRef(textureUUID: uuid, graphics: self)
+    }
+    
+    func flushNodeTexture(_ texture: GraphicsTextureRef) {
+        glMatrixMode(GL_PROJECTION.to_enum)
+        glPopMatrix()
+        
+        glMatrixMode(GL_MODELVIEW.to_enum)
+        glPopMatrix()
+    }
+    
+    func drawNodeTexture(_ texture: GraphicsTextureRef) {
+        glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
+        glViewport(0, 0, renderSize.width.to_size, renderSize.height.to_size)
+        
+        guard let meta = nodeMetas[texture.textureUUID] else { return }
+        let frame = CGRect(origin: .zero, size: meta.pointSize)
+        
+        let c = UIColor.white.extractComponents()
+        glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
+        
+        glEnable(GL_BLEND.to_enum)
+        
+        glBindTexture(GL_TEXTURE_2D.to_enum, meta.texture)
+        glEnable(GL_TEXTURE_2D.to_enum)
+        
+        glEnableClientState(GL_VERTEX_ARRAY.to_enum)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY.to_enum)
+        
+        let vertexPoints: [CGPoint] = [
+            frame.topLeftPoint,
+            frame.bottomLeftPoint,
+            frame.topRightPoint,
+            frame.bottomRightPoint
+        ]
+        
+        let textureScaling = CGRect(
+            x: 0,
+            y: 0,
+            width: meta.scale.width,
+            height: meta.scale.height
+        )
+        
+        let texturePoints: [CGPoint] = [
+            textureScaling.bottomLeftPoint,
+            textureScaling.topLeftPoint,
+            textureScaling.bottomRightPoint,
+            textureScaling.topRightPoint
+        ]
+        
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
+        let textureCoords = convertPointsToValues(texturePoints, scalable: false)
+        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+        glTexCoordPointer(2, GL_FLOAT.to_enum, 0, textureCoords)
+        glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
+        
+        glDisableClientState(GL_VERTEX_ARRAY.to_enum)
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY.to_enum)
+        
+        glBindTexture(GL_TEXTURE_2D.to_enum, 0)
+        glDisable(GL_TEXTURE_2D.to_enum)
+        
+        glDisable(GL_BLEND.to_enum)
+    }
+    
+    func storeLabelTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef? {
         var textureID = GLuint(0)
         glGenTextures(1, &textureID)
         guard textureID > 0 else { return nil }
@@ -240,8 +361,8 @@ final class OpenGraphics: IGraphics {
         )
 
         let uuid = UUID()
-        storingTextures[uuid] = TextureMeta(
-            textureID: textureID,
+        labelMetas[uuid] = LabelMeta(
+            texture: textureID,
             pointSize: meta.pointSize,
             scale: CGSize(
                 width: meta.pixelSize.width / meta.textureSize.width,
@@ -253,15 +374,15 @@ final class OpenGraphics: IGraphics {
         return GraphicsTextureRef(textureUUID: uuid, graphics: self)
     }
     
-    func drawTexture(_ texture: GraphicsTextureRef, in frame: CGRect) {
-        guard let meta = storingTextures[texture.textureUUID] else { return }
+    func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect) {
+        guard let meta = labelMetas[texture.textureUUID] else { return }
         
         let c = UIColor.white.extractComponents()
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
 
-        glBindTexture(GL_TEXTURE_2D.to_enum, meta.textureID)
+        glBindTexture(GL_TEXTURE_2D.to_enum, meta.texture)
         glEnable(GL_TEXTURE_2D.to_enum)
 
         glEnableClientState(GL_VERTEX_ARRAY.to_enum)
@@ -325,21 +446,28 @@ final class OpenGraphics: IGraphics {
     }
     
     func discardTexture(_ texture: GraphicsTextureRef) {
-        guard let meta = storingTextures[texture.textureUUID] else { return }
-        var textureID = meta.textureID
-        
-        glBindTexture(GL_TEXTURE_2D.to_enum, 0)
-        glDeleteTextures(1, &textureID)
+        if let meta = nodeMetas.removeValue(forKey: texture.textureUUID) {
+            var textureFrameBuffer = meta.frameBuffer
+            glBindFramebuffer(GL_FRAMEBUFFER.to_enum, 0)
+            glDeleteFramebuffers(1, &textureFrameBuffer)
+            
+            var textureID = meta.texture
+            glBindTexture(GL_TEXTURE_2D.to_enum, 0)
+            glDeleteTextures(1, &textureID)
+        }
+        else if let meta = labelMetas.removeValue(forKey: texture.textureUUID) {
+            var textureID = meta.texture
+            glBindTexture(GL_TEXTURE_2D.to_enum, 0)
+            glDeleteTextures(1, &textureID)
+        }
     }
     
     private func setupEnvironment() {
         guard renderBuffer == 0 else { return }
         
-        renderSize = renderView.bounds.size
+        let size = renderView.bounds.size
         renderScale = UIScreen.main.scale
-        
-        renderSize.width *= renderScale
-        renderSize.height *= renderScale
+        renderSize = CGSize(width: size.width * renderScale, height: size.height * renderScale)
         
         EAGLContext.setCurrent(context)
         
@@ -349,20 +477,10 @@ final class OpenGraphics: IGraphics {
             context.renderbufferStorage(GL_RENDERBUFFER.toInt, from: renderView.drawableLayer)
         }
         
-        glGenFramebuffers(1, &generalFrameBuffer)
-//        glGenFramebuffers(1, &msaaFrameBuffer)
-        if generalFrameBuffer > 0 {
-            glBindFramebuffer(GL_FRAMEBUFFER.to_enum, generalFrameBuffer)
-        }
-        
-        glGenTextures(1, &renderTexture)
-        if renderTexture > 0 {
-            glBindTexture(GL_TEXTURE_2D.to_enum, renderTexture)
-            glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MAG_FILTER.to_enum, GL_LINEAR.to_float)
-            glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MIN_FILTER.to_enum, GL_LINEAR.to_float)
-            glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_S.to_enum, GL_CLAMP_TO_EDGE.to_float)
-            glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_T.to_enum, GL_CLAMP_TO_EDGE.to_float)
-            glTexImage2D(GL_TEXTURE_2D.to_enum, 0, GL_RGBA, renderSize.width.to_size, renderSize.height.to_size, 0, GL_RGBA.to_enum, GL_UNSIGNED_BYTE.to_enum, nil)
+        glGenFramebuffers(1, &frameBuffer)
+        if frameBuffer > 0 {
+            glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, renderBuffer)
         }
         
         glEnable(GL_BLEND.to_enum)
@@ -375,16 +493,12 @@ final class OpenGraphics: IGraphics {
         EAGLContext.setCurrent(context)
         
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, 0)
-        glDeleteFramebuffers(1, &generalFrameBuffer)
-        generalFrameBuffer = 0
+        glDeleteFramebuffers(1, &frameBuffer)
+        frameBuffer = 0
 
         glBindRenderbuffer(GL_RENDERBUFFER.to_enum, 0)
         glDeleteRenderbuffers(1, &renderBuffer)
         renderBuffer = 0
-        
-        glBindTexture(GL_TEXTURE_2D.to_enum, 0)
-        glDeleteTextures(1, &renderTexture)
-        renderTexture = 0
         
         EAGLContext.setCurrent(nil)
     }

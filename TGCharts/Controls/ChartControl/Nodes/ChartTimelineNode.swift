@@ -15,7 +15,7 @@ protocol IChartTimelineNode: IChartSlicableNode {
 final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     private let formattingProvider: IFormattingProvider
     
-    private var dateNodes = [IChartLabelNode]()
+    private var dateNodes = [Date: IChartLabelNode]()
     
     private var chart = Chart()
     private var config = ChartConfig()
@@ -24,7 +24,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     init(tag: String?, formattingProvider: IFormattingProvider) {
         self.formattingProvider = formattingProvider
         
-        super.init(tag: tag ?? "[timeline]")
+        super.init(tag: tag ?? "[timeline]", cachable: false)
     }
     
     override var frame: CGRect {
@@ -39,10 +39,17 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     }
     
     private func update() {
-        removeAllChildren()
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+            dateNodes.values.forEach { $0.removeFromParent() }
+            dateNodes.removeAll()
+            return
+        }
         
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else { return }
-        guard let firstRenderedIndex = meta.renderedIndices.first else { return }
+        guard let firstRenderedIndex = meta.renderedIndices.first else {
+            dateNodes.values.forEach { $0.removeFromParent() }
+            dateNodes.removeAll()
+            return
+        }
         
         let dateWidth = size.width / 7
         let additionalNumberOfIndices = 0 // min(firstRenderedIndex, Int(ceil(dateWidth / meta.stepX)))
@@ -63,18 +70,23 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
                 height: size.height
             )
             
-            let content = ChartLabelNodeContent(
-                text: formattingProvider.format(date: item.date, style: .shortDate),
-                color: DesignBook.shared.color(.chartIndexForeground),
-                font: UIFont.systemFont(ofSize: 8),
-                alignment: .right,
-                limitedToBounds: false
-            )
+            if dateNodes[item.date] == nil {
+                let dateNode = ChartLabelNode(tag: "date", cachable: true)
+                dateNodes[item.date] = dateNode
+                
+                dateNode.content = ChartLabelNodeContent(
+                    text: formattingProvider.format(date: item.date, style: .shortDate),
+                    color: DesignBook.shared.color(.chartIndexForeground),
+                    font: UIFont.systemFont(ofSize: 8),
+                    alignment: .right,
+                    limitedToBounds: false
+                )
+                
+                addChild(node: dateNode)
+            }
             
-            let dateNode = ChartLabelNode(tag: "date")
+            guard let dateNode = dateNodes[item.date] else { return }
             dateNode.frame = rect
-            dateNode.content = content
-            addChild(node: dateNode)
             
             if index == 0, rect.minX < 0 {
                 dateNode.alpha = 0

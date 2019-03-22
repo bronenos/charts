@@ -33,10 +33,10 @@ final class ChartLabelNode: ChartNode, IChartLabelNode {
         guard super.render(graphics: graphics) else { return false }
         
         if let ref = textureRef {
-            graphics.drawTexture(ref, in: bounds)
+            graphics.drawLabelTexture(ref, in: bounds)
         }
-        else if let meta = generateTextureMeta(), let ref = graphics.storeTexture(meta: meta) {
-            graphics.drawTexture(ref, in: bounds)
+        else if let meta = generateTextureMeta(), let ref = graphics.storeLabelTexture(meta: meta) {
+            graphics.drawLabelTexture(ref, in: bounds)
             textureRef = ref
         }
         
@@ -122,21 +122,5 @@ final class ChartLabelNode: ChartNode, IChartLabelNode {
                 alignment: content.alignment
             )
         }
-    }
-    
-    private func calculateCoveringDuoPower(value: Int) -> Int {
-        for i in (0 ..< 32).indices.reversed() {
-            let bit = ((value & (1 << i)) > 0)
-            guard bit else { continue }
-            
-            if value.nonzeroBitCount > 1 {
-                return (1 << (i + 1))
-            }
-            else {
-                return (1 << i)
-            }
-        }
-        
-        return 1
     }
 }

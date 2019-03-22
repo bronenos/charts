@@ -15,23 +15,23 @@ enum StatLoadingState {
     case ready([Chart])
 }
 
-struct Chart {
+struct Chart: Equatable {
     let length: Int
     let lines: [ChartLine]
     let axis: [ChartAxisItem]
     
     init() {
         length = 0
-        axis = []
         lines = []
+        axis = []
     }
     
-    init(size: Int,
-         axis: [ChartAxisItem],
-         lines: [ChartLine]) {
-        self.length = size
-        self.axis = axis
+    init(length: Int,
+         lines: [ChartLine],
+         axis: [ChartAxisItem]) {
+        self.length = length
         self.lines = lines
+        self.axis = axis
     }
     
     func visibleLines(config: ChartConfig) -> [ChartLine] {
@@ -40,18 +40,39 @@ struct Chart {
             return line
         }
     }
+    
+    static func ==(lhs: Chart, rhs: Chart) -> Bool {
+        guard lhs.length == rhs.length else { return false }
+        guard lhs.lines == rhs.lines else { return false }
+        guard lhs.axis == rhs.axis else { return false }
+        return true
+    }
 }
 
-struct ChartAxisItem {
+struct ChartAxisItem: Equatable {
     let date: Date
     let values: [String: Int]
+    
+    static func ==(lhs: ChartAxisItem, rhs: ChartAxisItem) -> Bool {
+        guard lhs.date == rhs.date else { return false }
+        guard lhs.values == rhs.values else { return false }
+        return true
+    }
 }
 
-struct ChartLine {
+struct ChartLine: Equatable {
     let key: String
     let name: String
     let color: UIColor
     let values: [Int]
+    
+    static func ==(lhs: ChartLine, rhs: ChartLine) -> Bool {
+        guard lhs.key == rhs.key else { return false }
+        guard lhs.name == rhs.name else { return false }
+        guard lhs.color == rhs.color else { return false }
+        guard lhs.values == rhs.values else { return false }
+        return true
+    }
 }
 
 struct ChartSlice {

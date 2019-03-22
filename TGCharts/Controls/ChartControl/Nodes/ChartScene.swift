@@ -31,7 +31,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         timelineNode = ChartTimelineNode(tag: "timeline", formattingProvider: formattingProvider)
         navigatorNode = ChartNavigatorNode(tag: "navigator")
 
-        super.init(tag: tag ?? "[scene]")
+        super.init(tag: tag ?? "[scene]", cachable: false)
         
         addChild(node: graphNode)
         addChild(node: timelineNode)

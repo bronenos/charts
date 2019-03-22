@@ -23,8 +23,8 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
     let leftArrowNode = ChartSliderArrowNode(tag: "slider-left-arrow", direction: .left)
     let rightArrowNode = ChartSliderArrowNode(tag: "slider-right-arrow", direction: .right)
     
-    override init(tag: String?) {
-        super.init(tag: tag ?? "[slider]")
+    init(tag: String?) {
+        super.init(tag: tag ?? "[slider]", cachable: false)
         
         foregroundColor = DesignBook.shared.color(.sliderBackground)
         

@@ -23,7 +23,7 @@ final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
     init(tag: String?, direction: ChartSliderArrowDirection) {
         self.direction = direction
         
-        super.init(tag: tag ?? "[slider-arrow]")
+        super.init(tag: tag ?? "[slider-arrow]", cachable: false)
         
         width = 1
     }

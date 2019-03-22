@@ -24,9 +24,11 @@ protocol IChartNode: class {
     var backgroundColor: UIColor { get set }
     var foregroundColor: UIColor { get set }
     var isInteractable: Bool { get set }
+    var isDirty: Bool { get }
     var parentNode: IChartNode? { get }
     func addChild(node: IChartNode)
     func addChild(node: IChartNode, target: ChartNodeTarget)
+    func moveChild(node: IChartNode, target: ChartNodeTarget)
     func assignToParent(node: IChartNode?)
     func removeFromParent()
     func removeAllChildren()
@@ -34,20 +36,58 @@ protocol IChartNode: class {
     func render(graphics: IGraphics) -> Bool
     func node(at point: CGPoint, interactable: Bool) -> IChartNode?
     func node(by tag: String) -> IChartNode?
+    func dirtify()
     func calculateFullOrigin(of node: IChartNode) -> CGPoint?
 }
 
 class ChartNode: IChartNode {
     let tag: String
+    let cachable: Bool
     
-    var frame = CGRect.zero
-    var alpha = CGFloat(1.0)
-    var backgroundColor = UIColor.clear
-    var foregroundColor = UIColor.clear
     var isInteractable = true
+    
+    private var cachedTexture: GraphicsTextureRef?
 
     private var childNodes = [IChartNode]()
+    private(set) weak var parentNode: IChartNode?
 
+    init(tag: String, cachable: Bool) {
+        self.tag = tag
+        self.cachable = cachable
+    }
+    
+    deinit {
+        childNodes.forEach { $0.removeFromParent() }
+    }
+    
+    var frame = CGRect.zero {
+        didSet {
+            guard frame != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var alpha = CGFloat(1.0) {
+        didSet {
+            guard alpha != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var backgroundColor = UIColor.clear {
+        didSet {
+            guard backgroundColor != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var foregroundColor = UIColor.clear {
+        didSet {
+            guard foregroundColor != oldValue else { return }
+            dirtify()
+        }
+    }
+    
     var bounds: CGRect {
         return CGRect(origin: .zero, size: size)
     }
@@ -60,10 +100,9 @@ class ChartNode: IChartNode {
         return frame.size
     }
     
-    private(set) weak var parentNode: IChartNode?
-    
-    init(tag: String) {
-        self.tag = tag
+    var isDirty = false {
+        didSet {
+        }
     }
     
     final func addChild(node: IChartNode) {
@@ -71,12 +110,21 @@ class ChartNode: IChartNode {
     }
     
     final func addChild(node: IChartNode, target: ChartNodeTarget) {
+        guard node.parentNode !== self else { return }
+        node.assignToParent(node: self)
+
         switch target {
         case .front: childNodes.append(node)
         case .back: childNodes.insert(node, at: 0)
         }
+    }
+    
+    final func moveChild(node: IChartNode, target: ChartNodeTarget) {
+        if node.parentNode === self {
+            node.removeFromParent()
+        }
         
-        node.assignToParent(node: self)
+        addChild(node: node, target: target)
     }
     
     final func assignToParent(node: IChartNode?) {
@@ -99,8 +147,27 @@ class ChartNode: IChartNode {
     }
     
     final func renderWithChildren(graphics: IGraphics) {
-        guard render(graphics: graphics) else { return }
-        
+        if isDirty, cachable {
+            guard let texture = graphics.requestNodeTexture(size: size) else { return }
+            cachedTexture = texture
+            
+            defer {
+                graphics.flushNodeTexture(texture)
+                graphics.drawNodeTexture(texture)
+                isDirty = false
+            }
+            
+            if !render(graphics: graphics) {
+                return
+            }
+        }
+        else if let texture = cachedTexture {
+            graphics.drawNodeTexture(texture)
+        }
+        else if !render(graphics: graphics) {
+            return
+        }
+
         childNodes.forEach { childNode in
             graphics.pushOffset(childNode.origin)
             childNode.renderWithChildren(graphics: graphics)
@@ -141,6 +208,12 @@ class ChartNode: IChartNode {
         }
         
         return nil
+    }
+    
+    func dirtify() {
+        guard cachable else { return }
+        isDirty = true
+        cachedTexture = nil
     }
     
     func calculateFullOrigin(of node: IChartNode) -> CGPoint? {
