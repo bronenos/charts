@@ -23,6 +23,8 @@
 		D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A8223A673D002134ED /* CGPointExtensions.swift */; };
 		D45B78AB223A67D3002134ED /* CGVectorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */; };
 		D45D926F224411EB004E136C /* ChartVerticalStepNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */; };
+		D460353D2244DBC9006551F9 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D460353C2244DBC9006551F9 /* GameKit.framework */; };
+		D460353F2244DBCF006551F9 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D460353E2244DBCF006551F9 /* StoreKit.framework */; };
 		D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461821C2234614F006B72A7 /* AppDelegate.swift */; };
 		D461822422346151006B72A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D461822322346151006B72A7 /* Assets.xcassets */; };
 		D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D461822522346151006B72A7 /* LaunchScreen.storyboard */; };
@@ -87,6 +89,8 @@
 		D45B78A8223A673D002134ED /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtensions.swift; sourceTree = "<group>"; };
 		D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartVerticalStepNode.swift; sourceTree = "<group>"; };
+		D460353C2244DBC9006551F9 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		D460353E2244DBCF006551F9 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -143,6 +147,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D460353D2244DBC9006551F9 /* GameKit.framework in Frameworks */,
+				D460353F2244DBCF006551F9 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,11 +176,21 @@
 			path = Basic;
 			sourceTree = "<group>";
 		};
+		D460353B2244DBC9006551F9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D460353E2244DBCF006551F9 /* StoreKit.framework */,
+				D460353C2244DBC9006551F9 /* GameKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D46182102234614F006B72A7 = {
 			isa = PBXGroup;
 			children = (
 				D461821B2234614F006B72A7 /* TGCharts */,
 				D461821A2234614F006B72A7 /* Products */,
+				D460353B2244DBC9006551F9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -434,6 +450,14 @@
 				TargetAttributes = {
 					D46182182234614F006B72A7 = {
 						CreatedOnToolsVersion = 10.1;
+						SystemCapabilities = {
+							com.apple.GameCenter.iOS = {
+								enabled = 1;
+							};
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -593,6 +617,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -654,7 +679,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stanislav Potemkin (V8NCXSZ3T7)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -681,7 +707,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = V8NCXSZ3T7;
 				INFOPLIST_FILE = TGCharts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -690,8 +716,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.bronenos.TGCharts;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "TGCharts dev";
 				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -699,7 +726,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = V8NCXSZ3T7;
 				INFOPLIST_FILE = TGCharts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -708,8 +735,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.bronenos.TGCharts;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "TGCharts adhoc";
 				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
