@@ -11,19 +11,21 @@ import UIKit
 
 protocol IGraphics: class {
     var engineName: String { get }
-    func setDelegate(_ delegate: IGraphicsDelegate?)
-    func link(to view: UIView)
-    func unlink(from view: UIView)
+    func link(uuid: UUID, to view: UIView, delegate: IGraphicsDelegate) -> GraphicsOutputRef
+    func obtainCanvasSize(output: GraphicsOutputRef) -> CGSize
+    func unlink(uuid: UUID, output: GraphicsOutputRef)
     func pushOffset(_ offset: CGPoint)
     func popOffset()
-    func render(drawingBlock: (IGraphics) -> Void)
+    func render(output: GraphicsOutputRef, drawingBlock: (IGraphics) -> Void)
+    func pushMarker(caption: String)
+    func popMarker()
     func clear(color: UIColor)
     func place(points: [CGPoint], color: UIColor, width: CGFloat)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
     func requestNodeTexture(size: CGSize) -> GraphicsTextureRef?
     func flushNodeTexture(_ texture: GraphicsTextureRef)
-    func drawNodeTexture(_ texture: GraphicsTextureRef)
+    func drawNodeTexture(texture: GraphicsTextureRef)
     func storeLabelTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?
     func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect)
     func discardTexture(_ texture: GraphicsTextureRef)

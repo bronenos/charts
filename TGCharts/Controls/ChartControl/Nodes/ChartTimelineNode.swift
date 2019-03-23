@@ -59,6 +59,8 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         var skippingStep: Int?
         
         let axialSlice = chart.axis[firstEnumeratedIndex...].enumerated().reversed()
+        let preAxialSlice = chart.axis[0 ..< firstEnumeratedIndex]
+
         let lastAxialIndex = axialSlice.count - 1
         guard lastAxialIndex >= 0 else { return }
 
@@ -103,6 +105,10 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
             else {
                 dateNode.alpha = 0
             }
+        }
+        
+        preAxialSlice.forEach { item in
+            dateNodes[item.date]?.alpha = 0
         }
     }
     

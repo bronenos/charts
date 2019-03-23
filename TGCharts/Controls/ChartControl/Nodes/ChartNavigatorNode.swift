@@ -23,8 +23,11 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     init(tag: String?) {
         super.init(tag: tag ?? "[navigator]", cachable: false)
         
+        canvasNode.backgroundColor = DesignBook.shared.color(.primaryBackground)
         addChild(node: canvasNode)
+        
         addChild(node: graphNode)
+        
         addChild(node: sliderNode)
     }
     

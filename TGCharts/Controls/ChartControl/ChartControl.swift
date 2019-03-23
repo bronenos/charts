@@ -26,28 +26,28 @@ protocol IChartControlDelegate: class {
 }
 
 final class ChartControl: IChartControl, IChartInteractorDelegate {
+    private let graphics: IGraphics
     let chart: Chart
     private(set) var config: ChartConfig
 
     let view: (UIView & IChartView) = ChartView()
-    private var parentView: UIView?
+    private var outputRef: GraphicsOutputRef?
     private weak var delegate: IChartControlDelegate?
 
-    private let graphics: IGraphics
+    private let uuid = UUID()
     private let scene: ChartSceneNode
     private let interactor: IChartInteractor
     
     private let startupRange = ChartRange(start: 0.75, end: 1.0)
     
-    init(chart: Chart, formattingProvider: IFormattingProvider) {
+    init(graphics: IGraphics, chart: Chart, formattingProvider: IFormattingProvider) {
+        self.graphics = graphics
         self.chart = chart
         self.config = startupConfig(chart: chart, range: startupRange)
         
-        graphics = obtainGraphicsForCurrentDevice()
         scene = ChartSceneNode(tag: "scene", formattingProvider: formattingProvider)
         interactor = ChartInteractor(scene: scene, range: startupRange)
         
-        graphics.setDelegate(interactor)
         interactor.setDelegate(self)
     }
     
@@ -56,33 +56,29 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     }
     
     func link(to parentView: UIView) {
-        self.parentView = parentView
         view.frame = parentView.bounds
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        graphics.link(to: parentView)
+        parentView.addSubview(view)
+        
+        outputRef = graphics.link(uuid: uuid, to: view, delegate: interactor)
+        scene.frame = CGRect(origin: .zero, size: view.bounds.size)
     }
     
     func unlink() {
-        guard let parentView = parentView else { return }
-        graphics.unlink(from: parentView)
-        self.parentView = nil
+        guard let output = outputRef else { return }
+        graphics.unlink(uuid: uuid, output: output)
     }
     
     func render() {
-        guard let size = renderingSize else { return }
-        scene.frame = CGRect(origin: .zero, size: size)
+        guard let output = outputRef else { return }
         scene.setChart(chart, config: config)
-        graphics.render { link in scene.renderWithChildren(graphics: link)}
+        graphics.render(output: output) { link in scene.renderWithChildren(output: output, graphics: link) }
     }
     
     func toggleLine(key: String) {
         guard let index = config.lines.firstIndex(where: { $0.key == key }) else { return }
         config.lines[index].visible.toggle()
         render()
-    }
-    
-    private var renderingSize: CGSize? {
-        return parentView?.bounds.size
     }
     
     func interactorDidBegin() {

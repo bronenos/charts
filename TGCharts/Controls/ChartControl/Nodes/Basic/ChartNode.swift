@@ -32,7 +32,7 @@ protocol IChartNode: class {
     func assignToParent(node: IChartNode?)
     func removeFromParent()
     func removeAllChildren()
-    func renderWithChildren(graphics: IGraphics)
+    func renderWithChildren(output: GraphicsOutputRef, graphics: IGraphics)
     func render(graphics: IGraphics) -> Bool
     func node(at point: CGPoint, interactable: Bool) -> IChartNode?
     func node(by tag: String) -> IChartNode?
@@ -50,10 +50,11 @@ class ChartNode: IChartNode {
 
     private var childNodes = [IChartNode]()
     private(set) weak var parentNode: IChartNode?
+    private(set) var isDirty = false
 
     init(tag: String, cachable: Bool) {
         self.tag = tag
-        self.cachable = cachable
+        self.cachable = false // cachable
     }
     
     deinit {
@@ -100,11 +101,6 @@ class ChartNode: IChartNode {
         return frame.size
     }
     
-    var isDirty = false {
-        didSet {
-        }
-    }
-    
     final func addChild(node: IChartNode) {
         addChild(node: node, target: .front)
     }
@@ -146,23 +142,30 @@ class ChartNode: IChartNode {
         childNodes.removeAll()
     }
     
-    final func renderWithChildren(graphics: IGraphics) {
+    final func renderWithChildren(output: GraphicsOutputRef, graphics: IGraphics) {
+        graphics.pushMarker(caption: tag)
+        defer { graphics.popMarker() }
+        
         if isDirty, cachable {
-            guard let texture = graphics.requestNodeTexture(size: size) else { return }
-            cachedTexture = texture
-            
-            defer {
-                graphics.flushNodeTexture(texture)
-                graphics.drawNodeTexture(texture)
-                isDirty = false
+            if let texture = graphics.requestNodeTexture(size: size) {
+                cachedTexture = texture
+                
+                defer {
+                    graphics.flushNodeTexture(texture)
+                    graphics.drawNodeTexture(texture: texture)
+                    isDirty = false
+                }
+
+                if !render(graphics: graphics) {
+                    return
+                }
             }
-            
-            if !render(graphics: graphics) {
+            else if !render(graphics: graphics) {
                 return
             }
         }
         else if let texture = cachedTexture {
-            graphics.drawNodeTexture(texture)
+            graphics.drawNodeTexture(texture: texture)
         }
         else if !render(graphics: graphics) {
             return
@@ -170,7 +173,7 @@ class ChartNode: IChartNode {
 
         childNodes.forEach { childNode in
             graphics.pushOffset(childNode.origin)
-            childNode.renderWithChildren(graphics: graphics)
+            childNode.renderWithChildren(output: output, graphics: graphics)
             graphics.popOffset()
         }
     }

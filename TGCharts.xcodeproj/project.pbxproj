@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D40A86E522462E4300539999 /* GraphicsOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40A86E422462E4300539999 /* GraphicsOutput.swift */; };
 		D42658D02236341000FB79AB /* ChartTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658CF2236341000FB79AB /* ChartTypes.swift */; };
 		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4B223952E800733F2F /* ChartNode.swift */; };
@@ -73,6 +74,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D40A86E422462E4300539999 /* GraphicsOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicsOutput.swift; sourceTree = "<group>"; };
 		D42658CF2236341000FB79AB /* ChartTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTypes.swift; sourceTree = "<group>"; };
 		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D42B7A4B223952E800733F2F /* ChartNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNode.swift; sourceTree = "<group>"; };
@@ -386,6 +388,7 @@
 			children = (
 				D48EEF532236EF0B00C232E6 /* Graphics.swift */,
 				D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */,
+				D40A86E422462E4300539999 /* GraphicsOutput.swift */,
 				D48EEF552236F0AA00C232E6 /* OpenGraphics */,
 			);
 			path = Graphics;
@@ -552,6 +555,7 @@
 				D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */,
 				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
+				D40A86E522462E4300539999 /* GraphicsOutput.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
 				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,
 				D4AECB0E224156D300AE5D89 /* ChartPointerCloudNode.swift in Sources */,

@@ -6,16 +6,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "TGCharts/Controls/ChartControl/Nodes/Basic/ChartNode.swift"
-            timestampString = "574976672.804346"
+            filePath = "TGCharts/Graphics/GraphicsTexture.swift"
+            timestampString = "575047501.674408"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "146"
-            endingLineNumber = "146"
-            landmarkName = "removeAllChildren()"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
+            landmarkName = "deinit"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

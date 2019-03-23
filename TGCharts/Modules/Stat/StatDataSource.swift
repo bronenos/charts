@@ -208,13 +208,15 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     private func populateChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
-        cell.selectionStyle = .none
         control.link(to: cell.contentView)
         control.render()
+        
+        cell.separatorInset.left = cell.bounds.width
+        cell.selectionStyle = .none
     }
     
     private func utilizeChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
-        control.unlink()
+//        control.unlink()
     }
     
     private func reusableChartLineControlCell() -> UITableViewCell {
