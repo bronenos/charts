@@ -25,14 +25,7 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
     
     init(tag: String?) {
         super.init(tag: tag ?? "[slider]", cachable: false)
-        
-        foregroundColor = DesignBook.shared.color(.sliderBackground)
-        
-        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
         addChild(node: leftArrowNode)
-        
-        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
-        rightArrowNode.foregroundColor = UIColor.white
         addChild(node: rightArrowNode)
     }
     
@@ -41,6 +34,10 @@ final class ChartSliderNode: ChartNode, IChartSliderNode {
     }
     
     override func render(graphics: IGraphics) -> Bool {
+        foregroundColor = DesignBook.shared.color(.sliderBackground)
+        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
+        rightArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
+
         guard super.render(graphics: graphics) else { return false }
         
         let leftGapFrame = bounds.divided(atDistance: horizontalGap, from: .minXEdge).slice

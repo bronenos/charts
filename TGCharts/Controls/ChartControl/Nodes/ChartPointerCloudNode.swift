@@ -34,7 +34,6 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         super.init(tag: tag, cachable: false)
         
         overlayNode.figure = .roundedSquare
-        overlayNode.color = DesignBook.shared.color(.chartPointerCloudBackground)
         overlayNode.radius = 4
         
         addChild(node: overlayNode)
@@ -80,6 +79,12 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         )
         
         return layout.totalSize
+    }
+    
+    override func render(graphics: IGraphics) -> Bool {
+        overlayNode.color = DesignBook.shared.color(.chartPointerCloudBackground)
+        
+        return super.render(graphics: graphics)
     }
     
     private func layoutChildren() {

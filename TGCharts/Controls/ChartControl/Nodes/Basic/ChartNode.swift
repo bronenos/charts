@@ -190,13 +190,17 @@ class ChartNode: IChartNode {
     }
 
     func node(at point: CGPoint, interactable: Bool) -> IChartNode? {
+        guard isInteractable || !interactable else {
+            return nil
+        }
+        
         for childNode in childNodes.reversed() {
             let childPoint = CGPoint(point - childNode.origin)
             guard let foundNode = childNode.node(at: childPoint, interactable: interactable) else { continue }
             return foundNode
         }
         
-        if bounds.contains(point), (isInteractable || !interactable) {
+        if bounds.contains(point) {
             return self
         }
         

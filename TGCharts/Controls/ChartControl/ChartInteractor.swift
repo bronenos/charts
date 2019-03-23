@@ -50,7 +50,7 @@ final class ChartInteractor: IChartInteractor {
         guard let sliderNode = scene.node(by: sliderTag) else { return }
         guard let navigatorNode = scene.node(by: navigatorTag) else { return }
         guard let graphNode = scene.node(by: graphTag) else { return }
-
+        
         switch node.tag {
         case sliderTag:
             scenario = ChartInteractorMoveScenario(
@@ -61,7 +61,7 @@ final class ChartInteractor: IChartInteractor {
                 startRange: range,
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
-            
+
         case leftArrowTag:
             scenario = ChartInteractionScaleScenario(
                 sceneNode: scene,
@@ -91,6 +91,7 @@ final class ChartInteractor: IChartInteractor {
             )
 
         default:
+            print("\(#function) -> tag[\(node.tag)] scenario[-]")
             scenario = nil
         }
         

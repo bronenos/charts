@@ -26,6 +26,8 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
     init(tag: String, step: ChartVerticalStep) {
         super.init(tag: tag, cachable: false)
         
+        isInteractable = false
+        
         switch step {
         case .value: addChild(node: valueNode)
         case .line: addChild(node: underlineNode)

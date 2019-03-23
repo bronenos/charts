@@ -105,7 +105,7 @@ final class DarkDesignBook: DesignBook {
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
         case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
-        case .sliderBackground: return UIColor(red: 0.16, green: 0.21, blue: 28, alpha: 1.0)
+        case .sliderBackground: return UIColor(red: 0.16, green: 0.21, blue: 0.28, alpha: 1.0)
         case .sliderForeground: return UIColor.white
         case .actionForeground: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
         }
