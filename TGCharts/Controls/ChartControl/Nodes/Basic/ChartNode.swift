@@ -38,6 +38,8 @@ protocol IChartNode: class {
     func node(by tag: String) -> IChartNode?
     func dirtify()
     func calculateFullOrigin(of node: IChartNode) -> CGPoint?
+    func addAnimation(_ animation: IChartNodeAnimation)
+    func prepareForAnimation(_ animation: IChartNodeAnimation)
 }
 
 class ChartNode: IChartNode {
@@ -50,6 +52,7 @@ class ChartNode: IChartNode {
 
     private var childNodes = [IChartNode]()
     private(set) weak var parentNode: IChartNode?
+    private var animations = [IChartNodeAnimation]()
     private(set) var isDirty = false
 
     init(tag: String, cachable: Bool) {
@@ -143,6 +146,9 @@ class ChartNode: IChartNode {
     }
     
     final func renderWithChildren(output: GraphicsOutputRef, graphics: IGraphics) {
+        animations.forEach { _ = $0.perform() }
+        animations = animations.filter { !$0.isFinished }
+        
         graphics.pushMarker(caption: tag)
         defer { graphics.popMarker() }
         
@@ -243,5 +249,13 @@ class ChartNode: IChartNode {
                 fullOrigin += CGVector(currentNode.origin)
             }
         }
+    }
+    
+    final func addAnimation(_ animation: IChartNodeAnimation) {
+        animations.append(animation)
+    }
+    
+    func prepareForAnimation(_ animation: IChartNodeAnimation) {
+        parentNode?.prepareForAnimation(animation)
     }
 }

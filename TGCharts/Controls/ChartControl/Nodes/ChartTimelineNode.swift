@@ -31,7 +31,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         didSet { update() }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval) {
         self.chart = chart
         self.config = config
         self.sideOverlap = sideOverlap

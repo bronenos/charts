@@ -12,7 +12,7 @@ import UIKit
 protocol IChartInteractor: IGraphicsDelegate {
     var range: ChartRange { get }
     var pointer: CGFloat? { get }
-    func setDelegate(_ delegate: IChartInteractorDelegate?)
+    var delegate: IChartInteractorDelegate? { get set }
 }
 
 protocol IChartInteractorDelegate: class {
@@ -25,7 +25,7 @@ final class ChartInteractor: IChartInteractor {
     private var scene: IChartSceneNode
     private(set) var range: ChartRange
     private(set) var pointer: CGFloat?
-    private weak var delegate: IChartInteractorDelegate?
+    weak var delegate: IChartInteractorDelegate?
     
     private let navigatorTag = "navigator"
     private let sliderTag = "navigator-slider"
@@ -39,10 +39,6 @@ final class ChartInteractor: IChartInteractor {
         self.scene = scene
         self.range = range
         self.pointer = nil
-    }
-    
-    func setDelegate(_ delegate: IChartInteractorDelegate?) {
-        self.delegate = delegate
     }
     
     func interactionDidStart(at point: CGPoint) {

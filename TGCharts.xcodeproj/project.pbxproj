@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D40A86E522462E4300539999 /* GraphicsOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40A86E422462E4300539999 /* GraphicsOutput.swift */; };
+		D40A86E72246C68100539999 /* ChartNodeAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40A86E62246C68100539999 /* ChartNodeAnimation.swift */; };
 		D42658D02236341000FB79AB /* ChartTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658CF2236341000FB79AB /* ChartTypes.swift */; };
 		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4B223952E800733F2F /* ChartNode.swift */; };
@@ -75,6 +76,7 @@
 
 /* Begin PBXFileReference section */
 		D40A86E422462E4300539999 /* GraphicsOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicsOutput.swift; sourceTree = "<group>"; };
+		D40A86E62246C68100539999 /* ChartNodeAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNodeAnimation.swift; sourceTree = "<group>"; };
 		D42658CF2236341000FB79AB /* ChartTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTypes.swift; sourceTree = "<group>"; };
 		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D42B7A4B223952E800733F2F /* ChartNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNode.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				D42B7A4B223952E800733F2F /* ChartNode.swift */,
 				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 				D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */,
+				D40A86E62246C68100539999 /* ChartNodeAnimation.swift */,
 			);
 			path = Basic;
 			sourceTree = "<group>";
@@ -516,6 +519,7 @@
 				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
+				D40A86E72246C68100539999 /* ChartNodeAnimation.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D4F4610B2238C60B00EDDF90 /* global.swift in Sources */,
 				D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */,

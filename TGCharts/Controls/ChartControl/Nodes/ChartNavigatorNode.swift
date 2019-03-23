@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol IChartNavigatorNode: IChartNode {
-    func setChart(_ chart: Chart, config: ChartConfig)
+    func setChart(_ chart: Chart, config: ChartConfig, duration: TimeInterval)
 }
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
@@ -32,10 +32,10 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
         didSet { update(range: range) }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig) {
+    func setChart(_ chart: Chart, config: ChartConfig, duration: TimeInterval) {
         self.range = config.range
         
-        graphNode.setChart(chart, config: config.fullRanged(), sideOverlap: 0)
+        graphNode.setChart(chart, config: config.fullRanged(), sideOverlap: 0, duration: duration)
         update(range: config.range)
     }
     

@@ -25,7 +25,7 @@ protocol IChartControlDelegate: class {
     func chartControlDidEndInteraction()
 }
 
-final class ChartControl: IChartControl, IChartInteractorDelegate {
+final class ChartControl: IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
     private let graphics: IGraphics
     let chart: Chart
     private(set) var config: ChartConfig
@@ -40,6 +40,10 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     
     private let startupRange = ChartRange(start: 0.75, end: 1.0)
     
+    private weak var displayLink: CADisplayLink?
+    private var linkAwaitingDuration = TimeInterval(0)
+    private var linkTerminationDate: Date?
+    
     init(graphics: IGraphics, chart: Chart, formattingProvider: IFormattingProvider) {
         self.graphics = graphics
         self.chart = chart
@@ -48,7 +52,8 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
         scene = ChartSceneNode(tag: "scene", formattingProvider: formattingProvider)
         interactor = ChartInteractor(scene: scene, range: startupRange)
         
-        interactor.setDelegate(self)
+        scene.delegate = self
+        interactor.delegate = self
     }
     
     func setDelegate(_ delegate: IChartControlDelegate?) {
@@ -71,14 +76,20 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
     
     func render() {
         guard let output = outputRef else { return }
+        
         scene.setChart(chart, config: config)
         graphics.render(output: output) { link in scene.renderWithChildren(output: output, graphics: link) }
+        
+        if linkAwaitingDuration > 0 {
+            runAutoupdate(duration: linkAwaitingDuration)
+            linkAwaitingDuration = 0
+        }
     }
     
     func toggleLine(key: String) {
         guard let index = config.lines.firstIndex(where: { $0.key == key }) else { return }
         config.lines[index].visible.toggle()
-        render()
+        scene.updateChart(chart, config: config)
     }
     
     func interactorDidBegin() {
@@ -93,6 +104,39 @@ final class ChartControl: IChartControl, IChartInteractorDelegate {
         config.range = interactor.range
         config.pointer = interactor.pointer
         render()
+    }
+    
+    private func runAutoupdate(duration: TimeInterval) {
+        linkTerminationDate = Date(timeIntervalSinceNow: duration)
+        
+        if displayLink == nil {
+            let link = CADisplayLink(target: self, selector: #selector(handleDisplayLink))
+            link.add(to: .current, forMode: .default)
+            displayLink = link
+        }
+    }
+    
+    private func stopAutoupdate() {
+        linkTerminationDate = nil
+        displayLink?.invalidate()
+    }
+    
+    @objc private func handleDisplayLink() {
+        guard let terminationDate = linkTerminationDate else {
+            stopAutoupdate()
+            return
+        }
+        
+        guard terminationDate > Date() else {
+            stopAutoupdate()
+            return
+        }
+        
+        render()
+    }
+    
+    func sceneDidRequestAnimatedRendering(duration: TimeInterval) {
+        linkAwaitingDuration = max(linkAwaitingDuration, duration)
     }
 }
 

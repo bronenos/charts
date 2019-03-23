@@ -21,6 +21,19 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     private let width: CGFloat
     
     private var lineNodes = [String: ChartFigureNode]()
+    fileprivate var overrideEdge: ChartRange?
+
+    init(tag: String?, width: CGFloat, cachable: Bool) {
+        self.width = width
+        
+        super.init(tag: tag ?? "[graph]", cachable: cachable)
+    }
+    
+    override var frame: CGRect {
+        didSet {
+            update()
+        }
+    }
     
     private(set) var chart = Chart() {
         didSet {
@@ -43,23 +56,25 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
-    init(tag: String?, width: CGFloat, cachable: Bool) {
-        self.width = width
-        
-        super.init(tag: tag ?? "[graph]", cachable: cachable)
-    }
-    
-    override var frame: CGRect {
-        didSet {
-            update()
-        }
-    }
-    
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat) {
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval) {
+        let oldEdge = obtainEdge()
         self.chart = chart
         self.config = config
         self.sideOverlap = sideOverlap
-        update()
+        let newEdge = obtainEdge()
+
+        if duration > 0 {
+            let animation = ChartGraphAdjustEdgeAnimation(
+                duration: duration,
+                startEdge: oldEdge,
+                endEdge: newEdge
+            )
+            
+            animation.attach(to: self)
+        }
+        else {
+            update()
+        }
     }
     
     func update(meta: ChartSliceMeta, edge: ChartRange, lineMetas: [LineMeta]) {
@@ -102,9 +117,18 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
         
         let lines = chart.visibleLines(config: config)
-        let edge = calculateEdge(lines: lines, meta: meta)
+        let edge = overrideEdge ?? calculateEdge(lines: lines, meta: meta)
         let lineMetas = lines.map { LineMeta(line: $0, points: slicePoints(line: $0, edge: edge, with: meta)) }
         update(meta: meta, edge: edge, lineMetas: lineMetas)
+    }
+    
+    private func obtainEdge() -> ChartRange {
+        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+            return ChartRange(start: 0, end: 1.0)
+        }
+        
+        let lines = chart.visibleLines(config: config)
+        return calculateEdge(lines: lines, meta: meta)
     }
     
     private func calculateEdge(lines: [ChartLine], meta: ChartSliceMeta) -> ChartRange {
@@ -120,10 +144,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let leftOverlappingEdge: ChartRange? = meta.leftOverlappingIndex.flatMap { index in
             let baseIndex = Int(floor(index))
             let growingPercent = index - CGFloat(baseIndex)
-            
-            guard baseIndex < chart.length - 1 else {
-                return nil
-            }
+            guard baseIndex < chart.length - 1 else { return nil }
             
             let values: [CGFloat] = lines.map { line in
                 let baseValue = CGFloat(line.values[baseIndex])
@@ -139,10 +160,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let rightOverlappingEdge: ChartRange? = meta.rightOverlappingIndex.flatMap { index in
             let baseIndex = Int(floor(index))
             let growingPercent = index - CGFloat(baseIndex)
-            
-            guard baseIndex < chart.length - 1 else {
-                return nil
-            }
+            guard baseIndex < chart.length - 1 else { return nil }
             
             let values: [CGFloat] = lines.map { line in
                 let baseValue = CGFloat(line.values[baseIndex])
@@ -175,5 +193,32 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             let y = calculateY(value: value, edge: edge)
             return CGPoint(x: x, y: CGFloat(y))
         }
+    }
+}
+
+fileprivate class ChartGraphAdjustEdgeAnimation: ChartNodeAnimation {
+    private let startEdge: ChartRange
+    private let endEdge: ChartRange
+    
+    init(duration: TimeInterval, startEdge: ChartRange, endEdge: ChartRange) {
+        self.startEdge = startEdge
+        self.endEdge = endEdge
+        
+        super.init(duration: duration)
+    }
+    
+    deinit {
+        (node as? ChartGraphNode)?.overrideEdge = nil
+    }
+    
+    override func perform() -> Bool {
+        guard super.perform() else { return false }
+        
+        print("\(#function) -> progress[\(progress)]")
+        let actualStart = startEdge.start + (endEdge.start - startEdge.start) * progress
+        let actualEnd = startEdge.end + (endEdge.end - startEdge.end) * progress
+        (node as? ChartGraphNode)?.overrideEdge = ChartRange(start: actualStart, end: actualEnd)
+        
+        return true
     }
 }

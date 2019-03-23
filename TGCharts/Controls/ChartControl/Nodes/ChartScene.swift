@@ -10,16 +10,21 @@ import Foundation
 import UIKit
 
 protocol IChartSceneNode: IChartNode {
+    var delegate: IChartSceneDelegate? { get set }
     var graphNode: IChartMainGraphNode { get }
     var timelineNode: IChartTimelineNode { get }
     var navigatorNode: IChartNavigatorNode { get }
     func setChart(_ chart: Chart, config: ChartConfig)
+    func updateChart(_ chart: Chart, config: ChartConfig)
 }
 
 protocol IChartSceneDelegate: class {
+    func sceneDidRequestAnimatedRendering(duration: TimeInterval)
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
+    weak var delegate: IChartSceneDelegate?
+    
     let graphNode: IChartMainGraphNode
     let timelineNode: IChartTimelineNode
     let navigatorNode: IChartNavigatorNode
@@ -58,11 +63,26 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func setChart(_ chart: Chart, config: ChartConfig) {
         self.config = config
         
-        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap)
-        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap)
-        navigatorNode.setChart(chart, config: config)
+        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
+        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
+        navigatorNode.setChart(chart, config: config, duration: 0)
         
         layoutChildren()
+    }
+    
+    func updateChart(_ chart: Chart, config: ChartConfig) {
+        self.config = config
+        
+        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0.25)
+        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
+        navigatorNode.setChart(chart, config: config, duration: 0.25)
+        
+        layoutChildren()
+    }
+    
+    override func prepareForAnimation(_ animation: IChartNodeAnimation) {
+        let duration = animation.endTime.timeIntervalSince(Date())
+        delegate?.sceneDidRequestAnimatedRendering(duration: duration)
     }
     
     private func layoutChildren() {

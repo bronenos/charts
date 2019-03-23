@@ -44,9 +44,9 @@ final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
         }
         
         return [
-            bounds.offsetBy(dx: 1 * mult, dy: 3).center,
+            bounds.offsetBy(dx: 1 * mult, dy: 4).center,
             bounds.offsetBy(dx: -1 * mult, dy: 0).center,
-            bounds.offsetBy(dx: 1 * mult, dy: -3).center
+            bounds.offsetBy(dx: 1 * mult, dy: -4).center
         ]
     }
 }

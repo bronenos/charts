@@ -20,7 +20,7 @@ struct ChartSliceMeta {
 }
 
 protocol IChartSlicableNode: IChartNode {
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat)
+    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval)
     func obtainMeta(chart: Chart, config: ChartConfig, sideOverlap: CGFloat) -> ChartSliceMeta?
 }
 
