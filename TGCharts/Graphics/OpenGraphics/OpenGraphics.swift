@@ -39,6 +39,9 @@ final class OpenGraphics: IGraphics {
     private var activeOutputMeta: OutputMeta?
     private var nodeMetas = [UUID: NodeMeta]()
     private var labelMetas = [UUID: LabelMeta]()
+    
+    private var alphaQueueValues = [CGFloat(1.0)]
+    private var alphaResolvedValue = [CGFloat(1.0)]
 
     init(context: EAGLContext) {
         self.context = context
@@ -122,6 +125,9 @@ final class OpenGraphics: IGraphics {
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
         
+        glEnable(GL_BLEND.to_enum)
+        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
+        
         drawingBlock(self)
 
         glBindRenderbuffer(GL_RENDERBUFFER.to_enum, outputMeta.renderBuffer)
@@ -136,23 +142,33 @@ final class OpenGraphics: IGraphics {
         glPopGroupMarkerEXT()
     }
     
+    func pushAlpha(_ alpha: CGFloat) {
+        let lastResolvedValue = currentResolvedAlpha
+        let currentResolvedValue = lastResolvedValue * alpha
+        
+        alphaQueueValues.append(alpha)
+        alphaResolvedValue.append(currentResolvedValue)
+    }
+    
+    func popAlpha() {
+        alphaQueueValues.removeLast()
+        alphaResolvedValue.removeLast()
+    }
+    
     func clear(color: UIColor) {
-        let c = color.extractComponents()
+        let c = color.extractComponents(extraBlended: 1.0)
         glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
         glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
     }
     
     func place(points: [CGPoint], color: UIColor, width: CGFloat) {
-        let c = color.extractComponents()
+        let c = color.extractComponents(extraBlended: currentResolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_POINT_SMOOTH.to_enum)
         glHint(GL_POINT_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
         glPointSize(width.scaled().to_float)
         
-        glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
-
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         
         let vertexCoords = convertPointsToValues(points, scalable: true)
@@ -179,7 +195,6 @@ final class OpenGraphics: IGraphics {
         glPointSize(pointSize.scaled().to_float)
 
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
 
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         glEnableClientState(GL_COLOR_ARRAY.to_enum);
@@ -226,7 +241,7 @@ final class OpenGraphics: IGraphics {
             ]
 
             let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-            let colorsCoords = convertColorsToValues(vertexColors)
+            let colorsCoords = convertColorsToValues(vertexColors, extraBlended: currentResolvedAlpha)
             glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
             glColorPointer(4, GL_FLOAT.to_enum, 0, colorsCoords)
             glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
@@ -241,11 +256,10 @@ final class OpenGraphics: IGraphics {
     }
     
     func fill(frame: CGRect, color: UIColor) {
-        let c = color.extractComponents()
+        let c = color.extractComponents(extraBlended: currentResolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
 
         glEnableClientState(GL_VERTEX_ARRAY.to_enum)
         
@@ -347,11 +361,10 @@ final class OpenGraphics: IGraphics {
         guard let nodeMeta = nodeMetas[texture.textureUUID] else { return }
         let frame = CGRect(origin: .zero, size: nodeMeta.pointSize)
         
-        let c = UIColor.white.extractComponents()
+        let c = UIColor.white.extractComponents(extraBlended: 1.0)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
 
         glBindTexture(GL_TEXTURE_2D.to_enum, nodeMeta.texture)
         glEnable(GL_TEXTURE_2D.to_enum)
@@ -430,11 +443,10 @@ final class OpenGraphics: IGraphics {
     func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect) {
         guard let meta = labelMetas[texture.textureUUID] else { return }
         
-        let c = UIColor.white.extractComponents()
+        let c = UIColor.white.extractComponents(extraBlended: currentResolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
-        glBlendFunc(GL_SRC_ALPHA.to_enum, GL_ONE_MINUS_SRC_ALPHA.to_enum)
 
         glBindTexture(GL_TEXTURE_2D.to_enum, meta.texture)
         glEnable(GL_TEXTURE_2D.to_enum)
@@ -553,6 +565,10 @@ final class OpenGraphics: IGraphics {
         glDeleteRenderbuffers(1, [output.renderBuffer])
     }
     
+    private var currentResolvedAlpha: CGFloat {
+        return alphaResolvedValue.last ?? 1.0
+    }
+    
     private func convertPointsToValues(_ points: [CGPoint], scalable: Bool) -> [GLfloat] {
         var values = [GLfloat](repeating: 0, count: points.count * 2)
         var index = 0
@@ -577,12 +593,12 @@ final class OpenGraphics: IGraphics {
         return values
     }
     
-    private func convertColorsToValues(_ colors: [UIColor]) -> [GLfloat] {
+    private func convertColorsToValues(_ colors: [UIColor], extraBlended alpha: CGFloat) -> [GLfloat] {
         var values = [GLfloat](repeating: 0, count: colors.count * 4)
         var index = 0
         
         func _extractColorComponents(_ color: UIColor) -> UIColor.Components {
-            return color.extractComponents()
+            return color.extractComponents(extraBlended: alpha)
         }
 
         colors.map(_extractColorComponents).forEach { components in
@@ -661,9 +677,10 @@ fileprivate extension UIColor {
         var alpha: CGFloat = 0
     }
     
-    func extractComponents() -> Components {
+    func extractComponents(extraBlended alpha: CGFloat) -> Components {
         var c = Components()
         getRed(&c.red, green: &c.green, blue: &c.blue, alpha: &c.alpha)
+        c.alpha *= alpha
         return c
     }
 }

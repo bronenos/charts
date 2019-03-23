@@ -55,9 +55,6 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         let additionalNumberOfIndices = 0 // min(firstRenderedIndex, Int(ceil(dateWidth / meta.stepX)))
         let firstEnumeratedIndex = firstRenderedIndex - additionalNumberOfIndices
         
-        var leftAnchor = CGFloat.infinity
-        var skippingStep: Int?
-        
         let axialSlice = chart.axis[firstEnumeratedIndex...].enumerated().reversed()
         let preAxialSlice = chart.axis[0 ..< firstEnumeratedIndex]
 
@@ -87,58 +84,51 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
                 addChild(node: dateNode)
             }
             
-            guard let dateNode = dateNodes[item.date] else { return }
-            dateNode.frame = rect
-            
-            if index == 0, rect.minX < 0 {
-                dateNode.alpha = 0
-            }
-            else if rect.maxX <= leftAnchor {
-                adjustBySkippingStep(
-                    dateNode: dateNode,
-                    leftAnchor: &leftAnchor,
-                    index: index,
-                    lastAxialIndex: lastAxialIndex,
-                    skippingStep: &skippingStep
-                )
-            }
-            else {
-                dateNode.alpha = 0
-            }
+            dateNodes[item.date]?.frame = rect
         }
         
         preAxialSlice.forEach { item in
             dateNodes[item.date]?.alpha = 0
         }
+        
+        let nodes = axialSlice.map({ $0.element.date }).sorted(by: >).compactMap({ dateNodes[$0] })
+        let skippingStep = calculateSkippingStep(nodes: nodes)
+        performLayout(nodes: nodes, skippingStep: skippingStep)
     }
     
-    private func adjustBySkippingStep(dateNode: IChartNode,
-                                      leftAnchor: inout CGFloat,
-                                      index: Int,
-                                      lastAxialIndex: Int,
-                                      skippingStep: inout Int?) {
-        if index == lastAxialIndex {
-            dateNode.alpha = 1.0
-            leftAnchor = dateNode.frame.minX
+    private func calculateSkippingStep(nodes: [IChartNode]) -> Int {
+        guard let primaryAnchor = nodes.first?.frame.minX else {
+            return 1
         }
-        else if let step = skippingStep {
-            if ((lastAxialIndex - index) % step) == 0 {
-                dateNode.alpha = 1.0
-                leftAnchor = dateNode.frame.minX
+        
+        for (index, node) in nodes.enumerated() {
+            guard node.frame.maxX <= primaryAnchor else { continue }
+            return calculateCoveringDuoPower(value: index)
+        }
+        
+        return 1
+    }
+    
+    private func performLayout(nodes: [IChartNode], skippingStep: Int) {
+        let skippingSemiStep = max(1, skippingStep / 2)
+        var lastAnchor = CGFloat(0)
+        
+        for (index, node) in nodes.enumerated() {
+            if node.frame.minX < 0, index == nodes.count - 1 {
+                node.alpha = 0
+            }
+            else if (index % skippingStep) == 0 {
+                node.alpha = 1.0
+                lastAnchor = node.frame.minX
+            }
+            else if (index % skippingSemiStep) == 0 {
+                let distance = node.frame.maxX - lastAnchor
+                let limit = node.size.width * 0.25
+                let value = 1.0 - min(1.0, distance / limit)
+                node.alpha = value
             }
             else {
-                dateNode.alpha = 0
-            }
-        }
-        else {
-            let step = lastAxialIndex - index
-            if step.nonzeroBitCount == 1 {
-                skippingStep = step
-                dateNode.alpha = 1.0
-                leftAnchor = dateNode.frame.minX
-            }
-            else {
-                dateNode.alpha = 0
+                node.alpha = 0
             }
         }
     }

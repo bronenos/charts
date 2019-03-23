@@ -19,6 +19,8 @@ protocol IGraphics: class {
     func render(output: GraphicsOutputRef, drawingBlock: (IGraphics) -> Void)
     func pushMarker(caption: String)
     func popMarker()
+    func pushAlpha(_ alpha: CGFloat)
+    func popAlpha()
     func clear(color: UIColor)
     func place(points: [CGPoint], color: UIColor, width: CGFloat)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)

@@ -146,6 +146,9 @@ class ChartNode: IChartNode {
         graphics.pushMarker(caption: tag)
         defer { graphics.popMarker() }
         
+        graphics.pushAlpha(alpha)
+        defer { graphics.popAlpha() }
+        
         if isDirty, cachable {
             if let texture = graphics.requestNodeTexture(size: size) {
                 cachedTexture = texture
