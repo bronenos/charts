@@ -9,6 +9,9 @@
 import Foundation
 import UIKit
 
+private let mostNearDepthZ = GLfloat(-10)
+private let mostFarDepthZ = GLfloat(10)
+
 final class OpenGraphics: IGraphics {
     private struct OutputMeta {
         let renderView: OpenGraphicsRenderView
@@ -18,7 +21,7 @@ final class OpenGraphics: IGraphics {
         var renderScale = CGFloat(0)
         var frameBuffer = GLuint(0)
         var renderBuffer = GLuint(0)
-        var stencilBuffer = GLuint(0)
+        var depthStencilBuffer = GLuint(0)
     }
     
     private struct NodeMeta {
@@ -111,7 +114,7 @@ final class OpenGraphics: IGraphics {
         
         glMatrixMode(GL_PROJECTION.to_enum)
         glLoadIdentity()
-        glOrthof(0, outputMeta.renderSize.width.to_float, 0, outputMeta.renderSize.height.to_float, -1, 1)
+        glOrthof(0, outputMeta.renderSize.width.to_float, 0, outputMeta.renderSize.height.to_float, mostNearDepthZ, mostFarDepthZ)
         
         glMatrixMode(GL_MODELVIEW.to_enum)
         glLoadIdentity()
@@ -159,7 +162,7 @@ final class OpenGraphics: IGraphics {
     func clear(color: UIColor) {
         let c = color.extractComponents(extraBlended: 1.0)
         glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
-        glClear(GL_COLOR_BUFFER_BIT.to_bitfield | GL_STENCIL_BUFFER_BIT.to_bitfield)
+        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
     }
     
     func place(points: [CGPoint], color: UIColor, width: CGFloat) {
@@ -172,8 +175,9 @@ final class OpenGraphics: IGraphics {
         
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         
-        let vertexCoords = convertPointsToValues(points, scalable: true)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+        var depthIndex: GLfloat?
+        let vertexCoords = convertPointsToValues(points, scalable: true, depthIndex: &depthIndex)
+        glVertexPointer(3, GL_FLOAT.to_enum, 0, vertexCoords)
         glDrawArrays(GL_POINTS.to_enum, 0, points.count.to_size)
         
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
@@ -191,14 +195,20 @@ final class OpenGraphics: IGraphics {
         let pointSize = outerSide * 1.75
         let outerColor = color.withAlphaComponent(0)
         
+        glEnable(GL_BLEND.to_enum)
+        
         glEnable(GL_POINT_SMOOTH.to_enum)
         glHint(GL_POINT_SMOOTH_HINT.to_enum, GL_NICEST.to_enum)
         glPointSize(pointSize.scaled().to_float)
 
-        glEnable(GL_BLEND.to_enum)
-
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         glEnableClientState(GL_COLOR_ARRAY.to_enum);
+        
+        var linesVertexCoords = [GLfloat]()
+        var linesColorsCoords = [GLfloat]()
+        var pointsVertexCoords = [GLfloat]()
+        var pointsColorsCoords = [GLfloat]()
+        var depthIndex: GLfloat?
         
         for i in (0 ..< lastIndex) {
             let pointFrom = points[i]
@@ -241,14 +251,56 @@ final class OpenGraphics: IGraphics {
                 outerColor
             ]
 
-            let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-            let colorsCoords = convertColorsToValues(vertexColors, extraBlended: resolvedAlpha)
-            glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
-            glColorPointer(4, GL_FLOAT.to_enum, 0, colorsCoords)
-            glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
-            glDrawArrays(GL_POINTS.to_enum, 4, 2)
+            linesVertexCoords.append(
+                contentsOf: convertPointsToValues(
+                    vertexPoints,
+                    scalable: true,
+                    depthIndex: &depthIndex
+                )
+            )
+            
+            linesColorsCoords.append(
+                contentsOf: convertColorsToValues(
+                    vertexColors,
+                    extraBlended: resolvedAlpha
+                )
+            )
+            
+            pointsVertexCoords.append(
+                contentsOf: convertPointsToValues(
+                    Array(vertexPoints[4 ... 5]),
+                    scalable: true,
+                    depthIndex: &depthIndex
+                )
+            )
+
+            pointsColorsCoords.append(
+                contentsOf: convertColorsToValues(
+                    Array(vertexColors[4 ... 5]),
+                    extraBlended: resolvedAlpha
+                )
+            )
         }
         
+        func _draw() {
+            glVertexPointer(3, GL_FLOAT.to_enum, 0, linesVertexCoords)
+            glColorPointer(4, GL_FLOAT.to_enum, 0, linesColorsCoords)
+            glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, linesVertexCoords.count.to_size / 3)
+            
+            glVertexPointer(3, GL_FLOAT.to_enum, 0, pointsVertexCoords)
+            glColorPointer(4, GL_FLOAT.to_enum, 0, pointsColorsCoords)
+            glDrawArrays(GL_POINTS.to_enum, 0, pointsVertexCoords.count.to_size / 3)
+        }
+        
+//        glEnable(GL_DEPTH_TEST.to_enum)
+//        glClear(GL_DEPTH_BUFFER_BIT.to_bitfield)
+//        glColorMask(GL_FALSE.to_boolean, GL_FALSE.to_boolean, GL_FALSE.to_boolean, GL_FALSE.to_boolean)
+        _draw()
+//        glColorMask(GL_TRUE.to_boolean, GL_TRUE.to_boolean, GL_TRUE.to_boolean, GL_TRUE.to_boolean)
+//        glDepthFunc(GL_LEQUAL.to_enum)
+//        _draw()
+//        glDisable(GL_DEPTH_TEST.to_enum)
+
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
         glDisableClientState(GL_COLOR_ARRAY.to_enum)
         
@@ -271,8 +323,9 @@ final class OpenGraphics: IGraphics {
             frame.bottomRightPoint
         ]
 
-        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
+        var depthIndex: GLfloat?
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true, depthIndex: &depthIndex)
+        glVertexPointer(3, GL_FLOAT.to_enum, 0, vertexCoords)
         glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
         
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
@@ -394,10 +447,11 @@ final class OpenGraphics: IGraphics {
             textureScaling.topRightPoint
         ]
         
-        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-        let textureCoords = convertPointsToValues(texturePoints, scalable: false)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
-        glTexCoordPointer(2, GL_FLOAT.to_enum, 0, textureCoords)
+        var depthIndex: GLfloat?
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true, depthIndex: &depthIndex)
+        let textureCoords = convertPointsToValues(texturePoints, scalable: false, depthIndex: &depthIndex)
+        glVertexPointer(3, GL_FLOAT.to_enum, 0, vertexCoords)
+        glTexCoordPointer(3, GL_FLOAT.to_enum, 0, textureCoords)
         glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
         
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
@@ -497,10 +551,11 @@ final class OpenGraphics: IGraphics {
             textureScaling.topRightPoint
         ]
         
-        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-        let textureCoords = convertPointsToValues(texturePoints, scalable: false)
-        glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
-        glTexCoordPointer(2, GL_FLOAT.to_enum, 0, textureCoords)
+        var depthIndex: GLfloat?
+        let vertexCoords = convertPointsToValues(vertexPoints, scalable: true, depthIndex: &depthIndex)
+        let textureCoords = convertPointsToValues(texturePoints, scalable: false, depthIndex: &depthIndex)
+        glVertexPointer(3, GL_FLOAT.to_enum, 0, vertexCoords)
+        glTexCoordPointer(3, GL_FLOAT.to_enum, 0, textureCoords)
         glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
         
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
@@ -545,13 +600,13 @@ final class OpenGraphics: IGraphics {
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, renderBuffer)
         
-        var stencilBuffer = GLuint(0)
-        glGenRenderbuffers(1, &stencilBuffer)
-        guard stencilBuffer > 0 else { abort() }
-        glBindRenderbuffer(GL_RENDERBUFFER.to_enum, stencilBuffer)
-        glRenderbufferStorage(GL_RENDERBUFFER.to_enum, GL_STENCIL_INDEX8.to_enum, renderSize.width.to_size, renderSize.height.to_size)
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_STENCIL_ATTACHMENT.to_enum, GL_RENDERBUFFER.to_enum, stencilBuffer)
-
+        var depthStencilBuffer = GLuint(0)
+        glGenRenderbuffers(1, &depthStencilBuffer)
+        guard depthStencilBuffer > 0 else { abort() }
+        glBindRenderbuffer(GL_RENDERBUFFER.to_enum, depthStencilBuffer)
+        glRenderbufferStorage(GL_RENDERBUFFER.to_enum, GL_DEPTH24_STENCIL8.to_enum, renderSize.width.to_size, renderSize.height.to_size)
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_DEPTH_STENCIL_ATTACHMENT.to_enum, GL_RENDERBUFFER.to_enum, depthStencilBuffer)
+        
         return OutputMeta(
             renderView: renderView,
             parentView: parentView,
@@ -560,7 +615,7 @@ final class OpenGraphics: IGraphics {
             renderScale: renderScale,
             frameBuffer: frameBuffer,
             renderBuffer: renderBuffer,
-            stencilBuffer: stencilBuffer
+            depthStencilBuffer: depthStencilBuffer
         )
     }
     
@@ -571,7 +626,7 @@ final class OpenGraphics: IGraphics {
         glDeleteFramebuffers(1, [output.frameBuffer])
 
         glBindRenderbuffer(GL_RENDERBUFFER.to_enum, 0)
-        glDeleteRenderbuffers(2, [output.renderBuffer, output.stencilBuffer])
+        glDeleteRenderbuffers(2, [output.renderBuffer, output.depthStencilBuffer])
     }
     
     private func applyResolvedClippingArea() {
@@ -595,16 +650,32 @@ final class OpenGraphics: IGraphics {
         return alphaResolvedValue.last ?? 1.0
     }
     
-    private func convertPointsToValues(_ points: [CGPoint], scalable: Bool) -> [GLfloat] {
-        var values = [GLfloat](repeating: 0, count: points.count * 2)
+    private func convertPointsToValues(_ points: [CGPoint], scalable: Bool, depthIndex: inout GLfloat?) -> [GLfloat] {
+        var values = [GLfloat](repeating: 0, count: points.count * 3)
         var index = 0
         
         points.forEach { point in
+//            let depth: GLfloat
+//            if let index = depthIndex {
+//                if index >= 0 {
+//                    depth = mostNearDepthZ
+//                }
+//                else {
+//                    depth = index + 0.01
+//                }
+//            }
+//            else {
+//                depth = mostNearDepthZ
+//            }
+            
             if scalable {
                 values[index] = point.x.scaled().to_float
                 index += 1
                 
                 values[index] = point.y.scaled().to_float
+                index += 1
+                
+                values[index] = 0
                 index += 1
             }
             else {
@@ -613,7 +684,12 @@ final class OpenGraphics: IGraphics {
                 
                 values[index] = point.y.to_float
                 index += 1
+                
+                values[index] = 0
+                index += 1
             }
+            
+//            depthIndex = depth
         }
         
         return values
@@ -674,6 +750,10 @@ fileprivate extension Int32 {
     
     var to_bitfield: GLbitfield {
         return GLbitfield(self)
+    }
+    
+    var to_boolean: GLboolean {
+        return GLboolean(self)
     }
 }
 

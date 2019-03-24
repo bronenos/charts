@@ -27,6 +27,8 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
         
+        navigationItem.prompt = "Made by Stan Potemkin aka bronenos, powered by OpenGL ES 1.1"
+        
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
         

@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Graphics/GraphicsTexture.swift"
-            timestampString = "575114742.797244"
+            timestampString = "575122551.988655"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "30"
@@ -26,7 +26,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Controls/ChartControl/Nodes/ChartTimelineNode.swift"
-            timestampString = "575114742.79755"
+            timestampString = "575122551.988928"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "128"
@@ -42,13 +42,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Controls/ChartControl/Nodes/Basic/ChartFigureNode.swift"
-            timestampString = "575112137.659819"
+            timestampString = "575120102.437517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "80"
             endingLineNumber = "80"
-            landmarkName = "alpha"
-            landmarkType = "24">
+            landmarkName = "render(graphics:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Controls/ChartControl/Nodes/ChartScene.swift"
-            timestampString = "575114742.797773"
+            timestampString = "575122551.989151"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "59"

@@ -135,12 +135,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
-    override func render(graphics: IGraphics) -> Bool {
-        backgroundColor = DesignBook.shared.color(.primaryBackground)
-        
-        return super.render(graphics: graphics)
-    }
-    
     final func calculateY(value: Int, edge: ChartRange) -> CGFloat {
         guard size.height > 0 else { return 0 }
         return ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
