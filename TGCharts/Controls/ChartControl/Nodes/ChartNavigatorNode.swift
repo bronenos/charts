@@ -23,8 +23,6 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     init(tag: String?) {
         super.init(tag: tag ?? "[navigator]", cachable: false)
         
-        insets = .zero
-        
         addChild(node: canvasNode)
         addChild(node: graphNode)
         addChild(node: sliderNode)
@@ -37,7 +35,7 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     func setChart(_ chart: Chart, config: ChartConfig, duration: TimeInterval) {
         self.range = config.range
         
-        graphNode.setChart(chart, config: config.fullRanged(), sideOverlap: 0, duration: duration)
+        graphNode.setChart(chart, config: config.fullRanged(), overlap: .zero, duration: duration)
         update(range: config.range)
     }
     

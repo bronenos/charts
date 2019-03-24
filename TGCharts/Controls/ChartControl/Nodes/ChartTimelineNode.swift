@@ -19,7 +19,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     
     private var chart = Chart()
     private var config = ChartConfig()
-    private var sideOverlap = CGFloat(0)
+    private var overlap = UIEdgeInsets.zero
     
     init(tag: String?, formattingProvider: IFormattingProvider) {
         self.formattingProvider = formattingProvider
@@ -31,15 +31,15 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         didSet { update() }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval) {
+    func setChart(_ chart: Chart, config: ChartConfig, overlap: UIEdgeInsets, duration: TimeInterval) {
         self.chart = chart
         self.config = config
-        self.sideOverlap = sideOverlap
+        self.overlap = overlap
         update()
     }
     
     private func update() {
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+        guard let meta = obtainMeta(chart: chart, config: config, overlap: overlap) else {
             dateNodes.values.forEach { $0.removeFromParent() }
             dateNodes.removeAll()
             return

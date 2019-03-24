@@ -20,12 +20,12 @@ struct ChartSliceMeta {
 }
 
 protocol IChartSlicableNode: IChartNode {
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval)
-    func obtainMeta(chart: Chart, config: ChartConfig, sideOverlap: CGFloat) -> ChartSliceMeta?
+    func setChart(_ chart: Chart, config: ChartConfig, overlap: UIEdgeInsets, duration: TimeInterval)
+    func obtainMeta(chart: Chart, config: ChartConfig, overlap: UIEdgeInsets) -> ChartSliceMeta?
 }
 
 extension IChartSlicableNode {
-    func obtainMeta(chart: Chart, config: ChartConfig, sideOverlap: CGFloat) -> ChartSliceMeta? {
+    func obtainMeta(chart: Chart, config: ChartConfig, overlap: UIEdgeInsets) -> ChartSliceMeta? {
         guard chart.length > 0 else { return nil }
         guard config.range.distance > 0 else { return nil }
         
@@ -33,18 +33,18 @@ extension IChartSlicableNode {
         let totalWidth = size.width / config.range.distance
         let stepX = totalWidth / lastIndex
         
-        let sideIndices = ceil(sideOverlap / stepX)
-        
+        let leftSideIndices = ceil(overlap.left / stepX)
         let leftFramePosition = CGFloat(totalWidth * config.range.start)
-        let leftRenderedIndex = Int(floor(max(0, lastIndex * config.range.start - sideIndices)))
+        let leftRenderedIndex = Int(floor(max(0, lastIndex * config.range.start - leftSideIndices)))
         let leftRenderedPosition = CGFloat(leftRenderedIndex) * stepX
-        let leftVisiblePosition = max(0, leftFramePosition - sideOverlap)
+        let leftVisiblePosition = max(0, leftFramePosition - overlap.left)
         let leftVisibleIndex = Int(ceil(leftVisiblePosition / stepX))
 
+        let rightSideIndices = ceil(overlap.right / stepX)
         let rightFramePosition = CGFloat(totalWidth * config.range.end)
-        let rightRenderedIndex = Int(ceil(min(lastIndex, lastIndex * config.range.end + sideIndices)))
+        let rightRenderedIndex = Int(ceil(min(lastIndex, lastIndex * config.range.end + rightSideIndices)))
         let rightRenderedPosition = CGFloat(rightRenderedIndex) * stepX
-        let rightVisiblePosition = min(totalWidth, rightFramePosition + sideOverlap)
+        let rightVisiblePosition = min(totalWidth, rightFramePosition + overlap.right)
         let rightVisibleIndex = Int(floor(rightVisiblePosition / stepX))
 
         let renderedIndices = (leftRenderedIndex ... rightRenderedIndex)

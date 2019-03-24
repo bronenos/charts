@@ -267,14 +267,6 @@ class ChartNode: IChartNode {
     func prepareForAnimation(_ animation: IChartNodeAnimation) {
         parentNode?.prepareForAnimation(animation)
     }
-    
-    private func calculateClippingArea() -> CGRect? {
-        guard let fullOrigin = calculateFullOrigin() else { return nil }
-        guard let insets = insets else { return nil }
-        
-        let fullFrame = CGRect(origin: fullOrigin, size: size)
-        return fullFrame.inset(by: insets)
-    }
 }
 
 final class ChartAlphaAnimation: ChartNodeAnimation {

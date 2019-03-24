@@ -50,20 +50,19 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
-    private(set) var sideOverlap = CGFloat(0) {
+    override var insets: UIEdgeInsets? {
         didSet {
-            guard sideOverlap != oldValue else { return }
-            insets = UIEdgeInsets(top: 0, left: -sideOverlap, bottom: 0, right: -sideOverlap)
+            guard insets != oldValue else { return }
             dirtify()
         }
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig, sideOverlap: CGFloat, duration: TimeInterval) {
+    func setChart(_ chart: Chart, config: ChartConfig, overlap: UIEdgeInsets, duration: TimeInterval) {
         let oldEdge = obtainEdge()
         let oldVisibleLineKeys = obtainVisibleKeys()
         self.chart = chart
         self.config = config
-        self.sideOverlap = sideOverlap
+        self.insets = overlap.invertedSides()
         let newEdge = obtainEdge()
         let newVisibleLineKeys = obtainVisibleKeys()
 
@@ -136,8 +135,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         return ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
     }
     
+    private var overlap: UIEdgeInsets {
+        return insets?.invertedSides() ?? .zero
+    }
+    
     private func update() {
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+        guard let meta = obtainMeta(chart: chart, config: config, overlap: overlap) else {
             lineNodes.forEach { $0.value.removeFromParent() }
             lineNodes.removeAll()
             return
@@ -150,7 +153,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     private func obtainEdge() -> ChartRange {
-        guard let meta = obtainMeta(chart: chart, config: config, sideOverlap: sideOverlap) else {
+        guard let meta = obtainMeta(chart: chart, config: config, overlap: overlap) else {
             return ChartRange(start: 0, end: 1.0)
         }
         
@@ -258,5 +261,11 @@ fileprivate class ChartGraphAdjustLinesAnimation: ChartNodeAnimation {
         (node as? ChartGraphNode)?.overrideEdge = ChartRange(start: actualStart, end: actualEnd)
 
         return true
+    }
+}
+
+fileprivate extension UIEdgeInsets {
+    func invertedSides() -> UIEdgeInsets {
+        return UIEdgeInsets(top: -top, left: -left, bottom: -bottom, right: -right)
     }
 }

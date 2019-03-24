@@ -63,8 +63,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func setChart(_ chart: Chart, config: ChartConfig) {
         self.config = config
         
-        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
-        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
+        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0)
+        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
         navigatorNode.setChart(chart, config: config, duration: 0)
         
         layoutChildren()
@@ -73,8 +73,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func updateChart(_ chart: Chart, config: ChartConfig) {
         self.config = config
         
-        graphNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0.25)
-        timelineNode.setChart(chart, config: config, sideOverlap: Layout.sideGap, duration: 0)
+        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0.25)
+        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
         navigatorNode.setChart(chart, config: config, duration: 0.25)
         
         layoutChildren()
@@ -94,29 +94,36 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
 }
 
 fileprivate struct Layout {
-    static let sideGap = CGFloat(15)
+    static func gaps(bottom: CGFloat) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 15, bottom: bottom, right: 15)
+    }
     
+    static let totalGaps = Layout.gaps(bottom: 5)
+    static let sideGaps = Layout.gaps(bottom: 0)
+
     let bounds: CGRect
     let config: ChartConfig
     
-    private let sideGap = Layout.sideGap
-    private let pointerWidth = CGFloat(90)
+    private let gaps = Layout.totalGaps
     private let timelineHeight = CGFloat(25)
     private let navigatorHeight = CGFloat(40)
     
     var graphNodeFrame: CGRect {
-        let height = bounds.height - timelineFrame.maxY - 5
-        let base = CGRect(x: 0, y: timelineFrame.maxY, width: bounds.width, height: height)
-        return base.insetBy(dx: sideGap, dy: 0)
+        let leftX = gaps.left
+        let width = bounds.width - gaps.right - leftX
+        let height = bounds.height - timelineFrame.maxY - gaps.bottom
+        return CGRect(x: leftX, y: timelineFrame.maxY, width: width, height: height)
     }
     
     var timelineFrame: CGRect {
-        let base = CGRect(x: 0, y: navigatorFrame.maxY, width: bounds.width, height: timelineHeight)
-        return base.insetBy(dx: sideGap, dy: 0)
+        let leftX = gaps.left
+        let width = bounds.width - gaps.right - leftX
+        return CGRect(x: leftX, y: navigatorFrame.maxY, width: width, height: timelineHeight)
     }
     
     var navigatorFrame: CGRect {
-        let base = CGRect(x: 0, y: 0, width: bounds.width, height: navigatorHeight)
-        return base.insetBy(dx: sideGap, dy: 0)
+        let leftX = gaps.left
+        let width = bounds.width - gaps.right - leftX
+        return CGRect(x: leftX, y: 0, width: width, height: navigatorHeight)
     }
 }
