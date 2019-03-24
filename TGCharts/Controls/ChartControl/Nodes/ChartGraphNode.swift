@@ -21,8 +21,11 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     private let width: CGFloat
     
     private var lineNodes = [String: ChartFigureNode]()
-    fileprivate var overrideEdge: ChartRange?
+    fileprivate(set) var overrideFromEdge: ChartRange?
+    fileprivate(set) var overrideEdge: ChartRange?
+    fileprivate(set) var overrideToEdge: ChartRange?
     fileprivate var overrideKeys = Set<String>()
+    fileprivate(set) var overrideProgress: CGFloat?
 
     init(tag: String?, width: CGFloat, cachable: Bool) {
         self.width = width
@@ -249,13 +252,19 @@ fileprivate class ChartGraphAdjustLinesAnimation<Node: ChartGraphNode>: ChartNod
     }
     
     deinit {
+        castedNode?.overrideFromEdge = nil
         castedNode?.overrideEdge = nil
+        castedNode?.overrideToEdge = nil
         castedNode?.overrideKeys = Set()
+        castedNode?.overrideProgress = nil
     }
     
     override func attach(to node: IChartNode) {
         super.attach(to: node)
-        (node as? ChartGraphNode)?.overrideKeys = visibleKeys
+        castedNode?.overrideFromEdge = startEdge
+        castedNode?.overrideToEdge = endEdge
+        castedNode?.overrideKeys = visibleKeys
+        castedNode?.overrideProgress = 0
     }
     
     override func perform() -> Bool {
@@ -264,6 +273,7 @@ fileprivate class ChartGraphAdjustLinesAnimation<Node: ChartGraphNode>: ChartNod
         let actualStart = startEdge.start + (endEdge.start - startEdge.start) * progress
         let actualEnd = startEdge.end + (endEdge.end - startEdge.end) * progress
         castedNode?.overrideEdge = ChartRange(start: actualStart, end: actualEnd)
+        castedNode?.overrideProgress = progress
 
         return true
     }

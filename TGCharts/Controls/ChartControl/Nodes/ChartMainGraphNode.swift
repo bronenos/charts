@@ -16,7 +16,9 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
     private let pointerCloudNode: IChartPointerCloudNode
     
     private var verticalValueNodes = [IChartVerticalStepNode]()
+    private var verticalPostValueNodes = [IChartVerticalStepNode]()
     private var verticalLineNodes = [IChartVerticalStepNode]()
+    private var verticalPostLineNodes = [IChartVerticalStepNode]()
     private var temporaryNodes = [IChartNode]()
 
     init(tag: String, width: CGFloat, formattingProvider: IFormattingProvider) {
@@ -95,34 +97,85 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
     }
     
     private func placeVerticalIndices(meta: ChartSliceMeta, edge: ChartRange, lineMetas: [ChartGraphNode.LineMeta]) {
-        let numberOfSteps = 6
-        let stepY = size.height / CGFloat(numberOfSteps)
-        let stepValue = edge.distance / CGFloat(numberOfSteps)
-        
-        (0 ..< numberOfSteps).forEach { step in
-            let value = Int(edge.start + CGFloat(step) * stepValue)
-            let currentY = CGFloat(step) * stepY
-            let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
-
-            if step >= verticalValueNodes.count {
-                let valueNode = ChartVerticalStepNode(tag: "graph-step", step: .value)
-                addChild(node: valueNode, target: .front)
-                verticalValueNodes.append(valueNode)
+        func _layout(valueNodes: inout [IChartVerticalStepNode],
+                     lineNodes: inout [IChartVerticalStepNode],
+                     usingEdge: ChartRange,
+                     startY: CGFloat,
+                     height: CGFloat,
+                     alpha: CGFloat) {
+            let numberOfSteps = 6
+            let stepY = height / CGFloat(numberOfSteps)
+            let stepValue = edge.distance / CGFloat(numberOfSteps)
+            
+            (0 ..< numberOfSteps).forEach { step in
+                let value = Int(edge.start + CGFloat(step) * stepValue)
+                let currentY = startY + CGFloat(step) * stepY
+                let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
                 
-                let lineNode = ChartVerticalStepNode(tag: "graph-step", step: .line)
-                addChild(node: lineNode, target: .back)
-                verticalLineNodes.append(lineNode)
+                if step >= valueNodes.count {
+                    let valueNode = ChartVerticalStepNode(tag: "graph-step", step: .value)
+                    addChild(node: valueNode, target: .front)
+                    valueNodes.append(valueNode)
+                    
+                    let lineNode = ChartVerticalStepNode(tag: "graph-step", step: .line)
+                    addChild(node: lineNode, target: .back)
+                    lineNodes.append(lineNode)
+                }
+                
+                let valueNode = valueNodes[step]
+                valueNode.frame = CGRect(x: 0, y: currentY, width: size.width, height: 20)
+                valueNode.value = String(describing: value)
+                valueNode.color = color
+                valueNode.alpha = alpha
+                
+                let lineNode = lineNodes[step]
+                lineNode.frame = CGRect(x: 0, y: currentY, width: size.width, height: 20)
+                lineNode.value = String(describing: value)
+                lineNode.color = color
+                lineNode.alpha = alpha
             }
+        }
+        
+        if let progress = overrideProgress, let fromEdge = overrideFromEdge, let toEdge = overrideToEdge {
+            let scalingCoef = edge.distance / fromEdge.distance
+            let startDiff = edge.start - fromEdge.start
+
+            let lowerFromPosition = -(startDiff / fromEdge.distance) * size.height
+            let adjustFromPosition = lowerFromPosition * (1 + scalingCoef)
             
-            let valueNode = verticalValueNodes[step]
-            valueNode.frame = CGRect(x: 0, y: currentY, width: size.width, height: 20)
-            valueNode.value = String(describing: value)
-            valueNode.color = color
+            _layout(
+                valueNodes: &verticalValueNodes,
+                lineNodes: &verticalLineNodes,
+                usingEdge: fromEdge,
+                startY: adjustFromPosition,
+                height: size.height / scalingCoef,
+                alpha: 1.0 - progress
+            )
             
-            let lineNode = verticalLineNodes[step]
-            lineNode.frame = CGRect(x: 0, y: currentY, width: size.width, height: 20)
-            lineNode.value = String(describing: value)
-            lineNode.color = color
+            let upperToPosition = -(startDiff / toEdge.distance) * size.height
+            let adjustToPosition = upperToPosition * (scalingCoef)
+            
+            _layout(
+                valueNodes: &verticalPostValueNodes,
+                lineNodes: &verticalPostLineNodes,
+                usingEdge: toEdge,
+                startY: adjustToPosition,
+                height: size.height * scalingCoef,
+                alpha: progress
+            )
+        }
+        else {
+            _layout(
+                valueNodes: &verticalValueNodes,
+                lineNodes: &verticalLineNodes,
+                usingEdge: edge,
+                startY: 0,
+                height: size.height,
+                alpha: 1.0
+            )
+            
+            verticalPostValueNodes.forEach { $0.alpha = 0 }
+            verticalPostLineNodes.forEach { $0.alpha = 0 }
         }
     }
 }
