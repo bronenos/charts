@@ -53,6 +53,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     private(set) var sideOverlap = CGFloat(0) {
         didSet {
             guard sideOverlap != oldValue else { return }
+            insets = UIEdgeInsets(top: 0, left: -sideOverlap, bottom: 0, right: -sideOverlap)
             dirtify()
         }
     }

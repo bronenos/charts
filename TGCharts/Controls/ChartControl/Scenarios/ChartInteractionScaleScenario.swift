@@ -35,7 +35,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         self.sliderNode = sliderNode
         self.navigatorNode = navigatorNode
         self.startPoint = startPoint
-        self.originPoint = sceneNode.calculateFullOrigin(of: sliderNode) ?? .zero
+        self.originPoint = sliderNode.calculateFullOrigin() ?? .zero
         self.startRange = startRange
         self.direction = direction
         self.rangeUpdateBlock = rangeUpdateBlock

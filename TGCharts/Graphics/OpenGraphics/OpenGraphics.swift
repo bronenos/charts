@@ -18,6 +18,7 @@ final class OpenGraphics: IGraphics {
         var renderScale = CGFloat(0)
         var frameBuffer = GLuint(0)
         var renderBuffer = GLuint(0)
+        var stencilBuffer = GLuint(0)
     }
     
     private struct NodeMeta {
@@ -40,6 +41,8 @@ final class OpenGraphics: IGraphics {
     private var nodeMetas = [UUID: NodeMeta]()
     private var labelMetas = [UUID: LabelMeta]()
     
+    private var clippingQueue = [CGRect]()
+    
     private var alphaQueueValues = [CGFloat(1.0)]
     private var alphaResolvedValue = [CGFloat(1.0)]
 
@@ -61,19 +64,7 @@ final class OpenGraphics: IGraphics {
     }
     
     func link(uuid: UUID, to view: UIView, delegate: IGraphicsDelegate) -> GraphicsOutputRef {
-        if let outputMeta = outputMetas[uuid] {
-            if outputMeta.parentView !== view {
-                outputMetas[uuid] = OutputMeta(
-                    renderView: outputMeta.renderView,
-                    parentView: view,
-                    nativeSize: outputMeta.nativeSize,
-                    renderSize: outputMeta.renderSize,
-                    renderScale: outputMeta.renderScale,
-                    frameBuffer: outputMeta.frameBuffer,
-                    renderBuffer: outputMeta.renderBuffer
-                )
-            }
-            
+        if let _ = outputMetas[uuid] {
             return GraphicsOutputRef(outputUUID: uuid, graphics: self)
         }
         else {
@@ -142,8 +133,18 @@ final class OpenGraphics: IGraphics {
         glPopGroupMarkerEXT()
     }
     
+    func pushClippingArea(_ area: CGRect) {
+        clippingQueue.append(area)
+        applyResolvedClippingArea()
+    }
+    
+    func popClippingArea() {
+        clippingQueue.removeLast()
+        applyResolvedClippingArea()
+    }
+    
     func pushAlpha(_ alpha: CGFloat) {
-        let lastResolvedValue = currentResolvedAlpha
+        let lastResolvedValue = resolvedAlpha
         let currentResolvedValue = lastResolvedValue * alpha
         
         alphaQueueValues.append(alpha)
@@ -158,11 +159,11 @@ final class OpenGraphics: IGraphics {
     func clear(color: UIColor) {
         let c = color.extractComponents(extraBlended: 1.0)
         glClearColor(c.red.to_clamp, c.green.to_clamp, c.blue.to_clamp, c.alpha.to_clamp)
-        glClear(GL_COLOR_BUFFER_BIT.to_bitfield)
+        glClear(GL_COLOR_BUFFER_BIT.to_bitfield | GL_STENCIL_BUFFER_BIT.to_bitfield)
     }
     
     func place(points: [CGPoint], color: UIColor, width: CGFloat) {
-        let c = color.extractComponents(extraBlended: currentResolvedAlpha)
+        let c = color.extractComponents(extraBlended: resolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_POINT_SMOOTH.to_enum)
@@ -241,7 +242,7 @@ final class OpenGraphics: IGraphics {
             ]
 
             let vertexCoords = convertPointsToValues(vertexPoints, scalable: true)
-            let colorsCoords = convertColorsToValues(vertexColors, extraBlended: currentResolvedAlpha)
+            let colorsCoords = convertColorsToValues(vertexColors, extraBlended: resolvedAlpha)
             glVertexPointer(2, GL_FLOAT.to_enum, 0, vertexCoords)
             glColorPointer(4, GL_FLOAT.to_enum, 0, colorsCoords)
             glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
@@ -256,7 +257,7 @@ final class OpenGraphics: IGraphics {
     }
     
     func fill(frame: CGRect, color: UIColor) {
-        let c = color.extractComponents(extraBlended: currentResolvedAlpha)
+        let c = color.extractComponents(extraBlended: resolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
@@ -443,7 +444,7 @@ final class OpenGraphics: IGraphics {
     func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect) {
         guard let meta = labelMetas[texture.textureUUID] else { return }
         
-        let c = UIColor.white.extractComponents(extraBlended: currentResolvedAlpha)
+        let c = UIColor.white.extractComponents(extraBlended: resolvedAlpha)
         glColor4f(c.red.to_float, c.green.to_float, c.blue.to_float, c.alpha.to_float)
         
         glEnable(GL_BLEND.to_enum)
@@ -543,6 +544,13 @@ final class OpenGraphics: IGraphics {
         
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, frameBuffer)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_RENDERBUFFER.to_enum, renderBuffer)
+        
+        var stencilBuffer = GLuint(0)
+        glGenRenderbuffers(1, &stencilBuffer)
+        guard stencilBuffer > 0 else { abort() }
+        glBindRenderbuffer(GL_RENDERBUFFER.to_enum, stencilBuffer)
+        glRenderbufferStorage(GL_RENDERBUFFER.to_enum, GL_STENCIL_INDEX8.to_enum, renderSize.width.to_size, renderSize.height.to_size)
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER.to_enum, GL_STENCIL_ATTACHMENT.to_enum, GL_RENDERBUFFER.to_enum, stencilBuffer)
 
         return OutputMeta(
             renderView: renderView,
@@ -551,7 +559,8 @@ final class OpenGraphics: IGraphics {
             renderSize: renderSize,
             renderScale: renderScale,
             frameBuffer: frameBuffer,
-            renderBuffer: renderBuffer
+            renderBuffer: renderBuffer,
+            stencilBuffer: stencilBuffer
         )
     }
     
@@ -562,10 +571,27 @@ final class OpenGraphics: IGraphics {
         glDeleteFramebuffers(1, [output.frameBuffer])
 
         glBindRenderbuffer(GL_RENDERBUFFER.to_enum, 0)
-        glDeleteRenderbuffers(1, [output.renderBuffer])
+        glDeleteRenderbuffers(2, [output.renderBuffer, output.stencilBuffer])
     }
     
-    private var currentResolvedAlpha: CGFloat {
+    private func applyResolvedClippingArea() {
+        if let area = clippingQueue.last {
+            glEnable(GL_STENCIL_TEST.to_enum)
+            glClear(GL_STENCIL_BUFFER_BIT.to_bitfield)
+            
+            glStencilFunc(GL_ALWAYS.to_enum, 1, ~0)
+            glStencilOp(GL_KEEP.to_enum, GL_KEEP.to_enum, GL_REPLACE.to_enum)
+            fill(frame: area, color: UIColor.white)
+            
+            glStencilFunc(GL_EQUAL.to_enum, 1, ~0)
+            glStencilOp(GL_KEEP.to_enum, GL_KEEP.to_enum, GL_KEEP.to_enum)
+        }
+        else {
+            glDisable(GL_STENCIL_TEST.to_enum)
+        }
+    }
+    
+    private var resolvedAlpha: CGFloat {
         return alphaResolvedValue.last ?? 1.0
     }
     

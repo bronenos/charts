@@ -19,6 +19,8 @@ protocol IGraphics: class {
     func render(output: GraphicsOutputRef, drawingBlock: (IGraphics) -> Void)
     func pushMarker(caption: String)
     func popMarker()
+    func pushClippingArea(_ area: CGRect)
+    func popClippingArea()
     func pushAlpha(_ alpha: CGFloat)
     func popAlpha()
     func clear(color: UIColor)

@@ -23,6 +23,8 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     init(tag: String?) {
         super.init(tag: tag ?? "[navigator]", cachable: false)
         
+        insets = .zero
+        
         addChild(node: canvasNode)
         addChild(node: graphNode)
         addChild(node: sliderNode)

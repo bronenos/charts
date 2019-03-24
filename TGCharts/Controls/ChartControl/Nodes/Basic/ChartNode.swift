@@ -23,6 +23,7 @@ protocol IChartNode: class {
     var alpha: CGFloat { get set }
     var backgroundColor: UIColor { get set }
     var foregroundColor: UIColor { get set }
+    var insets: UIEdgeInsets? { get set }
     var isInteractable: Bool { get set }
     var isDirty: Bool { get }
     var parentNode: IChartNode? { get }
@@ -37,7 +38,7 @@ protocol IChartNode: class {
     func node(at point: CGPoint, interactable: Bool) -> IChartNode?
     func node(by tag: String) -> IChartNode?
     func dirtify()
-    func calculateFullOrigin(of node: IChartNode) -> CGPoint?
+    func calculateFullOrigin() -> CGPoint?
     func addAnimation(_ animation: IChartNodeAnimation)
     func prepareForAnimation(_ animation: IChartNodeAnimation)
 }
@@ -90,6 +91,13 @@ class ChartNode: IChartNode {
     var foregroundColor = UIColor.clear {
         didSet {
             guard foregroundColor != oldValue else { return }
+            dirtify()
+        }
+    }
+    
+    var insets: UIEdgeInsets? {
+        didSet {
+            guard insets != oldValue else { return }
             dirtify()
         }
     }
@@ -148,11 +156,14 @@ class ChartNode: IChartNode {
     }
     
     final func renderWithChildren(output: GraphicsOutputRef, graphics: IGraphics) {
+        graphics.pushMarker(caption: tag)
+        defer { graphics.popMarker() }
+        
         animations.forEach { _ = $0.perform() }
         animations = animations.filter { !$0.isFinished }
         
-        graphics.pushMarker(caption: tag)
-        defer { graphics.popMarker() }
+        if let deref = insets { graphics.pushClippingArea(bounds.inset(by: deref)) }
+        defer { if let _ = insets { graphics.popClippingArea() } }
         
         graphics.pushAlpha(overrideAlpha ?? alpha)
         defer { graphics.popAlpha() }
@@ -234,21 +245,17 @@ class ChartNode: IChartNode {
         cachedTexture = nil
     }
     
-    func calculateFullOrigin(of node: IChartNode) -> CGPoint? {
-        var currentNode = node
+    func calculateFullOrigin() -> CGPoint? {
+        var currentNode: IChartNode = self
         var fullOrigin = CGVector(currentNode.origin)
         
         while true {
-            guard let parentNode = currentNode.parentNode else {
-                return nil
-            }
-            
-            if parentNode === self  {
-                return CGPoint(fullOrigin)
-            }
-            else {
+            if let parentNode = currentNode.parentNode {
                 currentNode = parentNode
                 fullOrigin += CGVector(currentNode.origin)
+            }
+            else {
+                return CGPoint(fullOrigin)
             }
         }
     }
@@ -259,6 +266,14 @@ class ChartNode: IChartNode {
     
     func prepareForAnimation(_ animation: IChartNodeAnimation) {
         parentNode?.prepareForAnimation(animation)
+    }
+    
+    private func calculateClippingArea() -> CGRect? {
+        guard let fullOrigin = calculateFullOrigin() else { return nil }
+        guard let insets = insets else { return nil }
+        
+        let fullFrame = CGRect(origin: fullOrigin, size: size)
+        return fullFrame.inset(by: insets)
     }
 }
 
