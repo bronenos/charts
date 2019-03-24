@@ -72,9 +72,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func updateChart(_ chart: Chart, config: ChartConfig) {
         self.config = config
         
-        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 2.5)
+        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0.25)
         timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
-        navigatorNode.setChart(chart, config: config, duration: 2.5)
+        navigatorNode.setChart(chart, config: config, duration: 0.25)
         
         layoutChildren()
     }

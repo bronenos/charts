@@ -124,7 +124,7 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
                 
                 let valueNode = valueNodes[step]
                 valueNode.frame = CGRect(x: 0, y: currentY, width: size.width, height: 20)
-                valueNode.value = String(describing: value)
+                valueNode.value = (step > 0 && value == 0 ? String() : String(describing: value))
                 valueNode.color = color
                 valueNode.alpha = alpha
                 
@@ -154,19 +154,9 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
             
             let relativeHeight = (fromEdge.distance / toEdge.distance) // size.height * (1.0 / scalingCoef)
             let adjustToPosition = relativeFromPosition * (1.0 - progress) // * (scalingCoef - 1)
-            
-            let resultToHeight: CGFloat
-            if relativeHeight > 1.0 {
-                resultToHeight = size.height - ((size.height / relativeHeight) * (1.0 - progress))
-            }
-            else if relativeHeight < 1.0 {
-                let sourceHeight = size.height / relativeHeight
-                let destinationHeight = size.height
-                resultToHeight = destinationHeight + (sourceHeight - destinationHeight) * (1.0 - progress)
-            }
-            else {
-                resultToHeight = size.height
-            }
+            let sourceToHeight = size.height / relativeHeight
+            let destinationToHeight = size.height
+            let resultToHeight = destinationToHeight + (sourceToHeight - destinationToHeight) * (1.0 - progress)
             
             _layout(
                 valueNodes: &verticalPostValueNodes,
