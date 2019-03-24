@@ -229,7 +229,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     private func populateChartLineControl(line: ChartLine, config: ChartLineConfig, intoCell cell: UITableViewCell) {
         let selectedBackgroundView = UIView()
-        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.primaryBackground)
+        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.focusedBackground)
         
         cell.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.selectedBackgroundView = selectedBackgroundView
@@ -251,7 +251,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     
     private func populateSwitchDesignCell(intoCell cell: UITableViewCell) {
         let selectedBackgroundView = UIView()
-        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.primaryBackground)
+        selectedBackgroundView.backgroundColor = DesignBook.shared.color(.focusedBackground)
         
         cell.backgroundColor = DesignBook.shared.color(.primaryBackground)
         cell.selectedBackgroundView = selectedBackgroundView

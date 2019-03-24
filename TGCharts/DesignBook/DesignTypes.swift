@@ -17,6 +17,7 @@ enum DesignBookStyle {
 enum DesignBookColor {
     case spaceBackground
     case primaryBackground
+    case focusedBackground
     case primaryForeground
     case secondaryForeground
     case chartIndexForeground

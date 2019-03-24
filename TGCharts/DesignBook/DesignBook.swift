@@ -69,6 +69,7 @@ final class LightDesignBook: DesignBook {
         switch color {
         case .spaceBackground: return UIColor(red: 0.92, green: 0.92, blue: 0.95, alpha: 1.0)
         case .primaryBackground: return UIColor.white
+        case .focusedBackground: return UIColor(white: 0.9, alpha: 1.0)
         case .primaryForeground: return UIColor.black
         case .secondaryForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
         case .chartIndexForeground: return UIColor(red: 0.52, green: 0.55, blue: 0.57, alpha: 1.0)
@@ -97,6 +98,7 @@ final class DarkDesignBook: DesignBook {
         switch color {
         case .spaceBackground: return UIColor(red: 0.07, green: 0.10, blue: 0.13, alpha: 1.0)
         case .primaryBackground: return UIColor(red: 0.10, green: 0.14, blue: 0.19, alpha: 1.0)
+        case .focusedBackground: return UIColor(red: 0.20, green: 0.24, blue: 0.29, alpha: 1.0)
         case .primaryForeground: return UIColor.white
         case .secondaryForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
         case .chartIndexForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
