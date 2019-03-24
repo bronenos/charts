@@ -27,9 +27,10 @@ protocol IGraphics: class {
     func place(points: [CGPoint], color: UIColor, width: CGFloat)
     func stroke(points: [CGPoint], color: UIColor, width: CGFloat)
     func fill(frame: CGRect, color: UIColor)
+    func isValidTexture(_ texture: GraphicsTextureRef) -> Bool
     func requestNodeTexture(size: CGSize) -> GraphicsTextureRef?
     func flushNodeTexture(_ texture: GraphicsTextureRef)
-    func drawNodeTexture(texture: GraphicsTextureRef)
+    func drawNodeTexture(_ texture: GraphicsTextureRef)
     func storeLabelTexture(meta: GraphicsTextureMeta) -> GraphicsTextureRef?
     func drawLabelTexture(_ texture: GraphicsTextureRef, in frame: CGRect)
     func discardTexture(_ texture: GraphicsTextureRef)

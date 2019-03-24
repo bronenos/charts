@@ -67,21 +67,28 @@ final class OpenGraphics: IGraphics {
     }
     
     func link(uuid: UUID, to view: UIView, delegate: IGraphicsDelegate) -> GraphicsOutputRef {
-        if let _ = outputMetas[uuid] {
-            return GraphicsOutputRef(outputUUID: uuid, graphics: self)
+        if let meta = outputMetas[uuid] {
+            if meta.nativeSize == view.bounds.size {
+                return GraphicsOutputRef(outputUUID: uuid, graphics: self)
+            }
+            else {
+                discardOutput(meta)
+                
+                nodeMetas.keys.forEach(discardTexture)
+                labelMetas.keys.forEach(discardTexture)
+            }
         }
-        else {
-            let renderView = OpenGraphicsRenderView()
-            renderView.frame = view.bounds
-            renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            renderView.delegate = delegate
-            view.addSubview(renderView)
-            
-            let outputMeta = setupOutput(renderView: renderView, parentView: view)
-            outputMetas[uuid] = outputMeta
-            
-            return GraphicsOutputRef(outputUUID: uuid, graphics: self)
-        }
+        
+        let renderView = OpenGraphicsRenderView()
+        renderView.frame = view.bounds
+        renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        renderView.delegate = delegate
+        view.addSubview(renderView)
+        
+        let outputMeta = setupOutput(renderView: renderView, parentView: view)
+        outputMetas[uuid] = outputMeta
+        
+        return GraphicsOutputRef(outputUUID: uuid, graphics: self)
     }
     
     func obtainCanvasSize(output: GraphicsOutputRef) -> CGSize {
@@ -333,6 +340,12 @@ final class OpenGraphics: IGraphics {
         glDisable(GL_BLEND.to_enum)
     }
     
+    func isValidTexture(_ texture: GraphicsTextureRef) -> Bool {
+        if let _ = nodeMetas[texture.textureUUID] { return true }
+        if let _ = labelMetas[texture.textureUUID] { return true }
+        return false
+    }
+    
     func requestNodeTexture(size: CGSize) -> GraphicsTextureRef? {
         guard let outputMeta = activeOutputMeta else { return nil }
         
@@ -406,7 +419,7 @@ final class OpenGraphics: IGraphics {
         glPopMatrix()
     }
     
-    func drawNodeTexture(texture: GraphicsTextureRef) {
+    func drawNodeTexture(_ texture: GraphicsTextureRef) {
         guard let outputMeta = activeOutputMeta else { return }
         
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, outputMeta.frameBuffer)
@@ -568,19 +581,23 @@ final class OpenGraphics: IGraphics {
     }
     
     func discardTexture(_ texture: GraphicsTextureRef) {
-        if let meta = nodeMetas.removeValue(forKey: texture.textureUUID) {
+        discardTexture(texture.textureUUID)
+    }
+    
+    func discardTexture(_ uuid: UUID) {
+        if let meta = nodeMetas.removeValue(forKey: uuid) {
             glBindFramebuffer(GL_FRAMEBUFFER.to_enum, 0)
             glDeleteFramebuffers(1, [meta.frameBuffer])
             
             glBindTexture(GL_TEXTURE_2D.to_enum, 0)
             glDeleteTextures(1, [meta.texture])
         }
-        else if let meta = labelMetas.removeValue(forKey: texture.textureUUID) {
+        else if let meta = labelMetas.removeValue(forKey: uuid) {
             glBindTexture(GL_TEXTURE_2D.to_enum, 0)
             glDeleteTextures(1, [meta.texture])
         }
     }
-    
+
     private func setupOutput(renderView: OpenGraphicsRenderView, parentView: UIView) -> OutputMeta {
         let nativeSize = renderView.bounds.size
         let renderScale = UIScreen.main.scale

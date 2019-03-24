@@ -35,6 +35,13 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         dataSource.switchDesignHandler = { [weak self] in
             self?.interactor.toggleDesign()
         }
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOrientationChange),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -56,6 +63,13 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         dataSource.setDesignSwitcherTitle(title)
     }
     
+    override func updateDesign() {
+        super.updateDesign()
+        
+        tableView.backgroundColor = DesignBook.shared.color(.spaceBackground)
+        dataSource.updateDesign()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(tableView)
@@ -71,13 +85,6 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         tableView.frame = layout.tableViewFrame
     }
     
-    override func updateDesign() {
-        super.updateDesign()
-        
-        tableView.backgroundColor = DesignBook.shared.color(.spaceBackground)
-        dataSource.updateDesign()
-    }
-
     private func getLayout(size: CGSize) -> Layout {
         return Layout(
             bounds: CGRect(origin: .zero, size: size),
@@ -94,6 +101,11 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         tableView.isScrollEnabled = true
     }
     
+    @objc private func handleOrientationChange() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
+            self?.dataSource.reload()
+        }
+    }
 }
 
 fileprivate struct Layout {

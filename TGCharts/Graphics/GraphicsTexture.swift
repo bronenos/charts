@@ -26,6 +26,10 @@ final class GraphicsTextureRef {
         self.graphics = graphics
     }
     
+    var isValid: Bool {
+        return (graphics?.isValidTexture(self) == true)
+    }
+    
     deinit {
         graphics?.discardTexture(self)
     }

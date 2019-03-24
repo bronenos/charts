@@ -168,13 +168,18 @@ class ChartNode: IChartNode {
         graphics.pushAlpha(overrideAlpha ?? alpha)
         defer { graphics.popAlpha() }
         
+        if let texture = cachedTexture, !texture.isValid {
+            cachedTexture = nil
+            isDirty = true
+        }
+        
         if isDirty, cachable {
             if let texture = graphics.requestNodeTexture(size: size) {
                 cachedTexture = texture
                 
                 defer {
                     graphics.flushNodeTexture(texture)
-                    graphics.drawNodeTexture(texture: texture)
+                    graphics.drawNodeTexture(texture)
                     isDirty = false
                 }
 
@@ -187,7 +192,7 @@ class ChartNode: IChartNode {
             }
         }
         else if let texture = cachedTexture {
-            graphics.drawNodeTexture(texture: texture)
+            graphics.drawNodeTexture(texture)
         }
         else if !render(graphics: graphics) {
             return

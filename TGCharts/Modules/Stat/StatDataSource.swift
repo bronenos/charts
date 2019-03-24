@@ -51,6 +51,10 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         self.tableView = tableView
     }
     
+    func reload() {
+        tableView?.reloadData()
+    }
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         return chartControls.count + 1
     }
