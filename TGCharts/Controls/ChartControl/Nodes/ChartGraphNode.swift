@@ -67,35 +67,40 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let newVisibleLineKeys = obtainVisibleKeys()
 
         if duration > 0 {
-            let animation = ChartGraphAdjustLinesAnimation(
+            let graphAnimation = ChartGraphAdjustLinesAnimation<ChartGraphNode>(
                 duration: duration,
                 startEdge: oldEdge,
                 endEdge: newEdge,
                 visibleKeys: oldVisibleLineKeys.union(newVisibleLineKeys)
             )
-            animation.attach(to: self)
             
             newVisibleLineKeys.subtracting(oldVisibleLineKeys).forEach { key in
                 guard let node = lineNodes[key] else { return }
                 
-                let animation = ChartAlphaAnimation(
+                let lineAnimation = ChartAlphaAnimation<ChartNode>(
                     duration: duration,
                     startAlpha: node.alpha,
                     endAlpha: 1.0
                 )
-                animation.attach(to: node)
+                
+                graphAnimation.link(lineAnimation)
+                lineAnimation.attach(to: node)
             }
             
             oldVisibleLineKeys.subtracting(newVisibleLineKeys).forEach { key in
                 guard let node = lineNodes[key] else { return }
                 
-                let animation = ChartAlphaAnimation(
+                let lineAnimation = ChartAlphaAnimation<ChartNode>(
                     duration: duration,
                     startAlpha: node.alpha,
                     endAlpha: 0
                 )
-                animation.attach(to: node)
+                
+                graphAnimation.link(lineAnimation)
+                lineAnimation.attach(to: node)
             }
+            
+            graphAnimation.attach(to: self)
         }
         else {
             update()
@@ -112,7 +117,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                 node.alpha = 1.0
             }
             else {
-                let node = ChartFigureNode(tag: "graph-line", cachable: cachable)
+                let node = ChartFigureNode(tag: "graph-line-\(lineMeta.line.key)", cachable: cachable)
                 lineNodes[lineMeta.line.key] = node
                 
                 node.figure = .joinedLines
@@ -128,6 +133,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         uselessKeys.forEach { key in
             lineNodes[key]?.alpha = 0
         }
+    }
+    
+    override func render(graphics: IGraphics) -> Bool {
+        backgroundColor = DesignBook.shared.color(.primaryBackground)
+        
+        return super.render(graphics: graphics)
     }
     
     final func calculateY(value: Int, edge: ChartRange) -> CGFloat {
@@ -230,7 +241,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
 }
 
-fileprivate class ChartGraphAdjustLinesAnimation: ChartNodeAnimation {
+fileprivate class ChartGraphAdjustLinesAnimation<Node: ChartGraphNode>: ChartNodeAnimation {
     private let startEdge: ChartRange
     private let endEdge: ChartRange
     private let visibleKeys: Set<String>
@@ -244,8 +255,8 @@ fileprivate class ChartGraphAdjustLinesAnimation: ChartNodeAnimation {
     }
     
     deinit {
-        (node as? ChartGraphNode)?.overrideEdge = nil
-        (node as? ChartGraphNode)?.overrideKeys = Set()
+        castedNode?.overrideEdge = nil
+        castedNode?.overrideKeys = Set()
     }
     
     override func attach(to node: IChartNode) {
@@ -254,13 +265,17 @@ fileprivate class ChartGraphAdjustLinesAnimation: ChartNodeAnimation {
     }
     
     override func perform() -> Bool {
-        guard super.perform() else { return false }
+        _ = super.perform()
         
         let actualStart = startEdge.start + (endEdge.start - startEdge.start) * progress
         let actualEnd = startEdge.end + (endEdge.end - startEdge.end) * progress
-        (node as? ChartGraphNode)?.overrideEdge = ChartRange(start: actualStart, end: actualEnd)
+        castedNode?.overrideEdge = ChartRange(start: actualStart, end: actualEnd)
 
         return true
+    }
+    
+    private var castedNode: Node? {
+        return node as? Node
     }
 }
 

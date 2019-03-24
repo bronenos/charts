@@ -269,7 +269,7 @@ class ChartNode: IChartNode {
     }
 }
 
-final class ChartAlphaAnimation: ChartNodeAnimation {
+final class ChartAlphaAnimation<Node: ChartNode>: ChartNodeAnimation {
     private let startAlpha: CGFloat
     private let endAlpha: CGFloat
     
@@ -281,15 +281,19 @@ final class ChartAlphaAnimation: ChartNodeAnimation {
     }
     
     deinit {
-        (node as? ChartNode)?.overrideAlpha = nil
-        (node as? ChartNode)?.alpha = endAlpha
+        castedNode?.overrideAlpha = nil
+        castedNode?.alpha = endAlpha
     }
     
     override func perform() -> Bool {
         guard super.perform() else { return false }
         
-        (node as? ChartNode)?.overrideAlpha = startAlpha + (endAlpha - startAlpha) * progress
+        castedNode?.overrideAlpha = startAlpha + (endAlpha - startAlpha) * progress
         
         return true
+    }
+    
+    private var castedNode: Node? {
+        return node as? Node
     }
 }

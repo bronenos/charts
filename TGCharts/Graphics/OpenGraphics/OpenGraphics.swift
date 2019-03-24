@@ -579,10 +579,10 @@ final class OpenGraphics: IGraphics {
             glEnable(GL_STENCIL_TEST.to_enum)
             glClear(GL_STENCIL_BUFFER_BIT.to_bitfield)
             
-            glStencilFunc(GL_ALWAYS.to_enum, 1, ~0)
+            glStencilFunc(GL_ALWAYS.to_enum, 1, 0)
             glStencilOp(GL_KEEP.to_enum, GL_KEEP.to_enum, GL_REPLACE.to_enum)
-            fill(frame: area, color: UIColor.white)
-            
+            fill(frame: area, color: UIColor.clear)
+
             glStencilFunc(GL_EQUAL.to_enum, 1, ~0)
             glStencilOp(GL_KEEP.to_enum, GL_KEEP.to_enum, GL_KEEP.to_enum)
         }

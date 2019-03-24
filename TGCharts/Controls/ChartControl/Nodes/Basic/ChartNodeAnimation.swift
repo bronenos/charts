@@ -13,6 +13,8 @@ protocol IChartNodeAnimation: class {
     var endTime: Date { get }
     var progress: CGFloat { get }
     var isFinished: Bool { get }
+    func link(_ animation: IChartNodeAnimation)
+    func attach(to node: IChartNode)
     func perform() -> Bool
 }
 
@@ -21,11 +23,16 @@ class ChartNodeAnimation: IChartNodeAnimation {
     let endTime: Date
     
     private(set) weak var node: IChartNode?
+    private(set) var linkedAnimations = [IChartNodeAnimation]()
     private(set) var isFinished = false
     
     init(duration: TimeInterval) {
         startTime = Date()
         endTime = Date(timeIntervalSinceNow: duration)
+    }
+    
+    func link(_ animation: IChartNodeAnimation) {
+        linkedAnimations.append(animation)
     }
     
     func attach(to node: IChartNode) {
@@ -52,6 +59,7 @@ class ChartNodeAnimation: IChartNodeAnimation {
         }
         
         node?.dirtify()
+        linkedAnimations.forEach { _ = $0.perform() }
         
         return true
     }

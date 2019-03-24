@@ -55,9 +55,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     override func render(graphics: IGraphics) -> Bool {
         backgroundColor = DesignBook.shared.color(.primaryBackground)
         graphics.clear(color: backgroundColor)
-        
-        guard super.render(graphics: graphics) else { return false }
-        return true
+
+        return super.render(graphics: graphics)
     }
     
     func setChart(_ chart: Chart, config: ChartConfig) {
