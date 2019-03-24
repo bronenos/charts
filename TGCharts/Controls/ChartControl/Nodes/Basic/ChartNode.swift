@@ -54,6 +54,8 @@ class ChartNode: IChartNode {
     private(set) weak var parentNode: IChartNode?
     private var animations = [IChartNodeAnimation]()
     private(set) var isDirty = false
+    
+    fileprivate var overrideAlpha: CGFloat?
 
     init(tag: String, cachable: Bool) {
         self.tag = tag
@@ -152,7 +154,7 @@ class ChartNode: IChartNode {
         graphics.pushMarker(caption: tag)
         defer { graphics.popMarker() }
         
-        graphics.pushAlpha(alpha)
+        graphics.pushAlpha(overrideAlpha ?? alpha)
         defer { graphics.popAlpha() }
         
         if isDirty, cachable {
@@ -188,7 +190,7 @@ class ChartNode: IChartNode {
     }
     
     func render(graphics: IGraphics) -> Bool {
-        guard alpha > 0 else { return false }
+        guard (overrideAlpha ?? alpha) > 0 else { return false }
         
         let rect = CGRect(origin: .zero, size: size)
         graphics.fill(frame: rect, color: backgroundColor)
@@ -257,5 +259,30 @@ class ChartNode: IChartNode {
     
     func prepareForAnimation(_ animation: IChartNodeAnimation) {
         parentNode?.prepareForAnimation(animation)
+    }
+}
+
+final class ChartAlphaAnimation: ChartNodeAnimation {
+    private let startAlpha: CGFloat
+    private let endAlpha: CGFloat
+    
+    init(duration: TimeInterval, startAlpha: CGFloat, endAlpha: CGFloat) {
+        self.startAlpha = startAlpha
+        self.endAlpha = endAlpha
+        
+        super.init(duration: duration)
+    }
+    
+    deinit {
+        (node as? ChartNode)?.overrideAlpha = nil
+        (node as? ChartNode)?.alpha = endAlpha
+    }
+    
+    override func perform() -> Bool {
+        guard super.perform() else { return false }
+        
+        (node as? ChartNode)?.overrideAlpha = startAlpha + (endAlpha - startAlpha) * progress
+        
+        return true
     }
 }

@@ -28,7 +28,7 @@ class ChartNodeAnimation: IChartNodeAnimation {
         endTime = Date(timeIntervalSinceNow: duration)
     }
     
-    final func attach(to node: IChartNode) {
+    func attach(to node: IChartNode) {
         self.node = node
         node.addAnimation(self)
         _ = perform()

@@ -34,10 +34,11 @@ struct Chart: Equatable {
         self.axis = axis
     }
     
-    func visibleLines(config: ChartConfig) -> [ChartLine] {
+    func visibleLines(config: ChartConfig, addingKeys: Set<String>) -> [ChartLine] {
         return zip(lines, config.lines).compactMap { line, lineConfig in
-            guard lineConfig.visible else { return nil }
-            return line
+            if addingKeys.contains(line.key) { return line }
+            if lineConfig.visible { return line }
+            return nil
         }
     }
     

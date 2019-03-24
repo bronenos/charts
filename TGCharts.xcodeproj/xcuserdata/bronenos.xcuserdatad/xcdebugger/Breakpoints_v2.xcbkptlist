@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Graphics/GraphicsTexture.swift"
-            timestampString = "575076176.490558"
+            timestampString = "575097319.419407"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "30"
@@ -26,12 +26,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TGCharts/Controls/ChartControl/Nodes/ChartTimelineNode.swift"
-            timestampString = "575076176.491065"
+            timestampString = "575097319.419685"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "128"
             endingLineNumber = "128"
             landmarkName = "performLayout(nodes:skippingStep:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TGCharts/Controls/ChartControl/ChartInteractor.swift"
+            timestampString = "575097387.708756"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
+            landmarkName = "interactionDidStart(at:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
