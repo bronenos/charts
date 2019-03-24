@@ -152,15 +152,28 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
                 alpha: 1.0 - progress
             )
             
-            let relativeHeight = size.height * (1.0 / scalingCoef)
+            let relativeHeight = (fromEdge.distance / toEdge.distance) // size.height * (1.0 / scalingCoef)
             let adjustToPosition = relativeFromPosition * (1.0 - progress) // * (scalingCoef - 1)
+            
+            let resultToHeight: CGFloat
+            if relativeHeight > 1.0 {
+                resultToHeight = size.height - ((size.height / relativeHeight) * (1.0 - progress))
+            }
+            else if relativeHeight < 1.0 {
+                let sourceHeight = size.height / relativeHeight
+                let destinationHeight = size.height
+                resultToHeight = destinationHeight + (sourceHeight - destinationHeight) * (1.0 - progress)
+            }
+            else {
+                resultToHeight = size.height
+            }
             
             _layout(
                 valueNodes: &verticalPostValueNodes,
                 lineNodes: &verticalPostLineNodes,
                 usingEdge: toEdge,
                 startY: adjustToPosition,
-                height: relativeHeight + (size.height - relativeHeight) * progress,
+                height: resultToHeight,
                 alpha: progress
             )
         }
