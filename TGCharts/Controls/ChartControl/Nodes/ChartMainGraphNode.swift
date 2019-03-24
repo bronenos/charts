@@ -105,10 +105,10 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
                      alpha: CGFloat) {
             let numberOfSteps = 6
             let stepY = height / CGFloat(numberOfSteps)
-            let stepValue = edge.distance / CGFloat(numberOfSteps)
+            let stepValue = usingEdge.distance / CGFloat(numberOfSteps)
             
             (0 ..< numberOfSteps).forEach { step in
-                let value = Int(edge.start + CGFloat(step) * stepValue)
+                let value = Int(usingEdge.start + CGFloat(step) * stepValue)
                 let currentY = startY + CGFloat(step) * stepY
                 let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
                 
@@ -137,30 +137,30 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
         }
         
         if let progress = overrideProgress, let fromEdge = overrideFromEdge, let toEdge = overrideToEdge {
-            let scalingCoef = edge.distance / fromEdge.distance
+            let scalingCoef = fromEdge.distance / edge.distance
             let startDiff = edge.start - fromEdge.start
 
-            let lowerFromPosition = -(startDiff / fromEdge.distance) * size.height
-            let adjustFromPosition = lowerFromPosition * (1 + scalingCoef)
+            let relativeFromPosition = (startDiff / fromEdge.distance) * size.height
+            let adjustFromPosition = -relativeFromPosition * (1 + scalingCoef)
             
             _layout(
                 valueNodes: &verticalValueNodes,
                 lineNodes: &verticalLineNodes,
                 usingEdge: fromEdge,
                 startY: adjustFromPosition,
-                height: size.height / scalingCoef,
+                height: size.height * scalingCoef,
                 alpha: 1.0 - progress
             )
             
-            let upperToPosition = -(startDiff / toEdge.distance) * size.height
-            let adjustToPosition = upperToPosition * (scalingCoef)
+            let relativeHeight = size.height * (1.0 / scalingCoef)
+            let adjustToPosition = relativeFromPosition * (1.0 - progress) // * (scalingCoef - 1)
             
             _layout(
                 valueNodes: &verticalPostValueNodes,
                 lineNodes: &verticalPostLineNodes,
                 usingEdge: toEdge,
                 startY: adjustToPosition,
-                height: size.height * scalingCoef,
+                height: relativeHeight + (size.height - relativeHeight) * progress,
                 alpha: progress
             )
         }
