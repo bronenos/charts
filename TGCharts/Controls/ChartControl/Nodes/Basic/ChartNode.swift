@@ -60,7 +60,7 @@ class ChartNode: IChartNode {
 
     init(tag: String, cachable: Bool) {
         self.tag = tag
-        self.cachable = false // cachable
+        self.cachable = cachable
     }
     
     deinit {

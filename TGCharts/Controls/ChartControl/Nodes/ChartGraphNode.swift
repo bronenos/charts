@@ -21,6 +21,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     private let width: CGFloat
     
     private var lineNodes = [String: ChartFigureNode]()
+    private var overlap = UIEdgeInsets.zero
+    
     fileprivate(set) var overrideFromEdge: ChartRange?
     fileprivate(set) var overrideEdge: ChartRange?
     fileprivate(set) var overrideToEdge: ChartRange?
@@ -65,7 +67,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let oldVisibleLineKeys = obtainVisibleKeys()
         self.chart = chart
         self.config = config
-        self.insets = overlap.invertedSides()
+        self.insets = nil
+        self.overlap = overlap
         let newEdge = obtainEdge()
         let newVisibleLineKeys = obtainVisibleKeys()
 
@@ -141,10 +144,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     final func calculateY(value: Int, edge: ChartRange) -> CGFloat {
         guard size.height > 0 else { return 0 }
         return ((CGFloat(value) - edge.start) / (edge.end - edge.start)) * size.height
-    }
-    
-    private var overlap: UIEdgeInsets {
-        return insets?.invertedSides() ?? .zero
     }
     
     private func update() {
