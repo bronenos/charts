@@ -63,16 +63,16 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func setChart(_ chart: Chart, config: ChartConfig, overlap: UIEdgeInsets, duration: TimeInterval) {
-        let oldEdge = obtainEdge()
-        let oldVisibleLineKeys = obtainVisibleKeys()
-        self.chart = chart
-        self.config = config
-        self.insets = nil
-        self.overlap = overlap
-        let newEdge = obtainEdge()
-        let newVisibleLineKeys = obtainVisibleKeys()
-
         if duration > 0 {
+            let oldEdge = obtainEdge()
+            let oldVisibleLineKeys = obtainVisibleKeys()
+            self.chart = chart
+            self.config = config
+            self.insets = nil
+            self.overlap = overlap
+            let newEdge = obtainEdge()
+            let newVisibleLineKeys = obtainVisibleKeys()
+            
             let graphAnimation = ChartGraphAdjustLinesAnimation<ChartGraphNode>(
                 duration: duration,
                 startEdge: oldEdge,
@@ -109,6 +109,11 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             graphAnimation.attach(to: self)
         }
         else {
+            self.chart = chart
+            self.config = config
+            self.insets = nil
+            self.overlap = overlap
+            
             update()
         }
     }
@@ -175,7 +180,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     private func calculateEdge(lines: [ChartLine], meta: ChartSliceMeta) -> ChartRange {
         let visibleLineKeys = lines.map { $0.key }
         
-        let visibleEdges: [ChartRange] = chart.axis.map { item in
+        let visibleEdgesSlice: [ChartRange] = chart.axis[meta.visibleIndices].map { item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
             let upperValue = CGFloat(visibleValues.max() ?? 0)
@@ -214,7 +219,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             return ChartRange(start: lowerValue, end: upperValue)
         }
         
-        let visibleEdgesSlice = visibleEdges[meta.visibleIndices]
         let overlappingEdges = [leftOverlappingEdge, rightOverlappingEdge].compactMap({ $0 })
         let edges = visibleEdgesSlice + overlappingEdges
         

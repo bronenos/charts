@@ -43,6 +43,7 @@ final class OpenGraphics: IGraphics {
     private var activeOutputMeta: OutputMeta?
     private var nodeMetas = [UUID: NodeMeta]()
     private var labelMetas = [UUID: LabelMeta]()
+    private var arrayBuffers = [String: GLuint]()
     
     private var clippingQueue = [CGRect]()
     
@@ -211,10 +212,6 @@ final class OpenGraphics: IGraphics {
         glEnableClientState(GL_VERTEX_ARRAY.to_enum);
         glEnableClientState(GL_COLOR_ARRAY.to_enum);
         
-        var linesVertexCoords = [GLfloat]()
-        var linesColorsCoords = [GLfloat]()
-        var pointsVertexCoords = [GLfloat]()
-        var pointsColorsCoords = [GLfloat]()
         var depthIndex: GLfloat?
         
         for i in (0 ..< lastIndex) {
@@ -245,69 +242,75 @@ final class OpenGraphics: IGraphics {
                 pointTo + CGVector(dx: outerSide * -horMult, dy: outerSide * -verMult)
             ]
 
-            let vertexColors: [UIColor] = [
-                outerColor,
-                outerColor,
-                color,
-                color,
-                color,
-                color,
-                color,
-                color,
-                outerColor,
-                outerColor
-            ]
-
-            linesVertexCoords.append(
-                contentsOf: convertPointsToValues(
-                    vertexPoints,
-                    scalable: true,
-                    depthIndex: &depthIndex
-                )
-            )
+            let lineVertexCoords = convertPointsToValues(vertexPoints, scalable: true, depthIndex: &depthIndex)
+            glVertexPointer(3, GL_FLOAT.to_enum, 0, lineVertexCoords)
             
-            linesColorsCoords.append(
-                contentsOf: convertColorsToValues(
-                    vertexColors,
+            let lineColorKey = "line-\(color.description)-\(resolvedAlpha)"
+            if let buffer = arrayBuffers[lineColorKey] {
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, buffer)
+                glColorPointer(4, GL_FLOAT.to_enum, 0, nil)
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, 0)
+            }
+            else {
+                let rawData = convertColorsToValues(
+                    [
+                        outerColor,
+                        outerColor,
+                        color,
+                        color,
+                        color,
+                        color,
+                        color,
+                        color,
+                        outerColor,
+                        outerColor
+                    ],
                     extraBlended: resolvedAlpha
                 )
-            )
+                
+                var buffer = GLuint(0)
+                glGenBuffers(1, &buffer)
+                arrayBuffers[lineColorKey] = buffer
+                
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, buffer)
+                glBufferData(GL_ARRAY_BUFFER.to_enum, rawData.count * MemoryLayout<GLfloat>.size, rawData, GL_STATIC_DRAW.to_enum)
+                glColorPointer(4, GL_FLOAT.to_enum, 0, nil)
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, 0)
+            }
             
-            pointsVertexCoords.append(
-                contentsOf: convertPointsToValues(
-                    Array(vertexPoints[4 ... 5]),
-                    scalable: true,
-                    depthIndex: &depthIndex
-                )
-            )
-
-            pointsColorsCoords.append(
-                contentsOf: convertColorsToValues(
-                    Array(vertexColors[4 ... 5]),
+            glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, vertexPoints.count.to_size)
+            
+            let pointVertexCoords = convertPointsToValues(Array(vertexPoints[4...5]), scalable: true, depthIndex: &depthIndex)
+            glVertexPointer(3, GL_FLOAT.to_enum, 0, pointVertexCoords)
+            
+            let pointColorKey = "point-\(color.description)-\(resolvedAlpha)"
+            if let buffer = arrayBuffers[pointColorKey] {
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, buffer)
+                glColorPointer(4, GL_FLOAT.to_enum, 0, nil)
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, 0)
+            }
+            else {
+                let rawData = convertColorsToValues(
+                    [
+                        color,
+                        color,
+                    ],
                     extraBlended: resolvedAlpha
                 )
-            )
-        }
-        
-        func _draw() {
-            glVertexPointer(3, GL_FLOAT.to_enum, 0, linesVertexCoords)
-            glColorPointer(4, GL_FLOAT.to_enum, 0, linesColorsCoords)
-            glDrawArrays(GL_TRIANGLE_STRIP.to_enum, 0, linesVertexCoords.count.to_size / 3)
+                
+                var buffer = GLuint(0)
+                glGenBuffers(1, &buffer)
+                arrayBuffers[pointColorKey] = buffer
+                
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, buffer)
+                glBufferData(GL_ARRAY_BUFFER.to_enum, rawData.count * MemoryLayout<GLfloat>.size, rawData, GL_STATIC_DRAW.to_enum)
+                glColorPointer(4, GL_FLOAT.to_enum, 0, nil)
+                glBindBuffer(GL_ARRAY_BUFFER.to_enum, 0)
+            }
             
-            glVertexPointer(3, GL_FLOAT.to_enum, 0, pointsVertexCoords)
-            glColorPointer(4, GL_FLOAT.to_enum, 0, pointsColorsCoords)
-            glDrawArrays(GL_POINTS.to_enum, 0, pointsVertexCoords.count.to_size / 3)
+            glDrawArrays(GL_POINTS.to_enum, 0, 2)
         }
         
-//        glEnable(GL_DEPTH_TEST.to_enum)
-//        glClear(GL_DEPTH_BUFFER_BIT.to_bitfield)
-//        glColorMask(GL_FALSE.to_boolean, GL_FALSE.to_boolean, GL_FALSE.to_boolean, GL_FALSE.to_boolean)
-        _draw()
-//        glColorMask(GL_TRUE.to_boolean, GL_TRUE.to_boolean, GL_TRUE.to_boolean, GL_TRUE.to_boolean)
-//        glDepthFunc(GL_LEQUAL.to_enum)
-//        _draw()
-//        glDisable(GL_DEPTH_TEST.to_enum)
-
         glDisableClientState(GL_VERTEX_ARRAY.to_enum)
         glDisableClientState(GL_COLOR_ARRAY.to_enum)
         
@@ -356,8 +359,6 @@ final class OpenGraphics: IGraphics {
 //        NSLog("\(#function) -> texture[\(textureID)] pre-status[\(glIsTexture(textureID))]")
         
         glBindTexture(GL_TEXTURE_2D.to_enum, textureID)
-        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MIN_FILTER.to_enum, GL_LINEAR.to_float)
-        glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_MAG_FILTER.to_enum, GL_LINEAR.to_float)
         glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_S.to_enum, GL_CLAMP_TO_EDGE.to_float)
         glTexParameterf(GL_TEXTURE_2D.to_enum, GL_TEXTURE_WRAP_T.to_enum, GL_CLAMP_TO_EDGE.to_float)
         
@@ -366,8 +367,8 @@ final class OpenGraphics: IGraphics {
         let textureWidth = calculateCoveringDuoPower(value: Int(renderWidth))
         let textureHeight = calculateCoveringDuoPower(value: Int(renderHeight))
 
-//        glBindBuffer(GL_PIXEL_UNPACK_BUFFER.to_enum, 0)
-//        glPixelStorei(GL_UNPACK_ALIGNMENT.to_enum, 1)
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER.to_enum, 0)
+        glPixelStorei(GL_UNPACK_ALIGNMENT.to_enum, 1)
         
         glTexImage2D(
             GL_TEXTURE_2D.to_enum, 0, GL_RGBA.to_int,
@@ -379,7 +380,7 @@ final class OpenGraphics: IGraphics {
         var textureFrameBuffer = GLuint(0)
         glGenFramebuffers(1, &textureFrameBuffer)
         guard textureFrameBuffer > 0 else { return nil }
-
+        
         glBindFramebuffer(GL_FRAMEBUFFER.to_enum, textureFrameBuffer)
         glFramebufferTexture2D(GL_FRAMEBUFFER.to_enum, GL_COLOR_ATTACHMENT0.to_enum, GL_TEXTURE_2D.to_enum, textureID, 0)
         glViewport(0, 0, renderWidth.to_size, renderHeight.to_size)

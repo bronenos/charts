@@ -27,6 +27,7 @@ protocol IChartNode: class {
     var isInteractable: Bool { get set }
     var isDirty: Bool { get }
     var parentNode: IChartNode? { get }
+    var isRenderable: Bool { get }
     func addChild(node: IChartNode)
     func addChild(node: IChartNode, target: ChartNodeTarget)
     func moveChild(node: IChartNode, target: ChartNodeTarget)
@@ -60,7 +61,7 @@ class ChartNode: IChartNode {
 
     init(tag: String, cachable: Bool) {
         self.tag = tag
-        self.cachable = cachable
+        self.cachable = false // cachable
     }
     
     deinit {
@@ -112,6 +113,11 @@ class ChartNode: IChartNode {
     
     var size: CGSize {
         return frame.size
+    }
+    
+    var isRenderable: Bool {
+        guard alpha > 0 else { return false }
+        return true
     }
     
     final func addChild(node: IChartNode) {
@@ -199,6 +205,7 @@ class ChartNode: IChartNode {
         }
 
         childNodes.forEach { childNode in
+            guard childNode.isRenderable else { return }
             graphics.pushOffset(childNode.origin)
             childNode.renderWithChildren(output: output, graphics: graphics)
             graphics.popOffset()
