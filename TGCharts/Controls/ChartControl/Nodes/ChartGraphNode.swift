@@ -82,6 +82,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     final func calculateY(value: Int, edge: ChartRange) -> CGFloat {
         guard bounds.size.height > 0 else { return 0 }
+        guard edge.distance > 0 else { return bounds.size.height }
         return ((1.0 - (CGFloat(value) - edge.start) / (edge.end - edge.start))) * bounds.size.height
     }
     

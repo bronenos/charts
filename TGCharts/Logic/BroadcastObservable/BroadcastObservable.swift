@@ -25,7 +25,7 @@ class BroadcastObservable<VT> {
         let id = observer.ID
         let ids = observers.map { $0.0 }
         
-        if let index = ids.index(of: id) {
+        if let index = ids.firstIndex(of: id) {
             observers.remove(at: index)
         }
     }

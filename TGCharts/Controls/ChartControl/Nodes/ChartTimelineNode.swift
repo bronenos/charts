@@ -140,3 +140,19 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
         }
     }
 }
+
+private func calculateCoveringDuoPower(value: Int) -> Int {
+    for i in (0 ..< 32).indices.reversed() {
+        let bit = ((value & (1 << i)) > 0)
+        guard bit else { continue }
+        
+        if value.nonzeroBitCount > 1 {
+            return (1 << (i + 1))
+        }
+        else {
+            return (1 << i)
+        }
+    }
+    
+    return 1
+}

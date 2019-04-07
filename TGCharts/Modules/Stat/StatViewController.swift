@@ -47,7 +47,6 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     }
     
     func setCharts(titlePrefix: String, charts: [Chart]) {
-        let graphics = obtainGraphicsForCurrentDevice()
         let formattingProvider = interactor.formattingProvider
         
         chartControls.forEach { control in control.setDelegate(nil) }

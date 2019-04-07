@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-protocol IChartInteractor: IGraphicsDelegate {
+protocol IChartInteractor: IChartInteracting {
     var range: ChartRange { get }
     var pointer: CGFloat? { get }
     var delegate: IChartInteractorDelegate? { get set }

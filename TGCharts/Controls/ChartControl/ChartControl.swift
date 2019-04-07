@@ -9,6 +9,12 @@
 import Foundation
 import UIKit
 
+protocol IChartInteracting: class {
+    func interactionDidStart(at point: CGPoint)
+    func interactionDidMove(to point: CGPoint)
+    func interactionDidEnd(at point: CGPoint)
+}
+
 protocol IChartControl: class {
     var chart: Chart { get }
     var config: ChartConfig { get }

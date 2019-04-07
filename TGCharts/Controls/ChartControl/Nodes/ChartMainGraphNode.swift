@@ -90,7 +90,14 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
     
     override func updateDesign() {
         super.updateDesign()
-        lastEdge = nil
+        verticalValueGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
+        verticalUnderlineGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
+        verticalValueGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
+        verticalUnderlineGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
+        verticalPostValueGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
+        verticalPostUnderlineGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
+        verticalPostValueGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
+        verticalPostUnderlineGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
     }
     
     override func layoutSubviews() {
@@ -272,6 +279,10 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
     }
     
     private func isMinorEdgeChange(fromEdge: ChartRange, toEdge: ChartRange) -> Bool {
+        if !(fromEdge.distance > 0 && toEdge.distance > 0) {
+            return true
+        }
+        
         let growth = abs(fromEdge.distance - toEdge.distance)
         if (growth / max(fromEdge.distance, toEdge.distance)) > 0.1 {
             return false
