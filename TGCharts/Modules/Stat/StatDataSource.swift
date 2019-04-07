@@ -43,7 +43,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: chartCellReuseID)
+//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: chartCellReuseID)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: optionCellReuseID)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: actionCellReuseID)
 
@@ -69,7 +69,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
             guard let title = sectionTitle else { return nil }
             
             let label = StatSectionHeader()
-            label.text = "\(title) \(section + 1)/\(chartControls.count)".uppercased()
+            label.text = "\(title) #\(section + 1)".uppercased()
             label.textColor = DesignBook.shared.color(.secondaryForeground)
             label.font = DesignBook.shared.font(size: 13, weight: .light)
             return label
@@ -204,23 +204,22 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     private func reusableChartControlCell() -> UITableViewCell {
-        if let cell = tableView?.dequeueReusableCell(withIdentifier: chartCellReuseID) {
-            return cell
-        }
+//        if let cell = tableView?.dequeueReusableCell(withIdentifier: chartCellReuseID) {
+//            return cell
+//        }
 
         return UITableViewCell(style: .default, reuseIdentifier: chartCellReuseID)
     }
     
     private func populateChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
         control.link(to: cell.contentView)
-        control.render()
         
         cell.separatorInset.left = cell.bounds.width
         cell.selectionStyle = .none
     }
     
     private func utilizeChartControl(control: IChartControl, intoCell cell: UITableViewCell) {
-//        control.unlink()
+        control.unlink()
     }
     
     private func reusableChartLineControlCell() -> UITableViewCell {
@@ -299,6 +298,10 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.visibleCells.forEach { cell in
             guard let indexPath = tableView.indexPath(for: cell) else { return }
             tableView.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
+        }
+        
+        chartControls.forEach { control in
+            control.update()
         }
     }
 }

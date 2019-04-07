@@ -7,6 +7,6 @@
 */
 
 "Stat.Title" = "Статистика";
-"Stat.Section.TitlePrefix" = "Подписчики";
+"Stat.Section.TitlePrefix" = "График";
 "Stat.Mode.Light" = "Переключиться в дневной режим";
 "Stat.Mode.Dark" = "Переключиться в ночной режим";

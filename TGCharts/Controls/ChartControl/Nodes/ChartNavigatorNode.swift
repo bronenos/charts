@@ -10,49 +10,75 @@ import Foundation
 import UIKit
 
 protocol IChartNavigatorNode: IChartNode {
-    func setChart(_ chart: Chart, config: ChartConfig, duration: TimeInterval)
+    func update(config: ChartConfig, duration: TimeInterval)
 }
 
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
-    let canvasNode: IChartNode = ChartNode(tag: "navigator-canvas", cachable: false)
-    let graphNode: IChartGraphNode = ChartGraphNode(tag: "navigator-graph", width: 1, cachable: true)
-    let sliderNode: IChartSliderNode = ChartSliderNode(tag: "navigator-slider")
+    let backDim = ChartNode()
+    let spaceNode = ChartNode()
+    let graphNode: ChartGraphNode
+    let leftDim = ChartNode()
+    let rightDim = ChartNode()
+    let sliderNode = ChartSliderNode()
     
-    private var range = ChartRange(start: 0, end: 1.0)
+    private var range: ChartRange
     
-    init(tag: String?) {
-        super.init(tag: tag ?? "[navigator]", cachable: false)
+    init(chart: Chart, config: ChartConfig) {
+        self.range = config.range
+
+        graphNode = ChartGraphNode(chart: chart, config: config.fullRanged(), width: 1)
         
-        addChild(node: canvasNode)
-        addChild(node: graphNode)
-        addChild(node: sliderNode)
+        super.init(frame: .zero)
+        
+        tag = ChartControlTag.navigator.rawValue
+        clipsToBounds = true
+        
+        addSubview(backDim)
+        addSubview(spaceNode)
+        addSubview(graphNode)
+        addSubview(leftDim)
+        addSubview(rightDim)
+        addSubview(sliderNode)
+        
+        updateDesign()
     }
     
-    override var frame: CGRect {
-        didSet { update(range: range) }
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig, duration: TimeInterval) {
+    func update(config: ChartConfig, duration: TimeInterval) {
         self.range = config.range
         
-        graphNode.setChart(chart, config: config.fullRanged(), overlap: .zero, duration: duration)
-        update(range: config.range)
-    }
-    
-    override func render(graphics: IGraphics) -> Bool {
-        backgroundColor = DesignBook.shared.color(.navigatorBackground)
-        canvasNode.backgroundColor = DesignBook.shared.color(.primaryBackground)
-        return super.render(graphics: graphics)
-    }
-    
-    private func update(range: ChartRange) {
-        let sliderLeftX = size.width * range.start - sliderNode.horizontalGap
-        let sliderWidth = size.width * range.distance + sliderNode.horizontalGap * 2
-        let sliderFrame = CGRect(x: sliderLeftX, y: 0, width: sliderWidth, height: size.height)
-        canvasNode.frame = sliderFrame
-        sliderNode.frame = sliderFrame
+        graphNode.update(config: config.fullRanged(), duration: duration)
+        sliderNode.setNeedsLayout()
         
-        let graphFrame = CGRect(origin: .zero, size: size).insetBy(dx: 0, dy: sliderNode.verticalGap)
+        setNeedsLayout()
+    }
+    
+    override func updateDesign() {
+        super.updateDesign()
+        backDim.backgroundColor = DesignBook.shared.color(.navigatorBackground)
+        spaceNode.backgroundColor = DesignBook.shared.color(.primaryBackground)
+        leftDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
+        rightDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
+        sliderNode.updateDesign()
+        graphNode.updateDesign()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        let graphFrame = CGRect(origin: .zero, size: bounds.size).insetBy(dx: 0, dy: sliderNode.verticalGap * 2)
+        let sliderLeftX = bounds.size.width * range.start
+        let sliderWidth = bounds.size.width * range.distance
+        let sliderFrame = CGRect(x: sliderLeftX, y: 0, width: sliderWidth, height: bounds.size.height)
+        
+        backDim.frame = graphFrame
+        spaceNode.frame = sliderFrame
         graphNode.frame = graphFrame
+        leftDim.frame = bounds.divided(atDistance: sliderLeftX, from: .minXEdge).slice
+        rightDim.frame = bounds.divided(atDistance: sliderLeftX + sliderWidth, from: .minXEdge).remainder
+        sliderNode.frame = sliderFrame
     }
 }

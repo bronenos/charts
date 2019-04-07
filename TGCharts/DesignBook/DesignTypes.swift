@@ -26,6 +26,7 @@ enum DesignBookColor {
     case chartPointerCloudBackground
     case chartPointerCloudForeground
     case navigatorBackground
+    case navigatorCoverBackground
     case sliderBackground
     case sliderForeground
     case actionForeground

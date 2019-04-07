@@ -27,8 +27,6 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
         
-        navigationItem.prompt = "Made by Stan Potemkin aka bronenos, powered by OpenGL ES 1.1"
-        
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
         
@@ -53,7 +51,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         let formattingProvider = interactor.formattingProvider
         
         chartControls.forEach { control in control.setDelegate(nil) }
-        chartControls = charts.map { ChartControl(graphics: graphics, chart: $0, formattingProvider: formattingProvider) }
+        chartControls = charts.map { ChartControl(chart: $0, formattingProvider: formattingProvider) }
         chartControls.forEach { control in control.setDelegate(self) }
         
         dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)

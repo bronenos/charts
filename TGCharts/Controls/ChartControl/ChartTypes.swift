@@ -26,6 +26,15 @@ struct ChartConfig: Equatable {
         self.pointer = pointer
     }
     
+    func findLine(for key: String) -> ChartLineConfig? {
+        for line in lines {
+            guard line.key == key else { continue }
+            return line
+        }
+        
+        return nil
+    }
+    
     func fullRanged() -> ChartConfig {
         return ChartConfig(
             lines: lines,

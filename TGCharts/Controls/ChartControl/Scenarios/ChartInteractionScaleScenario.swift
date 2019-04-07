@@ -15,8 +15,8 @@ enum ChartInteractionScaleDirection {
 }
 
 final class ChartInteractionScaleScenario: IChartInteractorScenario {
-    private let sliderNode: IChartNode
-    private let navigatorNode: IChartNode
+    private let sliderNode: UIView
+    private let navigatorNode: UIView
     private let startPoint: CGPoint
     private let originPoint: CGPoint
     private let startRange: ChartRange
@@ -26,8 +26,8 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
     private let minimalRangeDistance = CGFloat(0.1)
     
     init(sceneNode: IChartSceneNode,
-         sliderNode: IChartNode,
-         navigatorNode: IChartNode,
+         sliderNode: UIView,
+         navigatorNode: UIView,
          startPoint: CGPoint,
          startRange: ChartRange,
          direction: ChartInteractionScaleDirection,
@@ -35,7 +35,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         self.sliderNode = sliderNode
         self.navigatorNode = navigatorNode
         self.startPoint = startPoint
-        self.originPoint = sliderNode.calculateFullOrigin() ?? .zero
+        self.originPoint = sliderNode.convert(.zero, to: nil)
         self.startRange = startRange
         self.direction = direction
         self.rangeUpdateBlock = rangeUpdateBlock
@@ -46,7 +46,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
     
     func interactionDidMove(to point: CGPoint) {
         let vector = point - startPoint
-        let moveFactor = vector.dx / navigatorNode.size.width
+        let moveFactor = vector.dx / navigatorNode.bounds.size.width
         
         switch direction {
         case .left:

@@ -16,46 +16,42 @@ protocol IChartSliderNode: IChartNode {
     var rightArrowNode: ChartSliderArrowNode { get }
 }
 
-final class ChartSliderNode: ChartNode, IChartSliderNode {
+final class ChartSliderNode: ChartFigureNode, IChartSliderNode {
     let horizontalGap = CGFloat(10)
     let verticalGap = CGFloat(1)
     
-    let leftArrowNode = ChartSliderArrowNode(tag: "slider-left-arrow", direction: .left)
-    let rightArrowNode = ChartSliderArrowNode(tag: "slider-right-arrow", direction: .right)
+    let leftArrowNode = ChartSliderArrowNode(direction: .left)
+    let rightArrowNode = ChartSliderArrowNode(direction: .right)
     
-    init(tag: String?) {
-        super.init(tag: tag ?? "[slider]", cachable: false)
-        addChild(node: leftArrowNode)
-        addChild(node: rightArrowNode)
+    init() {
+        super.init(figure: .nestedBezierPaths)
+        
+        tag = ChartControlTag.slider.rawValue
+        
+        addSubview(leftArrowNode)
+        addSubview(rightArrowNode)
+        
+        updateDesign()
     }
     
-    override var frame: CGRect {
-        didSet { layoutChildren() }
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
-    override func render(graphics: IGraphics) -> Bool {
-        foregroundColor = DesignBook.shared.color(.sliderBackground)
-        leftArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
-        rightArrowNode.foregroundColor = DesignBook.shared.color(.sliderForeground)
-
-        guard super.render(graphics: graphics) else { return false }
-        
-        let leftGapFrame = bounds.divided(atDistance: horizontalGap, from: .minXEdge).slice
-        graphics.fill(frame: leftGapFrame, color: foregroundColor)
-        
-        let rightGapFrame = bounds.divided(atDistance: horizontalGap, from: .maxXEdge).slice
-        graphics.fill(frame: rightGapFrame, color: foregroundColor)
-        
-        let bottomGapFrame = bounds.divided(atDistance: verticalGap, from: .minYEdge).slice
-        graphics.fill(frame: bottomGapFrame, color: foregroundColor)
-        
-        let topGapFrame = bounds.divided(atDistance: verticalGap, from: .maxYEdge).slice
-        graphics.fill(frame: topGapFrame, color: foregroundColor)
-        
-        return true
+    override func updateDesign() {
+        super.updateDesign()
+        fillColor = DesignBook.shared.color(.sliderBackground)
+        leftArrowNode.updateDesign()
+        rightArrowNode.updateDesign()
     }
     
-    private func layoutChildren() {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        let outerPath = UIBezierPath(roundedRect: bounds, cornerRadius: 2)
+        let innerPath = UIBezierPath(rect: bounds.insetBy(dx: horizontalGap, dy: verticalGap))
+        bezierPaths = [outerPath, innerPath]
+        
         leftArrowNode.frame = bounds.divided(atDistance: horizontalGap, from: .minXEdge).slice
         rightArrowNode.frame = bounds.divided(atDistance: horizontalGap, from: .maxXEdge).slice
     }

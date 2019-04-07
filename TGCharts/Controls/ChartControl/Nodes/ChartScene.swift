@@ -9,79 +9,68 @@
 import Foundation
 import UIKit
 
+enum ChartControlTag: Int {
+    case unknown
+    case mainGraph
+    case navigator
+    case slider
+    case leftArrow
+    case rightArrow
+}
+
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
-    var graphNode: IChartMainGraphNode { get }
-    var timelineNode: IChartTimelineNode { get }
-    var navigatorNode: IChartNavigatorNode { get }
-    func setChart(_ chart: Chart, config: ChartConfig)
-    func updateChart(_ chart: Chart, config: ChartConfig)
+    func update(config: ChartConfig, duration: TimeInterval)
 }
 
 protocol IChartSceneDelegate: class {
-    func sceneDidRequestAnimatedRendering(duration: TimeInterval)
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
     weak var delegate: IChartSceneDelegate?
     
-    let graphNode: IChartMainGraphNode
-    let timelineNode: IChartTimelineNode
-    let navigatorNode: IChartNavigatorNode
+    let graphNode: ChartMainGraphNode
+    let timelineNode: ChartTimelineNode
+    let navigatorNode: ChartNavigatorNode
     
-    private var config = ChartConfig(lines: [], range: ChartRange(start: 0, end: 0), pointer: nil)
+    private var config: ChartConfig
     
-    init(tag: String?, formattingProvider: IFormattingProvider) {
-        graphNode = ChartMainGraphNode(tag: "graph", width: 2, formattingProvider: formattingProvider)
-        timelineNode = ChartTimelineNode(tag: "timeline", formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorNode(tag: "navigator")
-
-        super.init(tag: tag ?? "[scene]", cachable: false)
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+        self.config = config
         
-        addChild(node: graphNode)
-        addChild(node: timelineNode)
-        addChild(node: navigatorNode)
+        graphNode = ChartMainGraphNode(chart: chart, config: config, width: 2, formattingProvider: formattingProvider)
+        timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        navigatorNode = ChartNavigatorNode(chart: chart, config: config)
+
+        super.init(frame: .zero)
+        
+        addSubview(graphNode)
+        addSubview(timelineNode)
+        addSubview(navigatorNode)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     override var frame: CGRect {
         didSet { layoutChildren() }
     }
     
-    override func node(at point: CGPoint, interactable: Bool) -> IChartNode? {
-        let flippedPoint = CGPoint(x: point.x, y: size.height - point.y)
-        return super.node(at: flippedPoint, interactable: interactable)
+    func update(config: ChartConfig, duration: TimeInterval) {
+        self.config = config
+        
+        graphNode.update(config: config, duration: duration)
+        timelineNode.update(config: config, duration: 0)
+        navigatorNode.update(config: config, duration: duration)
     }
     
-    override func render(graphics: IGraphics) -> Bool {
+    override func updateDesign() {
+        super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)
-        graphics.clear(color: backgroundColor)
-
-        return super.render(graphics: graphics)
-    }
-    
-    func setChart(_ chart: Chart, config: ChartConfig) {
-        self.config = config
-        
-        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0)
-        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
-        navigatorNode.setChart(chart, config: config, duration: 0)
-        
-        layoutChildren()
-    }
-    
-    func updateChart(_ chart: Chart, config: ChartConfig) {
-        self.config = config
-        
-        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0.25)
-        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
-        navigatorNode.setChart(chart, config: config, duration: 0.25)
-        
-        layoutChildren()
-    }
-    
-    override func prepareForAnimation(_ animation: IChartNodeAnimation) {
-        let duration = animation.endTime.timeIntervalSince(Date())
-        delegate?.sceneDidRequestAnimatedRendering(duration: duration)
+        graphNode.updateDesign()
+        timelineNode.updateDesign()
+        navigatorNode.updateDesign()
     }
     
     private func layoutChildren() {
@@ -109,20 +98,23 @@ fileprivate struct Layout {
     
     var graphNodeFrame: CGRect {
         let leftX = gaps.left
+        let topY = gaps.bottom
         let width = bounds.width - gaps.right - leftX
-        let height = bounds.height - timelineFrame.maxY - gaps.bottom
-        return CGRect(x: leftX, y: timelineFrame.maxY, width: width, height: height)
+        let height = timelineFrame.minY - topY
+        return CGRect(x: leftX, y: topY, width: width, height: height)
     }
     
     var timelineFrame: CGRect {
+        let topY = navigatorFrame.minY - timelineHeight
         let leftX = gaps.left
         let width = bounds.width - gaps.right - leftX
-        return CGRect(x: leftX, y: navigatorFrame.maxY, width: width, height: timelineHeight)
+        return CGRect(x: leftX, y: topY, width: width, height: timelineHeight)
     }
     
     var navigatorFrame: CGRect {
         let leftX = gaps.left
+        let topY = bounds.height - navigatorHeight
         let width = bounds.width - gaps.right - leftX
-        return CGRect(x: leftX, y: 0, width: width, height: navigatorHeight)
+        return CGRect(x: leftX, y: topY, width: width, height: navigatorHeight)
     }
 }
