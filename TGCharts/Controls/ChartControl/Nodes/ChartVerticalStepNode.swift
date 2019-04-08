@@ -15,23 +15,16 @@ protocol IChartVerticalStepNode: IChartNode {
 }
 
 final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
-    enum Mode {
-        case value
-        case underline
-    }
-    
     private let valueNode = ChartLabelNode()
     private let underlineNode = ChartNode()
     
-    init(mode: Mode) {
+    init() {
         super.init(frame: .zero)
         
         isUserInteractionEnabled = false
         
-        switch mode {
-        case .value: addSubview(valueNode)
-        case .underline: addSubview(underlineNode)
-        }
+        addSubview(valueNode)
+        addSubview(underlineNode)
     }
     
     required init?(coder aDecoder: NSCoder) {

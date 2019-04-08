@@ -21,17 +21,25 @@ final class ChartOptions: ChartNode, IChartOptions {
     private var tokenControls = [ChartOptionToken]()
     
     func populate(_ options: [ChartOption]) {
-        tokenControls.forEach { $0.removeFromSuperview() }
-        
         self.tokenOptions = options
-        tokenControls = options.map {
-            let control = ChartOptionToken()
-            control.configure(color: $0.color, title: $0.title, enabled: $0.enabled)
-            control.addTarget(self, action: #selector(handleTokenTap), for: .touchUpInside)
-            return control
-        }
         
-        tokenControls.forEach { addSubview($0) }
+        if options.count == tokenControls.count {
+            zip(options, tokenControls).forEach { option, control in
+                control.configure(color: option.color, title: option.title, enabled: option.enabled)
+            }
+        }
+        else {
+            tokenControls.forEach { $0.removeFromSuperview() }
+            
+            tokenControls = options.map { option in
+                let control = ChartOptionToken()
+                control.configure(color: option.color, title: option.title, enabled: option.enabled)
+                control.addTarget(self, action: #selector(handleTokenTap), for: .touchUpInside)
+                return control
+            }
+            
+            tokenControls.forEach { addSubview($0) }
+        }
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

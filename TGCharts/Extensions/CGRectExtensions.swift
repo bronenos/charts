@@ -29,4 +29,10 @@ extension CGRect {
     var topRightPoint: CGPoint {
         return CGPoint(x: maxX, y: minY)
     }
+    
+    func calculateY(value: Int, edge: ChartRange) -> CGFloat {
+        guard height > 0 else { return 0 }
+        guard edge.distance > 0 else { return height }
+        return ((1.0 - (CGFloat(value) - edge.start) / (edge.end - edge.start))) * height
+    }
 }

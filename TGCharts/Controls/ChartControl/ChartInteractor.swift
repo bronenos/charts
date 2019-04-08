@@ -45,7 +45,7 @@ final class ChartInteractor: IChartInteractor {
         guard let node = scene.hitTest(point, with: nil) else { return }
         guard let sliderNode = scene.viewWithTag(ChartControlTag.slider.rawValue) else { return }
         guard let navigatorNode = scene.viewWithTag(ChartControlTag.navigator.rawValue) else { return }
-        guard let graphNode = scene.viewWithTag(ChartControlTag.mainGraph.rawValue) else { return }
+        guard let graphNode = scene.viewWithTag(ChartControlTag.graph.rawValue) else { return }
 
         switch ChartControlTag(rawValue: node.tag) ?? .unknown {
         case .slider:
@@ -80,7 +80,7 @@ final class ChartInteractor: IChartInteractor {
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
 
-        case .mainGraph:
+        case .graph:
             scenario = ChartInteractionPointScenario(
                 graphNode: graphNode,
                 pointUpdateBlock: { [weak self] pointer in self?.updatePointer(pointer) }

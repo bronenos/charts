@@ -16,17 +16,17 @@ protocol IChartNavigatorNode: IChartNode {
 final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     let backDim = ChartNode()
     let spaceNode = ChartNode()
-    let graphNode: ChartGraphNode
+    let graphNode: ChartLineGraphNode
     let leftDim = ChartNode()
     let rightDim = ChartNode()
     let sliderNode = ChartSliderNode()
     
     private var range: ChartRange
     
-    init(chart: Chart, config: ChartConfig) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.range = config.range
 
-        graphNode = ChartGraphNode(chart: chart, config: config.fullRanged(), width: 1)
+        graphNode = ChartLineGraphNode(chart: chart, config: config.fullRanged(), formattingProvider: formattingProvider, width: 1, guidable: false)
         
         super.init(frame: .zero)
         

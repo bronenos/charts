@@ -11,7 +11,7 @@ import UIKit
 
 enum ChartControlTag: Int {
     case unknown
-    case mainGraph
+    case graph
     case navigator
     case slider
     case leftArrow
@@ -31,7 +31,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     weak var delegate: IChartSceneDelegate?
     
     let headerNode: ChartHeader
-    let graphNode: ChartMainGraphNode
+    let graphNode: ChartLineGraphNode
     let timelineNode: ChartTimelineNode
     let navigatorNode: ChartNavigatorNode
     let optionsNode: ChartOptions
@@ -44,9 +44,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         self.config = config
         
         headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
-        graphNode = ChartMainGraphNode(chart: chart, config: config, width: 2, formattingProvider: formattingProvider)
+        graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2, guidable: true)
         timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorNode(chart: chart, config: config)
+        navigatorNode = ChartNavigatorNode(chart: chart, config: config, formattingProvider: formattingProvider)
         optionsNode = ChartOptions()
 
         super.init(frame: .zero)
