@@ -11,6 +11,7 @@ import Foundation
 protocol IStatInteractor: IBaseInteractor {
     var router: IStatRouter! { get set }
     var view: IStatView! { get set }
+    var localeProvider: ILocaleProvider { get }
     var formattingProvider: IFormattingProvider { get }
     func toggleDesign()
 }
@@ -31,6 +32,10 @@ final class StatInteractor: IStatInteractor {
             let prefix = heartbeat.localized(key: "Stat.Section.TitlePrefix")
             self?.view.setCharts(titlePrefix: prefix, charts: charts)
         }
+    }
+    
+    var localeProvider: ILocaleProvider {
+        return heartbeat.providers.localeProvider
     }
     
     var formattingProvider: IFormattingProvider {

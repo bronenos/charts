@@ -9,86 +9,121 @@
 import Foundation
 import UIKit
 
+enum ChartControlTag: Int {
+    case unknown
+    case graph
+    case navigator
+    case slider
+    case leftArrow
+    case rightArrow
+}
+
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
-    var graphNode: IChartMainGraphNode { get }
-    var timelineNode: IChartTimelineNode { get }
-    var navigatorNode: IChartNavigatorNode { get }
-    func setChart(_ chart: Chart, config: ChartConfig)
-    func updateChart(_ chart: Chart, config: ChartConfig)
+    func update(config: ChartConfig, duration: TimeInterval)
 }
 
 protocol IChartSceneDelegate: class {
-    func sceneDidRequestAnimatedRendering(duration: TimeInterval)
+    func sceneDidToggleLine(index: Int)
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
     weak var delegate: IChartSceneDelegate?
     
-    let graphNode: IChartMainGraphNode
-    let timelineNode: IChartTimelineNode
-    let navigatorNode: IChartNavigatorNode
+    let headerNode: ChartHeader
+    let graphNode: ChartLineGraphNode
+    let timelineNode: ChartTimelineNode
+    let navigatorNode: ChartNavigatorNode
+    let optionsNode: ChartOptions
     
-    private var config = ChartConfig(lines: [], range: ChartRange(start: 0, end: 0), pointer: nil)
+    private let chart: Chart
+    private var config: ChartConfig
     
-    init(tag: String?, formattingProvider: IFormattingProvider) {
-        graphNode = ChartMainGraphNode(tag: "graph", width: 2, formattingProvider: formattingProvider)
-        timelineNode = ChartTimelineNode(tag: "timeline", formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorNode(tag: "navigator")
-
-        super.init(tag: tag ?? "[scene]", cachable: false)
+    init(chart: Chart, config: ChartConfig, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+        self.chart = chart
+        self.config = config
         
-        addChild(node: graphNode)
-        addChild(node: timelineNode)
-        addChild(node: navigatorNode)
+        headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
+        graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2, guidable: true)
+        timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        navigatorNode = ChartNavigatorNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        optionsNode = ChartOptions()
+
+        super.init(frame: .zero)
+        
+        addSubview(headerNode)
+        addSubview(graphNode)
+        addSubview(timelineNode)
+        addSubview(navigatorNode)
+        addSubview(optionsNode)
+        
+        populateOptions(chart: chart, config: config)
+        updateDesign()
+        
+        optionsNode.tokenTapHandler = { [weak self] index in
+            self?.delegate?.sceneDidToggleLine(index: index)
+        }
     }
     
-    override var frame: CGRect {
-        didSet { layoutChildren() }
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
-    override func node(at point: CGPoint, interactable: Bool) -> IChartNode? {
-        let flippedPoint = CGPoint(x: point.x, y: size.height - point.y)
-        return super.node(at: flippedPoint, interactable: interactable)
+    func update(config: ChartConfig, duration: TimeInterval) {
+        self.config = config
+        
+        graphNode.update(config: config, duration: duration)
+        timelineNode.update(config: config, duration: 0)
+        navigatorNode.update(config: config, duration: duration)
+        populateOptions(chart: chart, config: config)
     }
     
-    override func render(graphics: IGraphics) -> Bool {
+    override func updateDesign() {
+        super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)
-        graphics.clear(color: backgroundColor)
-
-        return super.render(graphics: graphics)
+        headerNode.updateDesign()
+        graphNode.updateDesign()
+        timelineNode.updateDesign()
+        navigatorNode.updateDesign()
     }
     
-    func setChart(_ chart: Chart, config: ChartConfig) {
-        self.config = config
-        
-        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0)
-        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
-        navigatorNode.setChart(chart, config: config, duration: 0)
-        
-        layoutChildren()
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let layout = getLayout(size: bounds.size)
+        return layout.totalSize
     }
     
-    func updateChart(_ chart: Chart, config: ChartConfig) {
-        self.config = config
+    override func layoutSubviews() {
+        super.layoutSubviews()
         
-        graphNode.setChart(chart, config: config, overlap: Layout.totalGaps, duration: 0.25)
-        timelineNode.setChart(chart, config: config, overlap: Layout.sideGaps, duration: 0)
-        navigatorNode.setChart(chart, config: config, duration: 0.25)
-        
-        layoutChildren()
-    }
-    
-    override func prepareForAnimation(_ animation: IChartNodeAnimation) {
-        let duration = animation.endTime.timeIntervalSince(Date())
-        delegate?.sceneDidRequestAnimatedRendering(duration: duration)
-    }
-    
-    private func layoutChildren() {
-        let layout = Layout(bounds: bounds, config: config)
+        let layout = getLayout(size: bounds.size)
+        headerNode.frame = layout.headerNodeFrame
         graphNode.frame = layout.graphNodeFrame
         timelineNode.frame = layout.timelineFrame
         navigatorNode.frame = layout.navigatorFrame
+        optionsNode.frame = layout.optionsNodeFrame
+    }
+    
+    private func getLayout(size: CGSize) -> Layout {
+        return Layout(
+            bounds: CGRect(origin: .zero, size: size),
+            config: config,
+            headerNode: headerNode,
+            graphNode: graphNode,
+            optionsNode: optionsNode
+        )
+    }
+    
+    private func populateOptions(chart: Chart, config: ChartConfig) {
+        optionsNode.populate(
+            zip(chart.lines, config.lines).map { line, lineConfig in
+                ChartOption(
+                    key: line.key,
+                    color: line.color,
+                    title: line.name,
+                    enabled: lineConfig.visible
+                )
+            }
+        )
     }
 }
 
@@ -102,27 +137,51 @@ fileprivate struct Layout {
 
     let bounds: CGRect
     let config: ChartConfig
+    let headerNode: ChartHeader
+    let graphNode: ChartGraphNode
+    let optionsNode: ChartOptions
     
     private let gaps = Layout.totalGaps
+    private let graphHeight = CGFloat(300)
     private let timelineHeight = CGFloat(25)
     private let navigatorHeight = CGFloat(40)
     
+    var headerNodeFrame: CGRect {
+        let size = headerNode.sizeThatFits(.zero)
+        return CGRect(x: 0, y: 0, width: bounds.width, height: size.height)
+    }
+    
     var graphNodeFrame: CGRect {
         let leftX = gaps.left
+        let topY = headerNodeFrame.maxY + gaps.bottom
         let width = bounds.width - gaps.right - leftX
-        let height = bounds.height - timelineFrame.maxY - gaps.bottom
-        return CGRect(x: leftX, y: timelineFrame.maxY, width: width, height: height)
+        let height = graphNode.sizeThatFits(.zero).height
+        return CGRect(x: leftX, y: topY, width: width, height: height)
     }
     
     var timelineFrame: CGRect {
+        let topY = graphNodeFrame.maxY
         let leftX = gaps.left
         let width = bounds.width - gaps.right - leftX
-        return CGRect(x: leftX, y: navigatorFrame.maxY, width: width, height: timelineHeight)
+        return CGRect(x: leftX, y: topY, width: width, height: timelineHeight)
     }
     
     var navigatorFrame: CGRect {
+        let topY = timelineFrame.maxY
         let leftX = gaps.left
         let width = bounds.width - gaps.right - leftX
-        return CGRect(x: leftX, y: 0, width: width, height: navigatorHeight)
+        return CGRect(x: leftX, y: topY, width: width, height: navigatorHeight)
+    }
+    
+    var optionsNodeFrame: CGRect {
+        let size = optionsNode.sizeThatFits(bounds.insetBy(dx: gaps.left, dy: 0).size)
+        let leftX = gaps.left
+        let topY = navigatorFrame.maxY
+        let width = bounds.width - gaps.right - leftX
+        return CGRect(x: leftX, y: topY, width: width, height: size.height)
+    }
+    
+    var totalSize: CGSize {
+        return CGSize(width: bounds.width, height: optionsNodeFrame.maxY)
     }
 }

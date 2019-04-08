@@ -10,10 +10,10 @@ import Foundation
 import UIKit
 
 final class ChartInteractionPointScenario: IChartInteractorScenario {
-    private let graphNode: IChartNode
+    private let graphNode: UIView
     private let pointUpdateBlock: (CGFloat?) -> Void
     
-    init(graphNode: IChartNode,
+    init(graphNode: UIView,
          pointUpdateBlock: @escaping (CGFloat?) -> Void) {
         self.graphNode = graphNode
         self.pointUpdateBlock = pointUpdateBlock
@@ -34,8 +34,7 @@ final class ChartInteractionPointScenario: IChartInteractorScenario {
     }
     
     private func calculatePointer(_ point: CGPoint) -> CGFloat {
-        let pointer = (point.x - graphNode.origin.x) / graphNode.size.width
+        let pointer = (point.x - graphNode.bounds.origin.x) / graphNode.bounds.size.width
         return max(0, min(pointer, 1.0))
     }
 }
-

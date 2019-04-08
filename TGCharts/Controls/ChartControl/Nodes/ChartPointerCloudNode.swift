@@ -10,45 +10,40 @@ import Foundation
 import UIKit
 
 protocol IChartPointerCloudNode: IChartNode {
-    var overlayNode: IChartFigureNode { get }
-    var dateNode: IChartLabelNode { get }
-    var yearNode: IChartLabelNode { get }
-    var valuesFont: UIFont { get set }
     func setDate(_ date: Date, lines: [ChartLine], index: Int)
-    func calculateSize() -> CGSize
 }
 
 final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
     private let formattingProvider: IFormattingProvider
     
-    let overlayNode: IChartFigureNode = ChartFigureNode(tag: "pointer-overlay", cachable: false)
-    let dateNode: IChartLabelNode = ChartLabelNode(tag: "pointer-date", cachable: false)
-    let yearNode: IChartLabelNode = ChartLabelNode(tag: "pointer-year", cachable: false)
-    var valuesFont = UIFont.systemFont(ofSize: 12)
+    let overlayNode = ChartFigureNode(figure: .roundedSquare)
+    let dateNode = ChartLabelNode()
+    let yearNode = ChartLabelNode()
 
-    private var valueNodes = [IChartLabelNode]()
+    private var valueNodes = [ChartLabelNode]()
     
-    init(tag: String, formattingProvider: IFormattingProvider) {
+    init(formattingProvider: IFormattingProvider) {
         self.formattingProvider = formattingProvider
         
-        super.init(tag: tag, cachable: false)
+        super.init(frame: .zero)
         
-        overlayNode.figure = .roundedSquare
         overlayNode.radius = 4
         
-        addChild(node: overlayNode)
-        overlayNode.addChild(node: dateNode)
-        overlayNode.addChild(node: yearNode)
+        addSubview(overlayNode)
+        overlayNode.addSubview(dateNode)
+        overlayNode.addSubview(yearNode)
     }
     
-    override var frame: CGRect {
-        didSet { layoutChildren() }
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     func setDate(_ date: Date, lines: [ChartLine], index: Int) {
-        valueNodes.forEach { $0.removeFromParent() }
+        overlayNode.fillColor = DesignBook.shared.color(.chartPointerCloudBackground)
+        
+        valueNodes.forEach { $0.removeFromSuperview() }
         valueNodes = lines.map { constructValueNode(line: $0, index: index) }
-        valueNodes.forEach { overlayNode.addChild(node: $0) }
+        valueNodes.forEach { overlayNode.addSubview($0) }
         
         dateNode.content = ChartLabelNodeContent(
             text: "\(formattingProvider.format(date: date, style: .shortDate))",
@@ -66,43 +61,33 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
             limitedToBounds: false
         )
         
-        layoutChildren()
+        setNeedsLayout()
     }
     
-    func calculateSize() -> CGSize {
-        let layout = Layout(
-            bounds: bounds,
-            overlayNode: overlayNode,
-            dateNode: dateNode,
-            yearNode: yearNode,
-            valueNodes: valueNodes
-        )
-        
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let layout = getLayout(size: size)
         return layout.totalSize
     }
     
-    override func render(graphics: IGraphics) -> Bool {
-        overlayNode.color = DesignBook.shared.color(.chartPointerCloudBackground)
-        
-        return super.render(graphics: graphics)
-    }
-    
-    private func layoutChildren() {
-        let layout = Layout(
-            bounds: bounds,
-            overlayNode: overlayNode,
-            dateNode: dateNode,
-            yearNode: yearNode,
-            valueNodes: valueNodes
-        )
-        
+    override func layoutSubviews() {
+        let layout = getLayout(size: bounds.size)
         overlayNode.frame = layout.overlayNodeFrame
         dateNode.frame = layout.dateNodeFrame
         yearNode.frame = layout.yearNodeFrame
         zip(valueNodes, layout.valueNodeFrames).forEach { node, nodeFrame in node.frame = nodeFrame }
     }
     
-    private func constructValueNode(line: ChartLine, index: Int) -> IChartLabelNode {
+    private func getLayout(size: CGSize) -> Layout {
+        return Layout(
+            bounds: CGRect(origin: .zero, size: size),
+            overlayNode: overlayNode,
+            dateNode: dateNode,
+            yearNode: yearNode,
+            valueNodes: valueNodes
+        )
+    }
+    
+    private func constructValueNode(line: ChartLine, index: Int) -> ChartLabelNode {
         let content = ChartLabelNodeContent(
             text: "\(line.values[index])",
             color: line.color,
@@ -111,7 +96,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
             limitedToBounds: false
         )
         
-        let valueNode = ChartLabelNode(tag: "pointer-value", cachable: false)
+        let valueNode = ChartLabelNode()
         valueNode.content = content
         return valueNode
     }
@@ -119,38 +104,38 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
 
 fileprivate struct Layout {
     let bounds: CGRect
-    let overlayNode: IChartFigureNode
-    let dateNode: IChartLabelNode
-    let yearNode: IChartLabelNode
-    let valueNodes: [IChartLabelNode]
+    let overlayNode: ChartFigureNode
+    let dateNode: ChartLabelNode
+    let yearNode: ChartLabelNode
+    let valueNodes: [ChartLabelNode]
     
     private let horGap = CGFloat(7)
     private let verGap = CGFloat(5)
     private let innerGap = CGFloat(15)
     
     var overlayNodeFrame: CGRect {
-        let leftLaneHeight = dateNode.calculateSize().height + yearNode.calculateSize().height
+        let leftLaneHeight = dateNode.sizeThatFits(.zero).height + yearNode.sizeThatFits(.zero).height
         let rightLaneHeight = valuesHeight
         let height = verGap + max(leftLaneHeight, rightLaneHeight) + verGap
-        return CGRect(x: 0, y: bounds.height - height, width: bounds.width, height: height)
+        return CGRect(x: 0, y: 0, width: bounds.width, height: height)
     }
     
     var dateNodeFrame: CGRect {
-        let size = dateNode.calculateSize()
-        let topY = overlayNodeFrame.height - verGap - size.height
+        let size = dateNode.sizeThatFits(.zero)
+        let topY = verGap
         return CGRect(x: horGap, y: topY, width: size.width, height: size.height)
     }
 
     var yearNodeFrame: CGRect {
-        let size = yearNode.calculateSize()
-        let topY = dateNodeFrame.minY - size.height
+        let size = yearNode.sizeThatFits(.zero)
+        let topY = dateNodeFrame.maxY
         return CGRect(x: horGap, y: topY, width: size.width, height: size.height)
     }
     
     var valueNodeFrames: [CGRect] {
         var topY = verGap
-        return valueNodes.reversed().map { node in
-            let size = node.calculateSize()
+        return valueNodes.map { node in
+            let size = node.sizeThatFits(.zero)
             defer { topY += size.height }
             
             let leftX = bounds.width - horGap - size.width
@@ -169,7 +154,7 @@ fileprivate struct Layout {
     }
     
     private var valuesNodeSizes: [CGSize] {
-        return valueNodes.map { $0.calculateSize() }
+        return valueNodes.map { $0.sizeThatFits(.zero) }
     }
     
     private var valuesMaxWidth: CGFloat {
@@ -181,8 +166,8 @@ fileprivate struct Layout {
     }
     
     private var contentWidth: CGFloat {
-        let dateWidth = dateNode.calculateSize().width
-        let yearWidth = yearNode.calculateSize().width
+        let dateWidth = dateNode.sizeThatFits(.zero).width
+        let yearWidth = yearNode.sizeThatFits(.zero).width
         return horGap + max(dateWidth, yearWidth) + innerGap + valuesMaxWidth + horGap
     }
 }

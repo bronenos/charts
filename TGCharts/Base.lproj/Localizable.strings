@@ -7,6 +7,8 @@
 */
 
 "Stat.Title" = "Statistics";
-"Stat.Section.TitlePrefix" = "Followers";
+"Stat.Section.TitlePrefix" = "Chart";
 "Stat.Mode.Light" = "Switch to Day Mode";
 "Stat.Mode.Dark" = "Switch to Night Mode";
+"Chart.Control.ZoomOut" = "〈 Zoom Out";
+

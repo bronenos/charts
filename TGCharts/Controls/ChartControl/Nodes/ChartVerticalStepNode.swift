@@ -9,33 +9,26 @@
 import Foundation
 import UIKit
 
-enum ChartVerticalStep {
-    case value
-    case line
-}
-
 protocol IChartVerticalStepNode: IChartNode {
     var value: String { get set }
-    var color: UIColor { get set }
+    var color: UIColor? { get set }
 }
 
 final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
-    private let valueNode: IChartLabelNode = ChartLabelNode(tag: "step-value", cachable: false)
-    private let underlineNode: IChartNode = ChartNode(tag: "step-underline", cachable: false)
+    private let valueNode = ChartLabelNode()
+    private let underlineNode = ChartNode()
     
-    init(tag: String, step: ChartVerticalStep) {
-        super.init(tag: tag, cachable: false)
+    init() {
+        super.init(frame: .zero)
         
-        isInteractable = false
+        isUserInteractionEnabled = false
         
-        switch step {
-        case .value: addChild(node: valueNode)
-        case .line: addChild(node: underlineNode)
-        }
+        addSubview(valueNode)
+        addSubview(underlineNode)
     }
     
-    override var frame: CGRect {
-        didSet { layoutChildren() }
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     var value = String() {
@@ -50,24 +43,16 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
                 limitedToBounds: false
             )
             
-            layoutChildren()
+            setNeedsLayout()
         }
     }
     
-    var color: UIColor {
-        get {
-            return underlineNode.backgroundColor
-        }
-        set {
-            guard newValue != underlineNode.backgroundColor else { return }
-            
-            underlineNode.backgroundColor = newValue
-            
-            layoutChildren()
-        }
+    var color: UIColor? {
+        get { return underlineNode.backgroundColor }
+        set { underlineNode.backgroundColor = newValue }
     }
     
-    private func layoutChildren() {
+    override func layoutSubviews() {
         let layout = Layout(
             bounds: bounds,
             valueNode: valueNode,
@@ -81,17 +66,17 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
 
 fileprivate struct Layout {
     let bounds: CGRect
-    let valueNode: IChartLabelNode
-    let underlineNode: IChartNode
+    let valueNode: ChartLabelNode
+    let underlineNode: ChartNode
 
     private let underlineHeight = CGFloat(1)
     
     var valueNodeFrame: CGRect {
-        let size = valueNode.calculateSize()
+        let size = valueNode.sizeThatFits(.zero)
         return CGRect(x: 0, y: 0, width: size.width, height: bounds.height)
     }
     
     var underlineNodeFrame: CGRect {
-        return bounds.divided(atDistance: 1, from: .minYEdge).slice
+        return bounds.divided(atDistance: 1, from: .maxYEdge).slice
     }
 }

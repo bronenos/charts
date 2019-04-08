@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-protocol IChartInteractor: IGraphicsDelegate {
+protocol IChartInteractor: IChartInteracting {
     var range: ChartRange { get }
     var pointer: CGFloat? { get }
     var delegate: IChartInteractorDelegate? { get set }
@@ -22,7 +22,7 @@ protocol IChartInteractorDelegate: class {
 }
 
 final class ChartInteractor: IChartInteractor {
-    private var scene: IChartSceneNode
+    private var scene: ChartSceneNode
     private(set) var range: ChartRange
     private(set) var pointer: CGFloat?
     weak var delegate: IChartInteractorDelegate?
@@ -35,20 +35,20 @@ final class ChartInteractor: IChartInteractor {
 
     private var scenario: IChartInteractorScenario?
 
-    init(scene: IChartSceneNode, range: ChartRange) {
+    init(scene: ChartSceneNode, range: ChartRange) {
         self.scene = scene
         self.range = range
         self.pointer = nil
     }
     
     func interactionDidStart(at point: CGPoint) {
-        guard let node = scene.node(at: point, interactable: true) else { return }
-        guard let sliderNode = scene.node(by: sliderTag) else { return }
-        guard let navigatorNode = scene.node(by: navigatorTag) else { return }
-        guard let graphNode = scene.node(by: graphTag) else { return }
-        
-        switch node.tag {
-        case sliderTag:
+        guard let node = scene.hitTest(point, with: nil) else { return }
+        guard let sliderNode = scene.viewWithTag(ChartControlTag.slider.rawValue) else { return }
+        guard let navigatorNode = scene.viewWithTag(ChartControlTag.navigator.rawValue) else { return }
+        guard let graphNode = scene.viewWithTag(ChartControlTag.graph.rawValue) else { return }
+
+        switch ChartControlTag(rawValue: node.tag) ?? .unknown {
+        case .slider:
             scenario = ChartInteractorMoveScenario(
                 sceneNode: scene,
                 sliderNode: sliderNode,
@@ -58,7 +58,7 @@ final class ChartInteractor: IChartInteractor {
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
 
-        case leftArrowTag:
+        case .leftArrow:
             scenario = ChartInteractionScaleScenario(
                 sceneNode: scene,
                 sliderNode: sliderNode,
@@ -68,8 +68,8 @@ final class ChartInteractor: IChartInteractor {
                 direction: .left,
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
-            
-        case rightArrowTag:
+
+        case .rightArrow:
             scenario = ChartInteractionScaleScenario(
                 sceneNode: scene,
                 sliderNode: sliderNode,
@@ -79,8 +79,8 @@ final class ChartInteractor: IChartInteractor {
                 direction: .right,
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
-            
-        case graphTag:
+
+        case .graph:
             scenario = ChartInteractionPointScenario(
                 graphNode: graphNode,
                 pointUpdateBlock: { [weak self] pointer in self?.updatePointer(pointer) }

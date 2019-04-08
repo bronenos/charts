@@ -9,15 +9,19 @@
 import Foundation
 import UIKit
 
+protocol IChartInteracting: class {
+    func interactionDidStart(at point: CGPoint)
+    func interactionDidMove(to point: CGPoint)
+    func interactionDidEnd(at point: CGPoint)
+}
+
 protocol IChartControl: class {
-    var view: UIView & IChartView { get }
     var chart: Chart { get }
     var config: ChartConfig { get }
     func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
     func unlink()
-    func render()
-    func toggleLine(key: String)
+    func update()
 }
 
 protocol IChartControlDelegate: class {
@@ -25,13 +29,10 @@ protocol IChartControlDelegate: class {
     func chartControlDidEndInteraction()
 }
 
-final class ChartControl: IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
-    private let graphics: IGraphics
+final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
     let chart: Chart
     private(set) var config: ChartConfig
 
-    let view: (UIView & IChartView) = ChartView()
-    private var outputRef: GraphicsOutputRef?
     private weak var delegate: IChartControlDelegate?
 
     private let uuid = UUID()
@@ -40,20 +41,22 @@ final class ChartControl: IChartControl, IChartInteractorDelegate, IChartSceneDe
     
     private let startupRange = ChartRange(start: 0.75, end: 1.0)
     
-    private weak var displayLink: CADisplayLink?
-    private var linkAwaitingDuration = TimeInterval(0)
-    private var linkTerminationDate: Date?
-    
-    init(graphics: IGraphics, chart: Chart, formattingProvider: IFormattingProvider) {
-        self.graphics = graphics
+    init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = startupConfig(chart: chart, range: startupRange)
+        self.scene = ChartSceneNode(chart: chart, config: config, localeProvider: localeProvider, formattingProvider: formattingProvider)
+        self.interactor = ChartInteractor(scene: scene, range: startupRange)
         
-        scene = ChartSceneNode(tag: "scene", formattingProvider: formattingProvider)
-        interactor = ChartInteractor(scene: scene, range: startupRange)
+        super.init(frame: .zero)
+        
+        addSubview(scene)
         
         scene.delegate = self
         interactor.delegate = self
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     func setDelegate(_ delegate: IChartControlDelegate?) {
@@ -61,35 +64,30 @@ final class ChartControl: IChartControl, IChartInteractorDelegate, IChartSceneDe
     }
     
     func link(to parentView: UIView) {
-        view.frame = parentView.bounds
-        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        parentView.addSubview(view)
+        frame = parentView.bounds
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        parentView.addSubview(self)
         
-        outputRef = graphics.link(uuid: uuid, to: view, delegate: interactor)
-        scene.frame = CGRect(origin: .zero, size: view.bounds.size)
+        scene.frame = CGRect(origin: .zero, size: bounds.size)
+        render()
     }
     
     func unlink() {
-        guard let output = outputRef else { return }
-        graphics.unlink(uuid: uuid, output: output)
+        removeFromSuperview()
     }
     
-    func render() {
-        guard let output = outputRef else { return }
-        
-        scene.setChart(chart, config: config)
-        graphics.render(output: output) { link in scene.renderWithChildren(output: output, graphics: link) }
-        
-        if linkAwaitingDuration > 0 {
-            runAutoupdate(duration: linkAwaitingDuration)
-            linkAwaitingDuration = 0
-        }
+    func render(duration: TimeInterval = 0) {
+        scene.update(config: config, duration: duration)
     }
     
-    func toggleLine(key: String) {
-        guard let index = config.lines.firstIndex(where: { $0.key == key }) else { return }
+    func update() {
+        scene.updateDesign()
+        render()
+    }
+    
+    func sceneDidToggleLine(index: Int) {
         config.lines[index].visible.toggle()
-        scene.updateChart(chart, config: config)
+        render(duration: 0.25)
     }
     
     func interactorDidBegin() {
@@ -106,37 +104,40 @@ final class ChartControl: IChartControl, IChartInteractorDelegate, IChartSceneDe
         render()
     }
     
-    private func runAutoupdate(duration: TimeInterval) {
-        linkTerminationDate = Date(timeIntervalSinceNow: duration)
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return scene.sizeThatFits(size)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
         
-        if displayLink == nil {
-            let link = CADisplayLink(target: self, selector: #selector(handleDisplayLink))
-            link.add(to: .current, forMode: .default)
-            displayLink = link
+        if let point = touches.first?.location(in: self) {
+            interactor.interactionDidStart(at: point)
         }
     }
     
-    private func stopAutoupdate() {
-        linkTerminationDate = nil
-        displayLink?.invalidate()
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+        
+        if let point = touches.first?.location(in: self) {
+            interactor.interactionDidMove(to: point)
+        }
     }
     
-    @objc private func handleDisplayLink() {
-        guard let terminationDate = linkTerminationDate else {
-            stopAutoupdate()
-            return
-        }
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
         
-        guard terminationDate > Date() else {
-            stopAutoupdate()
-            return
+        if let point = touches.first?.location(in: self) {
+            interactor.interactionDidEnd(at: point)
         }
-        
-        render()
     }
     
-    func sceneDidRequestAnimatedRendering(duration: TimeInterval) {
-        linkAwaitingDuration = max(linkAwaitingDuration, duration)
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        
+        if let point = touches.first?.location(in: self) {
+            interactor.interactionDidEnd(at: point)
+        }
     }
 }
 

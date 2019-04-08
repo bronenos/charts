@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D40A86E522462E4300539999 /* GraphicsOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40A86E422462E4300539999 /* GraphicsOutput.swift */; };
-		D40A86E72246C68100539999 /* ChartNodeAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40A86E62246C68100539999 /* ChartNodeAnimation.swift */; };
 		D42658D02236341000FB79AB /* ChartTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658CF2236341000FB79AB /* ChartTypes.swift */; };
 		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4B223952E800733F2F /* ChartNode.swift */; };
@@ -17,7 +15,6 @@
 		D42B7A522239779B00733F2F /* ChartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A512239779B00733F2F /* ChartScene.swift */; };
 		D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A552239893E00733F2F /* ChartFigureNode.swift */; };
 		D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */; };
-		D44F5F032242352500110F0A /* ChartMainGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44F5F022242352500110F0A /* ChartMainGraphNode.swift */; };
 		D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */; };
 		D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A0223A5A22002134ED /* ChartInteractor.swift */; };
 		D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */; };
@@ -60,23 +57,24 @@
 		D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182892235C902006B72A7 /* UIColorExtensions.swift */; };
 		D461828E223630A0006B72A7 /* ChartControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828D223630A0006B72A7 /* ChartControl.swift */; };
 		D4618290223630AE006B72A7 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828F223630AE006B72A7 /* ChartView.swift */; };
-		D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF532236EF0B00C232E6 /* Graphics.swift */; };
-		D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */; };
-		D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
+		D4984A96225A6B150008C552 /* ChartHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A95225A6B150008C552 /* ChartHeader.swift */; };
+		D4984A98225A78BD0008C552 /* ChartOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A97225A78BD0008C552 /* ChartOptions.swift */; };
+		D4984A9B225A80180008C552 /* ChartOptionsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A9A225A80180008C552 /* ChartOptionsTypes.swift */; };
+		D4984A9D225A80320008C552 /* ChartOptionToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A9C225A80320008C552 /* ChartOptionToken.swift */; };
+		D4984A9F225B42950008C552 /* ChartLineGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */; };
+		D4984AA1225B47340008C552 /* ChartGuideNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984AA0225B47340008C552 /* ChartGuideNode.swift */; };
+		D4984AA3225B4AE00008C552 /* ChartPointerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984AA2225B4AE00008C552 /* ChartPointerNode.swift */; };
 		D4AECB0E224156D300AE5D89 /* ChartPointerCloudNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */; };
 		D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */; };
 		D4BE0CAD223D8FAC001DEE03 /* ChartTimelineNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */; };
 		D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */; };
 		D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */; };
-		D4BE0CB3223DB6ED001DEE03 /* GraphicsTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */; };
 		D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D40A86E422462E4300539999 /* GraphicsOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicsOutput.swift; sourceTree = "<group>"; };
-		D40A86E62246C68100539999 /* ChartNodeAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNodeAnimation.swift; sourceTree = "<group>"; };
 		D42658CF2236341000FB79AB /* ChartTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTypes.swift; sourceTree = "<group>"; };
 		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D42B7A4B223952E800733F2F /* ChartNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNode.swift; sourceTree = "<group>"; };
@@ -85,7 +83,6 @@
 		D42B7A512239779B00733F2F /* ChartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartScene.swift; sourceTree = "<group>"; };
 		D42B7A552239893E00733F2F /* ChartFigureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartFigureNode.swift; sourceTree = "<group>"; };
 		D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRectExtensions.swift; sourceTree = "<group>"; };
-		D44F5F022242352500110F0A /* ChartMainGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartMainGraphNode.swift; sourceTree = "<group>"; };
 		D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSliderArrowNode.swift; sourceTree = "<group>"; };
 		D45B78A0223A5A22002134ED /* ChartInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractor.swift; sourceTree = "<group>"; };
 		D45B78A4223A60EE002134ED /* ChartInteractorScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractorScenario.swift; sourceTree = "<group>"; };
@@ -132,16 +129,19 @@
 		D46182892235C902006B72A7 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D461828D223630A0006B72A7 /* ChartControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartControl.swift; sourceTree = "<group>"; };
 		D461828F223630AE006B72A7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
-		D48EEF532236EF0B00C232E6 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
-		D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphics.swift; sourceTree = "<group>"; };
-		D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGraphicsRenderView.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
+		D4984A95225A6B150008C552 /* ChartHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartHeader.swift; sourceTree = "<group>"; };
+		D4984A97225A78BD0008C552 /* ChartOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptions.swift; sourceTree = "<group>"; };
+		D4984A9A225A80180008C552 /* ChartOptionsTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptionsTypes.swift; sourceTree = "<group>"; };
+		D4984A9C225A80320008C552 /* ChartOptionToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptionToken.swift; sourceTree = "<group>"; };
+		D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLineGraphNode.swift; sourceTree = "<group>"; };
+		D4984AA0225B47340008C552 /* ChartGuideNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGuideNode.swift; sourceTree = "<group>"; };
+		D4984AA2225B4AE00008C552 /* ChartPointerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerNode.swift; sourceTree = "<group>"; };
 		D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerCloudNode.swift; sourceTree = "<group>"; };
 		D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionPointScenario.swift; sourceTree = "<group>"; };
 		D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTimelineNode.swift; sourceTree = "<group>"; };
 		D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSlicableNode.swift; sourceTree = "<group>"; };
 		D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLabelNode.swift; sourceTree = "<group>"; };
-		D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicsTexture.swift; sourceTree = "<group>"; };
 		D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionScaleScenario.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,7 +176,6 @@
 				D42B7A4B223952E800733F2F /* ChartNode.swift */,
 				D42B7A552239893E00733F2F /* ChartFigureNode.swift */,
 				D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */,
-				D40A86E62246C68100539999 /* ChartNodeAnimation.swift */,
 			);
 			path = Basic;
 			sourceTree = "<group>";
@@ -214,7 +213,6 @@
 				D461827E2235A545006B72A7 /* Logic */,
 				D461822E223461F4006B72A7 /* Modules */,
 				D461828B22362F72006B72A7 /* Controls */,
-				D48EEF522236EE7700C232E6 /* Graphics */,
 				D461827B2235A401006B72A7 /* Extensions */,
 				D461823422346575006B72A7 /* DesignBook */,
 				D461821C2234614F006B72A7 /* AppDelegate.swift */,
@@ -386,34 +384,18 @@
 			path = ChartControl;
 			sourceTree = "<group>";
 		};
-		D48EEF522236EE7700C232E6 /* Graphics */ = {
-			isa = PBXGroup;
-			children = (
-				D48EEF532236EF0B00C232E6 /* Graphics.swift */,
-				D4BE0CB2223DB6ED001DEE03 /* GraphicsTexture.swift */,
-				D40A86E422462E4300539999 /* GraphicsOutput.swift */,
-				D48EEF552236F0AA00C232E6 /* OpenGraphics */,
-			);
-			path = Graphics;
-			sourceTree = "<group>";
-		};
-		D48EEF552236F0AA00C232E6 /* OpenGraphics */ = {
-			isa = PBXGroup;
-			children = (
-				D48EEF562236F0EE00C232E6 /* OpenGraphics.swift */,
-				D48EEF582236F17900C232E6 /* OpenGraphicsRenderView.swift */,
-			);
-			path = OpenGraphics;
-			sourceTree = "<group>";
-		};
 		D48EEF5A2237C6D300C232E6 /* Nodes */ = {
 			isa = PBXGroup;
 			children = (
 				D42B7A512239779B00733F2F /* ChartScene.swift */,
+				D4984A95225A6B150008C552 /* ChartHeader.swift */,
 				D45D92702244393C004E136C /* Basic */,
+				D4984A99225A80020008C552 /* ChartOptions */,
 				D4BE0CAE223D8FF1001DEE03 /* ChartSlicableNode.swift */,
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
-				D44F5F022242352500110F0A /* ChartMainGraphNode.swift */,
+				D4984AA0225B47340008C552 /* ChartGuideNode.swift */,
+				D4984AA2225B4AE00008C552 /* ChartPointerNode.swift */,
+				D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */,
 				D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */,
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
@@ -422,6 +404,16 @@
 				D45D926E224411EB004E136C /* ChartVerticalStepNode.swift */,
 			);
 			path = Nodes;
+			sourceTree = "<group>";
+		};
+		D4984A99225A80020008C552 /* ChartOptions */ = {
+			isa = PBXGroup;
+			children = (
+				D4984A9A225A80180008C552 /* ChartOptionsTypes.swift */,
+				D4984A97225A78BD0008C552 /* ChartOptions.swift */,
+				D4984A9C225A80320008C552 /* ChartOptionToken.swift */,
+			);
+			path = ChartOptions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +448,7 @@
 				TargetAttributes = {
 					D46182182234614F006B72A7 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
 						SystemCapabilities = {
 							com.apple.GameCenter.iOS = {
 								enabled = 1;
@@ -507,25 +500,29 @@
 			files = (
 				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
+				D4984A9B225A80180008C552 /* ChartOptionsTypes.swift in Sources */,
 				D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
+				D4984A9F225B42950008C552 /* ChartLineGraphNode.swift in Sources */,
 				D42B7A522239779B00733F2F /* ChartScene.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
 				D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */,
+				D4984AA3225B4AE00008C552 /* ChartPointerNode.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
 				D42B7A502239750400733F2F /* ChartNavigatorNode.swift in Sources */,
 				D4618290223630AE006B72A7 /* ChartView.swift in Sources */,
+				D4984A96225A6B150008C552 /* ChartHeader.swift in Sources */,
+				D4984A98225A78BD0008C552 /* ChartOptions.swift in Sources */,
 				D461827A2235A0D5006B72A7 /* StatParser.swift in Sources */,
 				D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */,
 				D4618236223465B2006B72A7 /* DesignBook.swift in Sources */,
-				D40A86E72246C68100539999 /* ChartNodeAnimation.swift in Sources */,
 				D461824522346FF3006B72A7 /* DesignTypes.swift in Sources */,
 				D4F4610B2238C60B00EDDF90 /* global.swift in Sources */,
 				D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */,
-				D4BE0CB3223DB6ED001DEE03 /* GraphicsTexture.swift in Sources */,
-				D44F5F032242352500110F0A /* ChartMainGraphNode.swift in Sources */,
 				D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */,
+				D4984AA1225B47340008C552 /* ChartGuideNode.swift in Sources */,
+				D4984A9D225A80320008C552 /* ChartOptionToken.swift in Sources */,
 				D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */,
 				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
 				D4BE0CAD223D8FAC001DEE03 /* ChartTimelineNode.swift in Sources */,
@@ -533,7 +530,6 @@
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
 				D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */,
-				D48EEF592236F17900C232E6 /* OpenGraphicsRenderView.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
 				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,
 				D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */,
@@ -550,7 +546,6 @@
 				D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */,
 				D42B7A4E22396D6800733F2F /* ChartSliderNode.swift in Sources */,
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
-				D48EEF542236EF0B00C232E6 /* Graphics.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
 				D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */,
 				D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */,
@@ -559,9 +554,7 @@
 				D45B78A1223A5A22002134ED /* ChartInteractor.swift in Sources */,
 				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
-				D40A86E522462E4300539999 /* GraphicsOutput.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
-				D48EEF572236F0EE00C232E6 /* OpenGraphics.swift in Sources */,
 				D4AECB0E224156D300AE5D89 /* ChartPointerCloudNode.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
@@ -725,7 +718,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.bronenos.TGCharts;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "TGCharts dev";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -744,7 +737,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.bronenos.TGCharts;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "TGCharts adhoc";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

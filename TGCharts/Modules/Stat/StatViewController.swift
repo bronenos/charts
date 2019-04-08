@@ -22,12 +22,10 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     private let tableView = UITableView(frame: .zero, style: .grouped)
     
     private let dataSource = StatDataSource()
-    private var chartControls = [IChartControl]()
+    private var chartControls = [ChartControl]()
 
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
-        
-        navigationItem.prompt = "Made by Stan Potemkin aka bronenos, powered by OpenGL ES 1.1"
         
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
@@ -49,11 +47,16 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     }
     
     func setCharts(titlePrefix: String, charts: [Chart]) {
-        let graphics = obtainGraphicsForCurrentDevice()
         let formattingProvider = interactor.formattingProvider
         
         chartControls.forEach { control in control.setDelegate(nil) }
-        chartControls = charts.map { ChartControl(graphics: graphics, chart: $0, formattingProvider: formattingProvider) }
+        chartControls = charts.map {
+            ChartControl(
+                chart: $0,
+                localeProvider: interactor.localeProvider,
+                formattingProvider: formattingProvider
+            )
+        }
         chartControls.forEach { control in control.setDelegate(self) }
         
         dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)

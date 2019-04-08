@@ -8,5 +8,5 @@
 
 import Foundation
 
-protocol IChartInteractorScenario: IGraphicsDelegate {
+protocol IChartInteractorScenario: IChartInteracting {
 }

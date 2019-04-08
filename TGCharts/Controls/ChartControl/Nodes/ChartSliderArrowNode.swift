@@ -20,20 +20,32 @@ protocol IChartSliderArrowNode: IChartNode {
 final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
     let direction: ChartSliderArrowDirection
     
-    init(tag: String?, direction: ChartSliderArrowDirection) {
+    init(direction: ChartSliderArrowDirection) {
         self.direction = direction
         
-        super.init(tag: tag ?? "[slider-arrow]", cachable: false)
+        super.init(figure: .joinedLines)
         
-        width = 1
+        width = 2
+        
+        switch direction {
+        case .left: tag = ChartControlTag.leftArrow.rawValue
+        case .right: tag = ChartControlTag.rightArrow.rawValue
+        }
+        
+        updateDesign()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        abort()
     }
     
     override var frame: CGRect {
         didSet { points = calculatePoints() }
     }
     
-    override var foregroundColor: UIColor {
-        didSet { color = foregroundColor }
+    override func updateDesign() {
+        super.updateDesign()
+        strokeColor = DesignBook.shared.color(.sliderForeground)
     }
     
     private func calculatePoints() -> [CGPoint] {
@@ -44,9 +56,9 @@ final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
         }
         
         return [
-            bounds.offsetBy(dx: 1 * mult, dy: 4).center,
+            bounds.offsetBy(dx: 1 * mult, dy: 5).center,
             bounds.offsetBy(dx: -1 * mult, dy: 0).center,
-            bounds.offsetBy(dx: 1 * mult, dy: -4).center
+            bounds.offsetBy(dx: 1 * mult, dy: -5).center
         ]
     }
 }
