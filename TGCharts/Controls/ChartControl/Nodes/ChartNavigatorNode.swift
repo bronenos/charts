@@ -26,7 +26,7 @@ final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.range = config.range
 
-        graphNode = ChartLineGraphNode(chart: chart, config: config.fullRanged(), formattingProvider: formattingProvider, width: 1, guidable: false)
+        graphNode = ChartLineGraphNode(chart: chart, config: config.fullRanged(), formattingProvider: formattingProvider, width: 1)
         
         super.init(frame: .zero)
         

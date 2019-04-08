@@ -57,6 +57,7 @@
 		D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182892235C902006B72A7 /* UIColorExtensions.swift */; };
 		D461828E223630A0006B72A7 /* ChartControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828D223630A0006B72A7 /* ChartControl.swift */; };
 		D4618290223630AE006B72A7 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828F223630AE006B72A7 /* ChartView.swift */; };
+		D46B96E1225B69C9001EFED6 /* ChartGraphContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B96E0225B69C9001EFED6 /* ChartGraphContainer.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
 		D4984A96225A6B150008C552 /* ChartHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A95225A6B150008C552 /* ChartHeader.swift */; };
 		D4984A98225A78BD0008C552 /* ChartOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A97225A78BD0008C552 /* ChartOptions.swift */; };
@@ -129,6 +130,7 @@
 		D46182892235C902006B72A7 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D461828D223630A0006B72A7 /* ChartControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartControl.swift; sourceTree = "<group>"; };
 		D461828F223630AE006B72A7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
+		D46B96E0225B69C9001EFED6 /* ChartGraphContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphContainer.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
 		D4984A95225A6B150008C552 /* ChartHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartHeader.swift; sourceTree = "<group>"; };
 		D4984A97225A78BD0008C552 /* ChartOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptions.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 				D4984AA0225B47340008C552 /* ChartGuideNode.swift */,
 				D4984AA2225B4AE00008C552 /* ChartPointerNode.swift */,
 				D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */,
+				D46B96E0225B69C9001EFED6 /* ChartGraphContainer.swift */,
 				D4BE0CAC223D8FAC001DEE03 /* ChartTimelineNode.swift */,
 				D42B7A4F2239750400733F2F /* ChartNavigatorNode.swift */,
 				D42B7A4D22396D6800733F2F /* ChartSliderNode.swift */,
@@ -529,6 +532,7 @@
 				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
+				D46B96E1225B69C9001EFED6 /* ChartGraphContainer.swift in Sources */,
 				D4BE0CAF223D8FF1001DEE03 /* ChartSlicableNode.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
 				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,

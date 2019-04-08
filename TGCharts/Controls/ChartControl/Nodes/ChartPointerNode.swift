@@ -9,8 +9,16 @@
 import Foundation
 import UIKit
 
+struct ChartPointerOptions: OptionSet {
+    let rawValue: Int
+    init(rawValue: Int) { self.rawValue = rawValue }
+    
+    static let line = ChartPointerOptions(rawValue: 1 << 0)
+    static let dots = ChartPointerOptions(rawValue: 1 << 1)
+}
+
 protocol IChartPointerNode: IChartNode {
-    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange)
+    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions)
 }
 
 final class ChartPointerNode: ChartNode, IChartPointerNode {
@@ -27,7 +35,6 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
         
         super.init(frame: .zero)
         
-        
         addSubview(pointerLineNode)
         
         clippedContainer.clipsToBounds = true
@@ -41,7 +48,7 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
         abort()
     }
     
-    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange) {
+    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions) {
         if let pointer = config.pointer {
             let startIndex = meta.visibleIndices.startIndex
             let endIndex = meta.visibleIndices.endIndex
@@ -69,17 +76,14 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
                 node.fillColor = DesignBook.shared.color(.primaryBackground)
                 node.bezierPaths = [path]
                 node.width = 2
+                node.isHidden = !options.contains(.dots)
             }
             
-            pointerLineNode.frame = CGRect(
-                x: max(0, min(bounds.width - 1, x)),
-                y: 0,
-                width: 1,
-                height: lowestY
-            )
-            
+            let pointerLineX = max(0, min(bounds.width - 1, x))
+            pointerLineNode.frame = CGRect(x: pointerLineX, y: 0, width: 1, height: bounds.height)
             pointerLineNode.backgroundColor = DesignBook.shared.color(.chartPointerFocusedLineStroke)
-            
+            pointerLineNode.isHidden = !options.contains(.line)
+
             let visibleLines = chart.visibleLines(config: config, addingKeys: [])
             pointerCloudNode.setDate(chart.axis[pointedIndex].date, lines: visibleLines, index: pointedIndex)
             
@@ -88,7 +92,6 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
             let pointerCloudLeftX = (bounds.size.width + pointerCloudOffscreen * 2 - pointerCloudWidth) * pointer - pointerCloudOffscreen
             let pointerNormalizedLeftX = pointerCloudLeftX // max(0, min(bounds.width - pointerCloudWidth, pointerCloudLeftX))
             pointerCloudNode.frame = CGRect(x: pointerNormalizedLeftX, y: 0, width: pointerCloudWidth, height: bounds.height)
-            bringSubviewToFront(pointerCloudNode)
             
             obtainPointerControls(config: config, onlyVisible: true).forEach { $0.alpha = 1.0 }
         }

@@ -16,11 +16,12 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     private let width: CGFloat
     
     private var lineNodes = [String: ChartFigureNode]()
-    
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat, guidable: Bool) {
+    private let pointerLineNode = ChartNode()
+
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
         self.width = width
         
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider, guidable: guidable)
+        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
         
         chart.lines.forEach { line in
             let node = ChartFigureNode(figure: .joinedLines)
@@ -29,6 +30,9 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             graphContainer.addSubview(node)
             lineNodes[line.key] = node
         }
+        
+        pointerLineNode.isHidden = true
+        addSubview(pointerLineNode)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -57,8 +61,8 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             }
         }
         
-        guidesContainer.update(edge: edge, duration: duration)
-        pointerContainer.update(chart: chart, config: config, meta: meta, edge: edge)
+        container?.adjustEdges([edge], duration: duration)
+        container?.adjustPointer(chart: chart, config: config, meta: meta, edge: edge, options: [.line, .dots])
     }
     
     override func layoutSubviews() {

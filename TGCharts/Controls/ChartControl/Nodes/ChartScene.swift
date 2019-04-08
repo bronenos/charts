@@ -31,20 +31,21 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     weak var delegate: IChartSceneDelegate?
     
     let headerNode: ChartHeader
-    let graphNode: ChartLineGraphNode
+    let graphContainer: ChartGraphContainer
     let timelineNode: ChartTimelineNode
     let navigatorNode: ChartNavigatorNode
     let optionsNode: ChartOptions
     
     private let chart: Chart
     private var config: ChartConfig
+    private var currentGraph: ChartGraphNode?
     
     init(chart: Chart, config: ChartConfig, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
         
         headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
-        graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2, guidable: true)
+        graphContainer = ChartGraphContainer(chart: chart, config: config, formattingProvider: formattingProvider)
         timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
         navigatorNode = ChartNavigatorNode(chart: chart, config: config, formattingProvider: formattingProvider)
         optionsNode = ChartOptions()
@@ -52,10 +53,14 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         super.init(frame: .zero)
         
         addSubview(headerNode)
-        addSubview(graphNode)
+        addSubview(graphContainer)
         addSubview(timelineNode)
         addSubview(navigatorNode)
         addSubview(optionsNode)
+        
+        let graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        currentGraph = graphNode
+        graphContainer.inject(graph: graphNode)
         
         populateOptions(chart: chart, config: config)
         updateDesign()
@@ -72,7 +77,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func update(config: ChartConfig, duration: TimeInterval) {
         self.config = config
         
-        graphNode.update(config: config, duration: duration)
+        currentGraph?.update(config: config, duration: duration)
         timelineNode.update(config: config, duration: 0)
         navigatorNode.update(config: config, duration: duration)
         populateOptions(chart: chart, config: config)
@@ -82,7 +87,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)
         headerNode.updateDesign()
-        graphNode.updateDesign()
+        graphContainer.updateDesign()
         timelineNode.updateDesign()
         navigatorNode.updateDesign()
     }
@@ -97,7 +102,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         
         let layout = getLayout(size: bounds.size)
         headerNode.frame = layout.headerNodeFrame
-        graphNode.frame = layout.graphNodeFrame
+        graphContainer.frame = layout.graphContainerFrame
         timelineNode.frame = layout.timelineFrame
         navigatorNode.frame = layout.navigatorFrame
         optionsNode.frame = layout.optionsNodeFrame
@@ -108,7 +113,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             bounds: CGRect(origin: .zero, size: size),
             config: config,
             headerNode: headerNode,
-            graphNode: graphNode,
+            graphContainer: graphContainer,
             optionsNode: optionsNode
         )
     }
@@ -138,7 +143,7 @@ fileprivate struct Layout {
     let bounds: CGRect
     let config: ChartConfig
     let headerNode: ChartHeader
-    let graphNode: ChartGraphNode
+    let graphContainer: ChartGraphContainer
     let optionsNode: ChartOptions
     
     private let gaps = Layout.totalGaps
@@ -151,16 +156,16 @@ fileprivate struct Layout {
         return CGRect(x: 0, y: 0, width: bounds.width, height: size.height)
     }
     
-    var graphNodeFrame: CGRect {
+    var graphContainerFrame: CGRect {
         let leftX = gaps.left
         let topY = headerNodeFrame.maxY + gaps.bottom
         let width = bounds.width - gaps.right - leftX
-        let height = graphNode.sizeThatFits(.zero).height
+        let height = graphContainer.sizeThatFits(.zero).height
         return CGRect(x: leftX, y: topY, width: width, height: height)
     }
     
     var timelineFrame: CGRect {
-        let topY = graphNodeFrame.maxY
+        let topY = graphContainerFrame.maxY
         let leftX = gaps.left
         let width = bounds.width - gaps.right - leftX
         return CGRect(x: leftX, y: topY, width: width, height: timelineHeight)

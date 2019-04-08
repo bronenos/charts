@@ -26,16 +26,10 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
     private var activeGuide: VerticalActiveGuide? = .primary
     private var lastEdge: ChartRange?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enabled: Bool) {
-        if enabled {
-            primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
-            secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
-        }
-        else {
-            primaryGuides = []
-            secondaryGuides = []
-        }
-        
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
+        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
+
         super.init(frame: .zero)
         
         primaryGuides.forEach { node in
@@ -54,7 +48,6 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
     }
     
     func update(edge: ChartRange, duration: TimeInterval) {
-        guard !primaryGuides.isEmpty else { return }
         guard let activeGuide = activeGuide else { return }
         let guidesPair = obtainGuides()
         
@@ -98,8 +91,8 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
                 guides: guidesPair.primary,
                 usingEdge: lastEdge,
                 startY: adjustFromPosition,
-                height: destinationToHeight * scalingCoef,
-                alpha: 0
+                height: bounds.height,
+                alpha: 1.0
             )
             
             _layout(
@@ -107,7 +100,7 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
                 usingEdge: edge,
                 startY: relativeFromPosition,
                 height: sourceToHeight,
-                alpha: 1.0
+                alpha: 0
             )
             
             self.activeGuide = nil
