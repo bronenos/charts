@@ -15,6 +15,8 @@ protocol IJsonReader {
     var stringValue: String { get }
     var int: Int? { get }
     var intValue: Int { get }
+    var bool: Bool? { get }
+    var boolValue: Bool { get }
     subscript(key: String) -> IJsonReader { get }
     subscript(index: Int) -> IJsonReader { get }
 }
@@ -52,6 +54,14 @@ struct JsonReader: IJsonReader {
     
     var intValue: Int {
         return int ?? 0
+    }
+    
+    var bool: Bool? {
+        return object as? Bool
+    }
+    
+    var boolValue: Bool {
+        return bool ?? false
     }
     
     subscript(key: String) -> IJsonReader {

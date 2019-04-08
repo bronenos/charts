@@ -16,22 +16,22 @@ enum StatLoadingState {
 }
 
 struct Chart: Equatable {
+    let type: ChartType
     let length: Int
     let lines: [ChartLine]
     let axis: [ChartAxisItem]
+    let children: [String: URL]
     
-    init() {
-        length = 0
-        lines = []
-        axis = []
-    }
-    
-    init(length: Int,
+    init(type: ChartType,
+         length: Int,
          lines: [ChartLine],
-         axis: [ChartAxisItem]) {
+         axis: [ChartAxisItem],
+         children: [String: URL]) {
+        self.type = type
         self.length = length
         self.lines = lines
         self.axis = axis
+        self.children = children
     }
     
     func visibleLines(config: ChartConfig, addingKeys: Set<String>) -> [ChartLine] {
@@ -43,11 +43,20 @@ struct Chart: Equatable {
     }
     
     static func ==(lhs: Chart, rhs: Chart) -> Bool {
+        guard lhs.type == rhs.type else { return false }
         guard lhs.length == rhs.length else { return false }
         guard lhs.lines == rhs.lines else { return false }
         guard lhs.axis == rhs.axis else { return false }
         return true
     }
+}
+
+enum ChartType {
+    case line
+    case duoLine
+    case bar
+    case area
+    case pie
 }
 
 struct ChartAxisItem: Equatable {

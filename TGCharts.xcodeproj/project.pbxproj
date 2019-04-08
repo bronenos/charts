@@ -46,7 +46,6 @@
 		D46182592234DB2B006B72A7 /* BaseInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46182582234DB2B006B72A7 /* BaseInteractor.swift */; };
 		D46182662234E0D5006B72A7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D46182682234E0D5006B72A7 /* Localizable.strings */; };
 		D461826E2234E35E006B72A7 /* StatDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461826D2234E35E006B72A7 /* StatDataSource.swift */; };
-		D4618270223595A8006B72A7 /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = D461826F223595A8006B72A7 /* chart_data.json */; };
 		D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827322359873006B72A7 /* HeartbeatWorkers.swift */; };
 		D461827622359895006B72A7 /* StatWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827522359895006B72A7 /* StatWorker.swift */; };
 		D461827822359927006B72A7 /* StatTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461827722359927006B72A7 /* StatTypes.swift */; };
@@ -58,6 +57,7 @@
 		D461828E223630A0006B72A7 /* ChartControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828D223630A0006B72A7 /* ChartControl.swift */; };
 		D4618290223630AE006B72A7 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D461828F223630AE006B72A7 /* ChartView.swift */; };
 		D46B96E1225B69C9001EFED6 /* ChartGraphContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B96E0225B69C9001EFED6 /* ChartGraphContainer.swift */; };
+		D46BA28F225B799C001EFED6 /* graph_data in Resources */ = {isa = PBXBuildFile; fileRef = D46BA28E225B799C001EFED6 /* graph_data */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
 		D4984A96225A6B150008C552 /* ChartHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A95225A6B150008C552 /* ChartHeader.swift */; };
 		D4984A98225A78BD0008C552 /* ChartOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A97225A78BD0008C552 /* ChartOptions.swift */; };
@@ -119,7 +119,6 @@
 		D46182692234E0D9006B72A7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D461826A2234E106006B72A7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D461826D2234E35E006B72A7 /* StatDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDataSource.swift; sourceTree = "<group>"; };
-		D461826F223595A8006B72A7 /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
 		D461827322359873006B72A7 /* HeartbeatWorkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartbeatWorkers.swift; sourceTree = "<group>"; };
 		D461827522359895006B72A7 /* StatWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatWorker.swift; sourceTree = "<group>"; };
 		D461827722359927006B72A7 /* StatTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTypes.swift; sourceTree = "<group>"; };
@@ -131,6 +130,7 @@
 		D461828D223630A0006B72A7 /* ChartControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartControl.swift; sourceTree = "<group>"; };
 		D461828F223630AE006B72A7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		D46B96E0225B69C9001EFED6 /* ChartGraphContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphContainer.swift; sourceTree = "<group>"; };
+		D46BA28E225B799C001EFED6 /* graph_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = graph_data; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
 		D4984A95225A6B150008C552 /* ChartHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartHeader.swift; sourceTree = "<group>"; };
 		D4984A97225A78BD0008C552 /* ChartOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptions.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 				D461822522346151006B72A7 /* LaunchScreen.storyboard */,
 				D461822822346151006B72A7 /* Info.plist */,
 				D46182682234E0D5006B72A7 /* Localizable.strings */,
-				D461826F223595A8006B72A7 /* chart_data.json */,
+				D46BA28E225B799C001EFED6 /* graph_data */,
 			);
 			path = TGCharts;
 			sourceTree = "<group>";
@@ -488,8 +488,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D461822722346151006B72A7 /* LaunchScreen.storyboard in Resources */,
+				D46BA28F225B799C001EFED6 /* graph_data in Resources */,
 				D46182662234E0D5006B72A7 /* Localizable.strings in Resources */,
-				D4618270223595A8006B72A7 /* chart_data.json in Resources */,
 				D461822422346151006B72A7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

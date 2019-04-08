@@ -30,7 +30,8 @@ final class Heartbeat: IHeartbeat {
         )
         
         let statWorker = StatWorker(
-            jsonFilename: "chart_data"
+            folderName: "graph_data",
+            entryFileName: "overview.json"
         )
         
         workers = HeartbeatWorkers(

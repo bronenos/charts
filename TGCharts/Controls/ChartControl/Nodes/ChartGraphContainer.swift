@@ -11,7 +11,7 @@ import UIKit
 
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
-    func adjustEdges(_ edges: [ChartRange], duration: TimeInterval)
+    func adjustGuides(_ edges: [ChartRange], duration: TimeInterval)
     func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions)
 }
 
@@ -50,7 +50,7 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         insertSubview(graph, belowSubview: guidesContainer)
     }
     
-    func adjustEdges(_ edges: [ChartRange], duration: TimeInterval) {
+    func adjustGuides(_ edges: [ChartRange], duration: TimeInterval) {
         guidesContainer.update(edge: edges.first!, duration: duration)
     }
     

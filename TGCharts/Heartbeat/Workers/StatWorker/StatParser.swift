@@ -10,17 +10,19 @@ import Foundation
 import UIKit
 
 protocol IStatParser: class {
-    func parse(data: Data) throws -> [Chart]
+    func parse(data: Data, including children: [String: URL]) throws -> Chart?
 }
 
 final class StatParser: IStatParser {
-    func parse(data: Data) throws -> [Chart] {
+    private let supportedLineTypes = ["line", "bar", "area"]
+    
+    func parse(data: Data, including children: [String: URL]) throws -> Chart? {
         let json = JsonReader(data: data)
-        let charts = json.array?.map(JsonReader.init).compactMap(parseChart) ?? []
-        return charts
+        let chart = parseChart(object: json, including: children)
+        return chart
     }
     
-    private func parseChart(object: JsonReader) -> Chart? {
+    private func parseChart(object: JsonReader, including children: [String: URL]) -> Chart? {
         guard let columns = object["columns"].array else { return nil }
         
         let columnNames: [String] = columns.map(JsonReader.init).compactMap { $0[0].string }
@@ -33,6 +35,7 @@ final class StatParser: IStatParser {
         guard lines.allSatisfy({ $0.values.count == numberOfDates }) else { return nil }
         
         return Chart(
+            type: parseChartType(object: object),
             length: numberOfDates,
             lines: lines,
             axis: dates.enumerated().map { index, date in
@@ -40,8 +43,24 @@ final class StatParser: IStatParser {
                     date: date,
                     values: calculateValues(lines: lines, index: index)
                 )
-            }
+            },
+            children: children
         )
+    }
+    
+    private func parseChartType(object: JsonReader) -> ChartType {
+        if object["y_scaled"].boolValue {
+            return .duoLine
+        }
+        else if object["percentage"].boolValue {
+            return .pie
+        }
+        else if object["stacked"].boolValue {
+            return .bar
+        }
+        else {
+            return .line
+        }
     }
     
     private func parseChartDates(object: JsonReader, key: String) -> [Date]? {
@@ -51,7 +70,7 @@ final class StatParser: IStatParser {
     }
     
     private func parseChartLine(object: JsonReader, key: String) -> ChartLine? {
-        guard object["types"][key].string == "line" else { return nil }
+        guard supportedLineTypes.contains(object["types"][key].stringValue) else { return nil }
         guard let name = object["names"][key].string else { return nil }
         guard let color = object["colors"][key].string else { return nil }
         let values: [Int] = obtainColumnValues(object: object, key: key)
@@ -77,3 +96,8 @@ final class StatParser: IStatParser {
         return edges
     }
 }
+
+// bar / area
+// root.y_scaled
+// root.stacked
+// root.percentage
