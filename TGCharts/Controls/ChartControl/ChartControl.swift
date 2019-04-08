@@ -21,7 +21,6 @@ protocol IChartControl: class {
     func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
     func unlink()
-    func toggleLine(key: String)
     func update()
 }
 
@@ -42,10 +41,10 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     
     private let startupRange = ChartRange(start: 0.75, end: 1.0)
     
-    init(chart: Chart, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = startupConfig(chart: chart, range: startupRange)
-        self.scene = ChartSceneNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        self.scene = ChartSceneNode(chart: chart, config: config, localeProvider: localeProvider, formattingProvider: formattingProvider)
         self.interactor = ChartInteractor(scene: scene, range: startupRange)
         
         super.init(frame: .zero)
@@ -70,6 +69,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         parentView.addSubview(self)
         
         scene.frame = CGRect(origin: .zero, size: bounds.size)
+        render()
     }
     
     func unlink() {
@@ -80,16 +80,14 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         scene.update(config: config, duration: duration)
     }
     
-    func toggleLine(key: String) {
-        guard let index = config.lines.firstIndex(where: { $0.key == key }) else { return }
-        
-        config.lines[index].visible.toggle()
-        render(duration: 0.25)
-    }
-    
     func update() {
         scene.updateDesign()
         render()
+    }
+    
+    func sceneDidToggleLine(index: Int) {
+        config.lines[index].visible.toggle()
+        render(duration: 0.25)
     }
     
     func interactorDidBegin() {
@@ -104,6 +102,10 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         config.range = interactor.range
         config.pointer = interactor.pointer
         render()
+    }
+    
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return scene.sizeThatFits(size)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

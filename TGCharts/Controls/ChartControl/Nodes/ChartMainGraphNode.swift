@@ -82,10 +82,10 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
         abort()
     }
     
-    override func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange) {
-        super.update(chart: chart, meta: meta, edge: edge)
+    override func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
+        super.update(chart: chart, meta: meta, edge: edge, duration: duration)
         placeHorizontalPointer(meta: meta, edge: edge)
-        placeVerticalIndices(meta: meta, edge: edge)
+        placeVerticalIndices(meta: meta, edge: edge, duration: duration)
     }
     
     override func updateDesign() {
@@ -162,7 +162,7 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
         }
     }
     
-    private func placeVerticalIndices(meta: ChartSliceMeta, edge: ChartRange) {
+    private func placeVerticalIndices(meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard let activeGuide = verticalActiveGuide else { return }
         
         guard edge != lastEdge else { return }
@@ -211,8 +211,8 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
             let destinationToHeight = bounds.height
             
             _layout(
-                valueNodes: currentPairs?.values ?? [],
-                underlineNodes: currentPairs?.underlines ?? [],
+                valueNodes: currentPairs.values,
+                underlineNodes: currentPairs.underlines,
                 usingEdge: lastEdge,
                 startY: adjustFromPosition,
                 height: destinationToHeight * scalingCoef,
@@ -220,8 +220,8 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
             )
             
             _layout(
-                valueNodes: otherPairs?.values ?? [],
-                underlineNodes: otherPairs?.underlines ?? [],
+                valueNodes: otherPairs.values,
+                underlineNodes: otherPairs.underlines,
                 usingEdge: edge,
                 startY: relativeFromPosition,
                 height: sourceToHeight,
@@ -230,11 +230,11 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
             
             verticalActiveGuide = nil
             UIView.animate(
-                withDuration: 0.15,
+                withDuration: (duration > 0 ? duration : 0.15),
                 animations: { [unowned self] in
                     _layout(
-                        valueNodes: currentPairs?.values ?? [],
-                        underlineNodes: currentPairs?.underlines ?? [],
+                        valueNodes: currentPairs.values,
+                        underlineNodes: currentPairs.underlines,
                         usingEdge: lastEdge,
                         startY: adjustFromPosition,
                         height: destinationToHeight * scalingCoef,
@@ -242,8 +242,8 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
                     )
                     
                     _layout(
-                        valueNodes: otherPairs?.values ?? [],
-                        underlineNodes: otherPairs?.underlines ?? [],
+                        valueNodes: otherPairs.values,
+                        underlineNodes: otherPairs.underlines,
                         usingEdge: edge,
                         startY: 0,
                         height: destinationToHeight,
@@ -259,22 +259,23 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
             )
         }
         else {
+            let currentPairs = obtainCurrentPairs()
+            let otherPairs = obtainOtherPairs()
+            
             _layout(
-                valueNodes: verticalValueGuides,
-                underlineNodes: verticalUnderlineGuides,
+                valueNodes: currentPairs.values,
+                underlineNodes: currentPairs.underlines,
                 usingEdge: edge,
                 startY: 0,
                 height: bounds.height,
                 alpha: 1.0
             )
             
-            let currentPairs = obtainCurrentPairs()
-            currentPairs?.values.forEach { $0.alpha = 1.0 }
-            currentPairs?.underlines.forEach { $0.alpha = 1.0 }
+            currentPairs.values.forEach { $0.alpha = 1.0 }
+            currentPairs.underlines.forEach { $0.alpha = 1.0 }
             
-            let otherPairs = obtainOtherPairs()
-            otherPairs?.values.forEach { $0.alpha = 0 }
-            otherPairs?.underlines.forEach { $0.alpha = 0 }
+            otherPairs.values.forEach { $0.alpha = 0 }
+            otherPairs.underlines.forEach { $0.alpha = 0 }
         }
     }
     
@@ -303,17 +304,17 @@ final class ChartMainGraphNode: ChartGraphNode, IChartMainGraphNode {
         }
     }
     
-    private func obtainCurrentPairs() -> (values: [ChartVerticalStepNode], underlines: [ChartVerticalStepNode])? {
+    private func obtainCurrentPairs() -> (values: [ChartVerticalStepNode], underlines: [ChartVerticalStepNode]) {
         switch verticalActiveGuide {
-        case .none: return nil
+        case .none: return ([], [])
         case .some(.primary): return (verticalValueGuides, verticalUnderlineGuides)
         case .some(.secondary): return (verticalPostValueGuides, verticalPostUnderlineGuides)
         }
     }
     
-    private func obtainOtherPairs() -> (values: [ChartVerticalStepNode], underlines: [ChartVerticalStepNode])? {
+    private func obtainOtherPairs() -> (values: [ChartVerticalStepNode], underlines: [ChartVerticalStepNode]) {
         switch verticalActiveGuide {
-        case .none: return nil
+        case .none: return ([], [])
         case .some(.primary): return (verticalPostValueGuides, verticalPostUnderlineGuides)
         case .some(.secondary): return (verticalValueGuides, verticalUnderlineGuides)
         }

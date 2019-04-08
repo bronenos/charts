@@ -10,3 +10,4 @@
 "Stat.Section.TitlePrefix" = "График";
 "Stat.Mode.Light" = "Переключиться в дневной режим";
 "Stat.Mode.Dark" = "Переключиться в ночной режим";
+"Chart.Control.ZoomOut" = "〈 Обратно";

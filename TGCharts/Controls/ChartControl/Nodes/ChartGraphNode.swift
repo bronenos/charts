@@ -54,10 +54,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             lineNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
         }
         
-        update()
+        update(duration: duration)
     }
     
-    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange) {
+    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         chart.lines.forEach { line in
             guard let node = self.lineNodes[line.key] else { return }
             node.points = self.calculateNormalizedPoints(line: line, edge: edge, with: meta)
@@ -65,7 +65,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             if let targetVisibility = self.config.findLine(for: line.key)?.visible {
                 let targetAlpha = CGFloat(targetVisibility ? 1.0 : 0)
                 guard node.alpha != targetAlpha else { return }
-                UIView.animate(withDuration: 0.25) { node.alpha = targetAlpha }
+                UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
             }
         }
     }
@@ -73,6 +73,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override func updateDesign() {
         super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)
+    }
+    
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return CGSize(width: size.width, height: 300)
     }
     
     override func layoutSubviews() {
@@ -86,10 +90,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         return ((1.0 - (CGFloat(value) - edge.start) / (edge.end - edge.start))) * bounds.size.height
     }
     
-    private func update() {
+    private func update(duration: TimeInterval = 0) {
         guard let meta = obtainMeta(chart: chart, config: config) else { return }
         let edge = calculateSliceEdge(meta: meta)
-        update(chart: chart, meta: meta, edge: edge)
+        update(chart: chart, meta: meta, edge: edge, duration: duration)
     }
     
     private func obtainEdge() -> ChartRange {

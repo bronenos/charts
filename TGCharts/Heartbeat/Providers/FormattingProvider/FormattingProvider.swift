@@ -33,6 +33,14 @@ final class FormattingProvider: IFormattingProvider {
         case .justYear:
             dateFormatter.dateFormat = "yyyy"
             dateFormatter.doesRelativeDateFormatting = false
+            
+        case .mediumDate:
+            dateFormatter.dateFormat = "d MMM yyyy"
+            dateFormatter.doesRelativeDateFormatting = false
+            
+        case .fullDate:
+            dateFormatter.dateFormat = "EEEE, d MMM yyyy"
+            dateFormatter.doesRelativeDateFormatting = false
         }
         
         return dateFormatter.string(from: date)

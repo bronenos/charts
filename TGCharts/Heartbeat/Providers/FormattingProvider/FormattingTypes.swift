@@ -11,4 +11,6 @@ import Foundation
 enum FormattingDateStyle {
     case shortDate
     case justYear
+    case mediumDate
+    case fullDate
 }

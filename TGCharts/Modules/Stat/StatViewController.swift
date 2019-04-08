@@ -22,7 +22,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     private let tableView = UITableView(frame: .zero, style: .grouped)
     
     private let dataSource = StatDataSource()
-    private var chartControls = [IChartControl]()
+    private var chartControls = [ChartControl]()
 
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
@@ -50,7 +50,13 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         let formattingProvider = interactor.formattingProvider
         
         chartControls.forEach { control in control.setDelegate(nil) }
-        chartControls = charts.map { ChartControl(chart: $0, formattingProvider: formattingProvider) }
+        chartControls = charts.map {
+            ChartControl(
+                chart: $0,
+                localeProvider: interactor.localeProvider,
+                formattingProvider: formattingProvider
+            )
+        }
         chartControls.forEach { control in control.setDelegate(self) }
         
         dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
