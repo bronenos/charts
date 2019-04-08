@@ -51,9 +51,9 @@ struct Chart: Equatable {
     }
 }
 
-enum ChartType {
+enum ChartType: String {
     case line
-    case duoLine
+    case duo
     case bar
     case area
     case pie
@@ -73,12 +73,14 @@ struct ChartAxisItem: Equatable {
 struct ChartLine: Equatable {
     let key: String
     let name: String
+    let type: String
     let color: UIColor
     let values: [Int]
     
     static func ==(lhs: ChartLine, rhs: ChartLine) -> Bool {
         guard lhs.key == rhs.key else { return false }
         guard lhs.name == rhs.name else { return false }
+        guard lhs.type == rhs.type else { return false }
         guard lhs.color == rhs.color else { return false }
         guard lhs.values == rhs.values else { return false }
         return true

@@ -14,8 +14,6 @@ protocol IStatParser: class {
 }
 
 final class StatParser: IStatParser {
-    private let supportedLineTypes = ["line", "bar", "area"]
-    
     func parse(data: Data, including children: [String: URL]) throws -> Chart? {
         let json = JsonReader(data: data)
         let chart = parseChart(object: json, including: children)
@@ -33,9 +31,10 @@ final class StatParser: IStatParser {
 
         let lines = columnNames.compactMap({ parseChartLine(object: object, key: $0) })
         guard lines.allSatisfy({ $0.values.count == numberOfDates }) else { return nil }
+        guard let firstLine = lines.first else { return nil }
         
         return Chart(
-            type: parseChartType(object: object),
+            type: parseChartType(object: object, firstLineType: firstLine.type),
             length: numberOfDates,
             lines: lines,
             axis: dates.enumerated().map { index, date in
@@ -48,18 +47,12 @@ final class StatParser: IStatParser {
         )
     }
     
-    private func parseChartType(object: JsonReader) -> ChartType {
-        if object["y_scaled"].boolValue {
-            return .duoLine
-        }
-        else if object["percentage"].boolValue {
-            return .pie
-        }
-        else if object["stacked"].boolValue {
-            return .bar
-        }
-        else {
-            return .line
+    private func parseChartType(object: JsonReader, firstLineType: String) -> ChartType {
+        switch firstLineType {
+        case "line" where object["y_scaled"].boolValue: return .duo
+        case "bar": return .bar
+        case "area": return .area
+        default: return .line
         }
     }
     
@@ -70,11 +63,11 @@ final class StatParser: IStatParser {
     }
     
     private func parseChartLine(object: JsonReader, key: String) -> ChartLine? {
-        guard supportedLineTypes.contains(object["types"][key].stringValue) else { return nil }
         guard let name = object["names"][key].string else { return nil }
+        guard let type = object["types"][key].string else { return nil }
         guard let color = object["colors"][key].string else { return nil }
         let values: [Int] = obtainColumnValues(object: object, key: key)
-        return ChartLine(key: key, name: name, color: UIColor(hex: color), values: values)
+        return ChartLine(key: key, name: name, type: type, color: UIColor(hex: color), values: values)
     }
     
     private func obtainColumnValues<T>(object: JsonReader, key: String) -> [T] {
