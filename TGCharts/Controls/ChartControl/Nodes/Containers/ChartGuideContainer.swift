@@ -22,7 +22,6 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
             chart: chart,
             config: config,
             alignment: .left,
-            pinned: true,
             formattingProvider: formattingProvider
         )
         
@@ -30,7 +29,6 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
             chart: chart,
             config: config,
             alignment: .right,
-            pinned: false,
             formattingProvider: formattingProvider
         )
         

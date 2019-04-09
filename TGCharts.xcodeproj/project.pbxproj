@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D402B3A1225CF04800A59A18 /* ChartBarGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D402B3A0225CF04800A59A18 /* ChartBarGraphNode.swift */; };
 		D42658D02236341000FB79AB /* ChartTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658CF2236341000FB79AB /* ChartTypes.swift */; };
 		D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42658D1223678CC00FB79AB /* StatSectionHeader.swift */; };
 		D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42B7A4B223952E800733F2F /* ChartNode.swift */; };
@@ -77,6 +78,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D402B3A0225CF04800A59A18 /* ChartBarGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartBarGraphNode.swift; sourceTree = "<group>"; };
 		D42658CF2236341000FB79AB /* ChartTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTypes.swift; sourceTree = "<group>"; };
 		D42658D1223678CC00FB79AB /* StatSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatSectionHeader.swift; sourceTree = "<group>"; };
 		D42B7A4B223952E800733F2F /* ChartNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartNode.swift; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 				D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */,
 				D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */,
 				D46EE1DD225BC79200183E6E /* ChartDuoGraphNode.swift */,
+				D402B3A0225CF04800A59A18 /* ChartBarGraphNode.swift */,
 			);
 			path = Graphs;
 			sourceTree = "<group>";
@@ -565,6 +568,7 @@
 				D4984A9B225A80180008C552 /* ChartOptionsTypes.swift in Sources */,
 				D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
+				D402B3A1225CF04800A59A18 /* ChartBarGraphNode.swift in Sources */,
 				D4984A9F225B42950008C552 /* ChartLineGraphNode.swift in Sources */,
 				D42B7A522239779B00733F2F /* ChartScene.swift in Sources */,
 				D46EE1E0225BCE8000183E6E /* ChartGuideContainer.swift in Sources */,
