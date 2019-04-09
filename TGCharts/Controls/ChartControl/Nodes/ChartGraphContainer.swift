@@ -11,23 +11,22 @@ import UIKit
 
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
-    func adjustGuides(_ edges: [ChartRange], duration: TimeInterval)
-    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions)
+    func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
+    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions)
 }
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
-    let guidesContainer: ChartGuideNode
+    let guidesContainer: ChartGuideContainer
     let pointerContainer: ChartPointerNode
 
     private var innerGraph: ChartGraphNode?
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        guidesContainer = ChartGuideNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
         pointerContainer = ChartPointerNode(chart: chart, formattingProvider: formattingProvider)
 
         super.init(frame: .zero)
         
-        guidesContainer.clipsToBounds = true
         guidesContainer.isUserInteractionEnabled = false
         addSubview(guidesContainer)
         
@@ -50,12 +49,12 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         insertSubview(graph, belowSubview: guidesContainer)
     }
     
-    func adjustGuides(_ edges: [ChartRange], duration: TimeInterval) {
-        guidesContainer.update(edge: edges.first!, duration: duration)
+    func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {
+        guidesContainer.update(leftEdge: left, rightEdge: right, duration: duration)
     }
     
-    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions) {
-        pointerContainer.update(chart: chart, config: config, meta: meta, edge: edge, options: options)
+    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions) {
+        pointerContainer.update(chart: chart, config: config, meta: meta, edges: edges, options: options)
     }
     
     override func updateDesign() {

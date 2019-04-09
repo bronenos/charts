@@ -30,7 +30,13 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         overlayNode.radius = 4
         
         addSubview(overlayNode)
+        
+        dateNode.font = UIFont.boldSystemFont(ofSize: 12)
+        dateNode.textAlignment = .left
         overlayNode.addSubview(dateNode)
+        
+        yearNode.font = UIFont.boldSystemFont(ofSize: 12)
+        yearNode.textAlignment = .left
         overlayNode.addSubview(yearNode)
     }
     
@@ -45,21 +51,11 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         valueNodes = lines.map { constructValueNode(line: $0, index: index) }
         valueNodes.forEach { overlayNode.addSubview($0) }
         
-        dateNode.content = ChartLabelNodeContent(
-            text: "\(formattingProvider.format(date: date, style: .shortDate))",
-            color: DesignBook.shared.color(.chartPointerCloudForeground),
-            font: UIFont.boldSystemFont(ofSize: 12),
-            alignment: .left,
-            limitedToBounds: false
-        )
+        dateNode.text = formattingProvider.format(date: date, style: .shortDate)
+        dateNode.textColor = DesignBook.shared.color(.chartPointerCloudForeground)
         
-        yearNode.content = ChartLabelNodeContent(
-            text: "\(formattingProvider.format(date: date, style: .justYear))",
-            color: DesignBook.shared.color(.chartPointerCloudForeground),
-            font: UIFont.systemFont(ofSize: 12),
-            alignment: .left,
-            limitedToBounds: false
-        )
+        yearNode.text = formattingProvider.format(date: date, style: .justYear)
+        yearNode.textColor = DesignBook.shared.color(.chartPointerCloudForeground)
         
         setNeedsLayout()
     }
@@ -88,16 +84,11 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
     }
     
     private func constructValueNode(line: ChartLine, index: Int) -> ChartLabelNode {
-        let content = ChartLabelNodeContent(
-            text: "\(line.values[index])",
-            color: line.color,
-            font: UIFont.systemFont(ofSize: 12),
-            alignment: .right,
-            limitedToBounds: false
-        )
-        
         let valueNode = ChartLabelNode()
-        valueNode.content = content
+        valueNode.text = "\(line.values[index])"
+        valueNode.textColor = line.color
+        valueNode.font = UIFont.systemFont(ofSize: 12)
+        valueNode.textAlignment = .right
         return valueNode
     }
 }

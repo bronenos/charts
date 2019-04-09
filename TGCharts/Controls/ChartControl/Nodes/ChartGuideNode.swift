@@ -26,9 +26,9 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
     private var activeGuide: VerticalActiveGuide? = .primary
     private var lastEdge: ChartRange?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
-        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode() }
+    init(chart: Chart, config: ChartConfig, alignment: NSTextAlignment, formattingProvider: IFormattingProvider) {
+        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
+        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
 
         super.init(frame: .zero)
         

@@ -27,20 +27,9 @@ struct ChartLabelNodeContent: Equatable {
 }
 
 protocol IChartLabelNode: IChartNode {
-    var content: ChartLabelNodeContent? { get set }
 }
 
 final class ChartLabelNode: UILabel, IChartLabelNode {
-    var content: ChartLabelNodeContent? {
-        didSet {
-            text = content?.text
-            textColor = content?.color
-            font = content?.font
-            textAlignment = content?.alignment ?? .center
-            clipsToBounds = content?.limitedToBounds ?? false
-        }
-    }
-    
     func updateDesign() {
     }
     

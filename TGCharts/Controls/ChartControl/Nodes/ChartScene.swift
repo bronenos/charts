@@ -58,7 +58,12 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         addSubview(navigatorNode)
         addSubview(optionsNode)
         
-        let graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        let graphNode: ChartGraphNode
+        switch chart.type {
+        case .duo: graphNode = ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        default: graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        }
+        
         currentGraph = graphNode
         graphContainer.inject(graph: graphNode)
         

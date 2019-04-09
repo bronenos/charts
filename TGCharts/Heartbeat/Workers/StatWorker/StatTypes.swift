@@ -59,7 +59,7 @@ enum ChartType: String {
     case pie
 }
 
-struct ChartAxisItem: Equatable {
+struct ChartAxisItem: Equatable, Comparable {
     let date: Date
     let values: [String: Int]
     
@@ -67,6 +67,10 @@ struct ChartAxisItem: Equatable {
         guard lhs.date == rhs.date else { return false }
         guard lhs.values == rhs.values else { return false }
         return true
+    }
+    
+    static func <(lhs: ChartAxisItem, rhs: ChartAxisItem) -> Bool {
+        return lhs.date < rhs.date
     }
 }
 

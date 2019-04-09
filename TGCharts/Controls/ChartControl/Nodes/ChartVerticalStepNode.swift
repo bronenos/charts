@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol IChartVerticalStepNode: IChartNode {
-    var value: String { get set }
+    var value: String? { get set }
     var color: UIColor? { get set }
 }
 
@@ -18,12 +18,15 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
     private let valueNode = ChartLabelNode()
     private let underlineNode = ChartNode()
     
-    init() {
+    init(alignment: NSTextAlignment) {
         super.init(frame: .zero)
         
         isUserInteractionEnabled = false
         
+        valueNode.font = UIFont.systemFont(ofSize: 12)
+        valueNode.textAlignment = alignment
         addSubview(valueNode)
+        
         addSubview(underlineNode)
     }
     
@@ -31,25 +34,23 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
         abort()
     }
     
-    var value = String() {
-        didSet {
-            guard value != oldValue else { return }
-            
-            valueNode.content = ChartLabelNodeContent(
-                text: value,
-                color: DesignBook.shared.color(.chartIndexForeground),
-                font: UIFont.systemFont(ofSize: 12),
-                alignment: .left,
-                limitedToBounds: false
-            )
-            
-            setNeedsLayout()
+    var value: String? {
+        get {
+            return valueNode.text
+        }
+        set {
+            valueNode.text = newValue
+            valueNode.textColor = DesignBook.shared.color(.chartIndexForeground)
         }
     }
     
     var color: UIColor? {
-        get { return underlineNode.backgroundColor }
-        set { underlineNode.backgroundColor = newValue }
+        get {
+            return underlineNode.backgroundColor
+        }
+        set {
+            underlineNode.backgroundColor = newValue
+        }
     }
     
     override func layoutSubviews() {
@@ -72,8 +73,7 @@ fileprivate struct Layout {
     private let underlineHeight = CGFloat(1)
     
     var valueNodeFrame: CGRect {
-        let size = valueNode.sizeThatFits(.zero)
-        return CGRect(x: 0, y: 0, width: size.width, height: bounds.height)
+        return bounds
     }
     
     var underlineNodeFrame: CGRect {

@@ -13,17 +13,20 @@ protocol IFormattingProvider: class {
 }
 
 final class FormattingProvider: IFormattingProvider {
-    private let localeProvider: ILocaleProvider
-    
     private let dateFormatter = DateFormatter()
     private(set) var calendar = Calendar.autoupdatingCurrent
     
+    private var cached = [String: String]()
+    
     init(localeProvider: ILocaleProvider) {
-        self.localeProvider = localeProvider
+        dateFormatter.locale = localeProvider.activeLocale
     }
     
     func format(date: Date, style: FormattingDateStyle) -> String {
-        dateFormatter.locale = localeProvider.activeLocale
+        let cachingKey = "\(date.timeIntervalSince1970):\(style)"
+        if let cached = cached[cachingKey] {
+            return cached
+        }
         
         switch style {
         case .shortDate:
@@ -43,6 +46,9 @@ final class FormattingProvider: IFormattingProvider {
             dateFormatter.doesRelativeDateFormatting = false
         }
         
-        return dateFormatter.string(from: date)
+        let result = dateFormatter.string(from: date)
+        cached[cachingKey] = result
+        
+        return result
     }
 }

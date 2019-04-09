@@ -18,7 +18,7 @@ struct ChartPointerOptions: OptionSet {
 }
 
 protocol IChartPointerNode: IChartNode {
-    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions)
+    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions)
 }
 
 final class ChartPointerNode: ChartNode, IChartPointerNode {
@@ -48,7 +48,7 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
         abort()
     }
     
-    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edge: ChartRange, options: ChartPointerOptions) {
+    func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions) {
         if let pointer = config.pointer {
             let startIndex = meta.visibleIndices.startIndex
             let endIndex = meta.visibleIndices.endIndex
@@ -58,7 +58,11 @@ final class ChartPointerNode: ChartNode, IChartPointerNode {
             let x = -offset + meta.stepX * CGFloat(pointedIndex)
             var lowestY = CGFloat(0)
             
-            zip(pointerDotNodes, chart.lines).forEach { node, line in
+            for index in chart.lines.indices {
+                let line = chart.lines[index]
+                let edge = edges[index]
+                let node = pointerDotNodes[index]
+                
                 let value = line.values[pointedIndex]
                 let y = bounds.calculateY(value: value, edge: edge)
                 lowestY = max(lowestY, y)
