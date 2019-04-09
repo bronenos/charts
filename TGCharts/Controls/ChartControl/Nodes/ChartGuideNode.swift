@@ -19,6 +19,9 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
         case secondary
     }
     
+    private let pinned: Bool
+    private let formattingProvider: IFormattingProvider
+    
     private let primaryGuides: [ChartVerticalStepNode]
     private let secondaryGuides: [ChartVerticalStepNode]
     
@@ -26,7 +29,10 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
     private var activeGuide: VerticalActiveGuide? = .primary
     private var lastEdge: ChartRange?
     
-    init(chart: Chart, config: ChartConfig, alignment: NSTextAlignment, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, config: ChartConfig, alignment: NSTextAlignment, pinned: Bool, formattingProvider: IFormattingProvider) {
+        self.pinned = pinned
+        self.formattingProvider = formattingProvider
+        
         primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
         secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
 
@@ -70,9 +76,10 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
                 
                 let guide = guides[step]
                 guide.frame = CGRect(x: 0, y: currentY, width: bounds.width, height: 20)
-                guide.value = (step > 0 && value == 0 ? String() : String(describing: value))
+                guide.value = (step > 0 && value == 0 ? String() : formattingProvider.format(guide: value))
                 guide.color = color
                 guide.alpha = alpha
+                guide.isHidden = (usingEdge.distance == 0 && pinned == false)
             }
         }
         

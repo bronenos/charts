@@ -18,8 +18,21 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
     let rightGuidesNode: ChartGuideNode
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        leftGuidesNode = ChartGuideNode(chart: chart, config: config, alignment: .left, formattingProvider: formattingProvider)
-        rightGuidesNode = ChartGuideNode(chart: chart, config: config, alignment: .right, formattingProvider: formattingProvider)
+        leftGuidesNode = ChartGuideNode(
+            chart: chart,
+            config: config,
+            alignment: .left,
+            pinned: true,
+            formattingProvider: formattingProvider
+        )
+        
+        rightGuidesNode = ChartGuideNode(
+            chart: chart,
+            config: config,
+            alignment: .right,
+            pinned: false,
+            formattingProvider: formattingProvider
+        )
         
         super.init(frame: .zero)
         

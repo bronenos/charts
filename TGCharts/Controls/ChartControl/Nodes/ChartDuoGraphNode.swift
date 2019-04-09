@@ -9,86 +9,39 @@
 import Foundation
 import UIKit
 
-protocol IChartDuoGraphNode: IChartGraphNode {
+protocol IChartDuoGraphNode: IChartLineGraphNode {
 }
 
-class ChartDuoGraphNode: ChartGraphNode, IChartDuoGraphNode {
-    private let width: CGFloat
-    
-    private var lineNodes = [String: ChartFigureNode]()
+class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     private let pointerLineNode = ChartNode()
-    
-    private var calculationQueue = OperationQueue()
-    private var cachedResult: CalculateOperation.Result?
-    
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        self.width = width
-        
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        calculationQueue.maxConcurrentOperationCount = 1
-        calculationQueue.qualityOfService = .userInteractive
-        
-        chart.lines.forEach { line in
-            let node = ChartFigureNode(figure: .joinedLines)
-            node.strokeColor = line.color
-            node.width = width
-            graphContainer.addSubview(node)
-            lineNodes[line.key] = node
-        }
-        
-        pointerLineNode.isHidden = true
-        addSubview(pointerLineNode)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        abort()
-    }
-    
-    override func update(config: ChartConfig, duration: TimeInterval) {
-        super.update(config: config, duration: duration)
-        
-        if duration > 0 {
-            lineNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
-        }
-        
-        update(duration: duration)
-    }
     
     func update(chart: Chart, meta: ChartSliceMeta, edges: [String: ChartRange], duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let coordsY = cachedResult?.coordsY else { return }
+        guard let coordsY = (cachedResult as? CalculateOperation.Result)?.coordsY else { return }
+
+        placeLines(
+            meta: meta,
+            offset: meta.totalWidth * config.range.start,
+            coordsY: coordsY,
+            duration: duration
+        )
         
-        let offset = meta.totalWidth * config.range.start
-        let orderedEdges = chart.lines.compactMap { edges[$0.key] }
+        container?.adjustGuides(
+            left: visibleGuide(lineIndex: 0, edges: edges),
+            right: visibleGuide(lineIndex: 1, edges: edges),
+            duration: duration
+        )
         
-        chart.lines.forEach { line in
-            guard let node = lineNodes[line.key] else { return }
-            guard let coords = coordsY[line.key] else { return }
-            
-            node.points = line.values.enumerated().map { index, value in
-                let x = -offset + meta.stepX * CGFloat(index)
-                let y = coords[index]
-                return CGPoint(x: x, y: y)
-            }
-            
-            if let targetVisibility = config.findLine(for: line.key)?.visible {
-                let targetAlpha = CGFloat(targetVisibility ? 1.0 : 0)
-                guard node.alpha != targetAlpha else { return }
-                UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
-            }
-        }
-        
-        container?.adjustGuides(left: visibleGuide(lineIndex: 0, edges: edges), right: visibleGuide(lineIndex: 1, edges: edges), duration: duration)
-        container?.adjustPointer(chart: chart, config: config, meta: meta, edges: orderedEdges, options: [.line, .dots])
+        container?.adjustPointer(
+            chart: chart,
+            config: config,
+            meta: meta,
+            edges: chart.lines.compactMap { edges[$0.key] },
+            options: [.line, .dots]
+        )
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        update()
-    }
-    
-    private func update(duration: TimeInterval = 0) {
+    override func update(duration: TimeInterval = 0) {
         guard let meta = obtainMeta(chart: chart, config: config) else { return }
         
         let operation = CalculateOperation(
@@ -98,20 +51,14 @@ class ChartDuoGraphNode: ChartGraphNode, IChartDuoGraphNode {
             bounds: bounds,
             completion: { [weak self] result in
                 guard let `self` = self else { return }
+                guard let `result` = result as? CalculateOperation.Result else { return }
+                
                 self.cachedResult = result
                 self.update(chart: self.chart, meta: meta, edges: result.edges, duration: duration)
             }
         )
         
-        if let _ = cachedResult {
-            guard calculationQueue.operations.isEmpty else { return }
-            calculationQueue.addOperation(operation)
-        }
-        else {
-            let result = operation.calculateResult()
-            cachedResult = result
-            update(chart: chart, meta: meta, edges: result.edges, duration: duration)
-        }
+        enqueueCalculation(operation: operation, duration: duration)
     }
     
     private func visibleGuide(lineIndex: Int, edges: [String: ChartRange]) -> ChartRange? {
@@ -120,7 +67,7 @@ class ChartDuoGraphNode: ChartGraphNode, IChartDuoGraphNode {
     }
 }
 
-fileprivate final class CalculateOperation: Operation {
+fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     struct Result {
         let range: ChartRange
         let edges: [String: ChartRange]
@@ -131,11 +78,11 @@ fileprivate final class CalculateOperation: Operation {
     private let config: ChartConfig
     private let meta: ChartSliceMeta
     private let bounds: CGRect
-    private let completion: ((Result) -> Void)
+    private let completion: ((Any) -> Void)
     
     private let callerQueue = OperationQueue.current ?? .main
     
-    init(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, bounds: CGRect, completion: @escaping ((Result) -> Void)) {
+    init(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, bounds: CGRect, completion: @escaping ((Any) -> Void)) {
         self.chart = chart
         self.config = config
         self.meta = meta
@@ -143,7 +90,7 @@ fileprivate final class CalculateOperation: Operation {
         self.completion = completion
     }
     
-    func calculateResult() -> Result {
+    func calculateResult() -> Any {
         let edges = calculateSliceEdges(meta: meta)
         let coordsY = calculateNormalizedPoints(edges: edges, with: meta)
         

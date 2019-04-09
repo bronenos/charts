@@ -10,11 +10,14 @@ import Foundation
 
 protocol IFormattingProvider: class {
     func format(date: Date, style: FormattingDateStyle) -> String
+    func format(guide value: Int) -> String
 }
 
 final class FormattingProvider: IFormattingProvider {
     private let dateFormatter = DateFormatter()
     private(set) var calendar = Calendar.autoupdatingCurrent
+    
+    private let quantityFormatter = NumberFormatter()
     
     private var cached = [String: String]()
     
@@ -24,9 +27,7 @@ final class FormattingProvider: IFormattingProvider {
     
     func format(date: Date, style: FormattingDateStyle) -> String {
         let cachingKey = "\(date.timeIntervalSince1970):\(style)"
-        if let cached = cached[cachingKey] {
-            return cached
-        }
+        if let cached = cached[cachingKey] { return cached }
         
         switch style {
         case .shortDate:
@@ -50,5 +51,32 @@ final class FormattingProvider: IFormattingProvider {
         cached[cachingKey] = result
         
         return result
+    }
+    
+    func format(guide value: Int) -> String {
+        if value > 1_000_000 {
+            quantityFormatter.minimumFractionDigits = 2
+            quantityFormatter.maximumFractionDigits = 2
+            
+            let rest = Double(value) / 1_000_000
+            if let value = quantityFormatter.string(from: NSNumber(value: rest)) {
+                return value + "M"
+            }
+        }
+        
+        if value > 1_000 {
+            quantityFormatter.minimumFractionDigits = 2
+            quantityFormatter.maximumFractionDigits = 2
+            
+            let rest = Double(value) / 1_000
+            if let value = quantityFormatter.string(from: NSNumber(value: rest)) {
+                return value + "K"
+            }
+        }
+        
+        quantityFormatter.minimumFractionDigits = 0
+        quantityFormatter.maximumFractionDigits = 0
+        
+        return String(describing: value)
     }
 }

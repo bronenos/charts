@@ -10,24 +10,18 @@ import Foundation
 import UIKit
 
 protocol IChartLineGraphNode: IChartGraphNode {
+    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval)
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     private let width: CGFloat
     
-    private var lineNodes = [String: ChartFigureNode]()
     private let pointerLineNode = ChartNode()
     
-    private var calculationQueue = OperationQueue()
-    private var cachedResult: CalculateOperation.Result?
-
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
         self.width = width
         
         super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        calculationQueue.maxConcurrentOperationCount = 1
-        calculationQueue.qualityOfService = .userInteractive
         
         chart.lines.forEach { line in
             let node = ChartFigureNode(figure: .joinedLines)
@@ -47,23 +41,38 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     
     override func update(config: ChartConfig, duration: TimeInterval) {
         super.update(config: config, duration: duration)
-        
-        if duration > 0 {
-            lineNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
-        }
-        
         update(duration: duration)
     }
     
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let coordsY = cachedResult?.coordsY else { return }
+        guard let coordsY = (cachedResult as? CalculateOperation.Result)?.coordsY else { return }
         
-        let offset = meta.totalWidth * config.range.start
-        let duplicatedEdges: [ChartRange] = chart.lines.map { _ in edge }
+        placeLines(
+            meta: meta,
+            offset: meta.totalWidth * config.range.start,
+            coordsY: coordsY,
+            duration: duration
+        )
         
+        container?.adjustGuides(
+            left: edge,
+            right: nil,
+            duration: duration
+        )
+        
+        container?.adjustPointer(
+            chart: chart,
+            config: config,
+            meta: meta,
+            edges: chart.lines.map { _ in edge },
+            options: [.line, .dots]
+        )
+    }
+    
+    func placeLines(meta: ChartSliceMeta, offset: CGFloat, coordsY: [String: [CGFloat]], duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
-            guard let node = self.lineNodes[line.key] else { return }
+            guard let node = lineNodes[line.key] else { return }
             guard let coords = coordsY[line.key] else { return }
             
             node.points = line.values.enumerated().map { index, value in
@@ -77,9 +86,6 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
             }
         }
-        
-        container?.adjustGuides(left: edge, right: nil, duration: duration)
-        container?.adjustPointer(chart: chart, config: config, meta: meta, edges: duplicatedEdges, options: [.line, .dots])
     }
     
     override func layoutSubviews() {
@@ -87,7 +93,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         update()
     }
     
-    private func update(duration: TimeInterval = 0) {
+    func update(duration: TimeInterval = 0) {
         guard let meta = obtainMeta(chart: chart, config: config) else { return }
         
         let operation = CalculateOperation(
@@ -97,34 +103,18 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             bounds: bounds,
             completion: { [weak self] result in
                 guard let `self` = self else { return }
+                guard let `result` = result as? CalculateOperation.Result else { return }
+                
                 self.cachedResult = result
                 self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
             }
         )
         
-//        premove(meta: meta)
-        
-        if let _ = cachedResult {
-            if calculationQueue.operations.isEmpty {
-                calculationQueue.addOperation(operation)
-            }
-        }
-        else {
-            let result = operation.calculateResult()
-            cachedResult = result
-            update(chart: chart, meta: meta, edge: result.edge, duration: duration)
-        }
-    }
-    
-    private func premove(meta: ChartSliceMeta) {
-        let offset = meta.totalWidth * config.range.start
-        for node in lineNodes.values {
-            node.transform = CGAffineTransform(translationX: -offset, y: 0)
-        }
+        enqueueCalculation(operation: operation, duration: duration)
     }
 }
 
-fileprivate final class CalculateOperation: Operation {
+fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     struct Result {
         let range: ChartRange
         let edge: ChartRange
@@ -135,7 +125,7 @@ fileprivate final class CalculateOperation: Operation {
     private let config: ChartConfig
     private let meta: ChartSliceMeta
     private let bounds: CGRect
-    private let completion: ((Result) -> Void)
+    private let completion: ((Any) -> Void)
     
     private let callerQueue = OperationQueue.current ?? .main
     
@@ -143,7 +133,7 @@ fileprivate final class CalculateOperation: Operation {
          config: ChartConfig,
          meta: ChartSliceMeta,
          bounds: CGRect,
-         completion: @escaping ((Result) -> Void)) {
+         completion: @escaping ((Any) -> Void)) {
         self.chart = chart
         self.config = config
         self.meta = meta
@@ -151,7 +141,7 @@ fileprivate final class CalculateOperation: Operation {
         self.completion = completion
     }
     
-    func calculateResult() -> Result {
+    func calculateResult() -> Any {
         let edge = calculateSliceEdge(meta: meta)
         let coordsY = calculateNormalizedPoints(edge: edge, with: meta)
         
@@ -164,8 +154,14 @@ fileprivate final class CalculateOperation: Operation {
     
     override func main() {
         let result = calculateResult()
-        let block = completion
-        callerQueue.addOperation { block(result) }
+        
+        if Thread.isMainThread {
+            completion(result)
+        }
+        else {
+            let block = completion
+            callerQueue.addOperation { block(result) }
+        }
     }
     
     private func calculateSliceEdge(meta: ChartSliceMeta) -> ChartRange {
