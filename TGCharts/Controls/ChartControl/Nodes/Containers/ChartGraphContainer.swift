@@ -17,13 +17,13 @@ protocol IChartGraphContainer: IChartNode {
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     let guidesContainer: ChartGuideContainer
-    let pointerContainer: ChartPointerNode
+    let pointerContainer: ChartPointerControl
 
     private var innerGraph: ChartGraphNode?
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
-        pointerContainer = ChartPointerNode(chart: chart, formattingProvider: formattingProvider)
+        pointerContainer = ChartPointerControl(chart: chart, formattingProvider: formattingProvider)
 
         super.init(frame: .zero)
         

@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-protocol IChartGraphNode: IChartSlicableNode {
+protocol IChartGraphNode {
     var container: IChartGraphContainer? { get set }
 }
 

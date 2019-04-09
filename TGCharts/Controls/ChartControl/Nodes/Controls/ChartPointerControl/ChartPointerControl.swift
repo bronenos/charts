@@ -1,5 +1,5 @@
 //
-//  ChartPointerNode.swift
+//  ChartPointerControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 08/04/2019.
@@ -17,11 +17,11 @@ struct ChartPointerOptions: OptionSet {
     static let dots = ChartPointerOptions(rawValue: 1 << 1)
 }
 
-protocol IChartPointerNode: IChartNode {
+protocol IChartPointerControl: IChartNode {
     func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions)
 }
 
-final class ChartPointerNode: ChartNode, IChartPointerNode {
+final class ChartPointerControl: ChartNode, IChartPointerControl {
     private let clippedContainer = ChartNode()
     
     private let pointerCloudNode: ChartPointerCloudNode

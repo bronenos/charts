@@ -32,9 +32,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     
     let headerNode: ChartHeader
     let graphContainer: ChartGraphContainer
-    let timelineNode: ChartTimelineNode
-    let navigatorNode: ChartNavigatorNode
-    let optionsNode: ChartOptions
+    let timelineNode: ChartTimelineControl
+    let navigatorNode: ChartNavigatorControl
+    let optionsNode: ChartOptionsControl
     
     private let chart: Chart
     private var config: ChartConfig
@@ -46,9 +46,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         
         headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
         graphContainer = ChartGraphContainer(chart: chart, config: config, formattingProvider: formattingProvider)
-        timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        optionsNode = ChartOptions()
+        timelineNode = ChartTimelineControl(chart: chart, config: config, formattingProvider: formattingProvider)
+        navigatorNode = ChartNavigatorControl(chart: chart, config: config, formattingProvider: formattingProvider)
+        optionsNode = ChartOptionsControl()
 
         super.init(frame: .zero)
         
@@ -126,7 +126,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     private func populateOptions(chart: Chart, config: ChartConfig) {
         optionsNode.populate(
             zip(chart.lines, config.lines).map { line, lineConfig in
-                ChartOption(
+                ChartOptionsItem(
                     key: line.key,
                     color: line.color,
                     title: line.name,
@@ -149,7 +149,7 @@ fileprivate struct Layout {
     let config: ChartConfig
     let headerNode: ChartHeader
     let graphContainer: ChartGraphContainer
-    let optionsNode: ChartOptions
+    let optionsNode: ChartOptionsControl
     
     private let gaps = Layout.totalGaps
     private let graphHeight = CGFloat(300)

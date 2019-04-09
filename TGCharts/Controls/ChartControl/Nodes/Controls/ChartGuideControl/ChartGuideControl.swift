@@ -1,5 +1,5 @@
 //
-//  ChartGuideNode.swift
+//  ChartGuideControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 08/04/2019.
@@ -9,11 +9,11 @@
 import Foundation
 import UIKit
 
-protocol IChartGuideNode: IChartNode {
+protocol IChartGuideControl: IChartNode {
     func update(edge: ChartRange, duration: TimeInterval)
 }
 
-final class ChartGuideNode: ChartNode, IChartGuideNode {
+final class ChartGuideControl: ChartNode, IChartGuideControl {
     private enum VerticalActiveGuide {
         case primary
         case secondary
@@ -22,8 +22,8 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
     private let pinned: Bool
     private let formattingProvider: IFormattingProvider
     
-    private let primaryGuides: [ChartVerticalStepNode]
-    private let secondaryGuides: [ChartVerticalStepNode]
+    private let primaryGuides: [ChartGuideStepNode]
+    private let secondaryGuides: [ChartGuideStepNode]
     
     private let numberOfVerticalGuides = 6
     private var activeGuide: VerticalActiveGuide? = .primary
@@ -33,8 +33,8 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
         self.pinned = pinned
         self.formattingProvider = formattingProvider
         
-        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
-        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartVerticalStepNode(alignment: alignment) }
+        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartGuideStepNode(alignment: alignment) }
+        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartGuideStepNode(alignment: alignment) }
 
         super.init(frame: .zero)
         
@@ -60,7 +60,7 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
         guard edge != lastEdge else { return }
         defer { lastEdge = edge }
         
-        func _layout(guides: [ChartVerticalStepNode],
+        func _layout(guides: [ChartGuideStepNode],
                      usingEdge: ChartRange,
                      startY: CGFloat,
                      height: CGFloat,
@@ -174,7 +174,7 @@ final class ChartGuideNode: ChartNode, IChartGuideNode {
         }
     }
     
-    private func obtainGuides() -> (primary: [ChartVerticalStepNode], secondary: [ChartVerticalStepNode]) {
+    private func obtainGuides() -> (primary: [ChartGuideStepNode], secondary: [ChartGuideStepNode]) {
         switch activeGuide {
         case .none: return ([], [])
         case .some(.primary): return (primaryGuides, secondaryGuides)

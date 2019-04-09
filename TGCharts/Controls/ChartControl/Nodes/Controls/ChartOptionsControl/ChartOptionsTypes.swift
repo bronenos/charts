@@ -1,5 +1,5 @@
 //
-//  ChartTypes.swift
+//  ChartOptionsTypes.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 07/04/2019.
@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct ChartOption {
+struct ChartOptionsItem {
     let key: String
     let color: UIColor
     let title: String

@@ -80,3 +80,9 @@ struct ChartMargins {
     let right: CGFloat
     var total: CGFloat { return left + right }
 }
+
+struct ChartSliceMeta {
+    let totalWidth: CGFloat
+    let stepX: CGFloat
+    let visibleIndices: Range<Int>
+}

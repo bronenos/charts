@@ -1,5 +1,5 @@
 //
-//  ChartNavigatorNode.swift
+//  ChartNavigatorControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 13/03/2019.
@@ -9,11 +9,11 @@
 import Foundation
 import UIKit
 
-protocol IChartNavigatorNode: IChartNode {
+protocol IChartNavigatorControl: IChartNode {
     func update(config: ChartConfig, duration: TimeInterval)
 }
 
-final class ChartNavigatorNode: ChartNode, IChartNavigatorNode {
+final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
     let backDim = ChartNode()
     let spaceNode = ChartNode()
     let graphNode: ChartLineGraphNode

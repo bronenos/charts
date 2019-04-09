@@ -1,5 +1,5 @@
 //
-//  ChartOptions.swift
+//  ChartOptionsControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 07/04/2019.
@@ -9,18 +9,18 @@
 import Foundation
 import UIKit
 
-protocol IChartOptions: class {
+protocol IChartOptionsControl: class {
     var tokenTapHandler: ((Int) -> Void)? { get set }
-    func populate(_ options: [ChartOption])
+    func populate(_ options: [ChartOptionsItem])
 }
 
-final class ChartOptions: ChartNode, IChartOptions {
+final class ChartOptionsControl: ChartNode, IChartOptionsControl {
     var tokenTapHandler: ((Int) -> Void)?
     
-    private var tokenOptions = [ChartOption]()
-    private var tokenControls = [ChartOptionToken]()
+    private var tokenOptions = [ChartOptionsItem]()
+    private var tokenControls = [ChartOptionsToken]()
     
-    func populate(_ options: [ChartOption]) {
+    func populate(_ options: [ChartOptionsItem]) {
         self.tokenOptions = options
         
         if options.count == tokenControls.count {
@@ -32,7 +32,7 @@ final class ChartOptions: ChartNode, IChartOptions {
             tokenControls.forEach { $0.removeFromSuperview() }
             
             tokenControls = options.map { option in
-                let control = ChartOptionToken()
+                let control = ChartOptionsToken()
                 control.configure(color: option.color, title: option.title, enabled: option.enabled)
                 control.addTarget(self, action: #selector(handleTokenTap), for: .touchUpInside)
                 return control
@@ -59,7 +59,7 @@ final class ChartOptions: ChartNode, IChartOptions {
         )
     }
     
-    @objc private func handleTokenTap(_ control: ChartOptionToken) {
+    @objc private func handleTokenTap(_ control: ChartOptionsToken) {
         guard let index = tokenControls.firstIndex(of: control) else { return }
         tokenTapHandler?(index)
     }
@@ -67,7 +67,7 @@ final class ChartOptions: ChartNode, IChartOptions {
 
 fileprivate struct Layout {
     let bounds: CGRect
-    let tokenControls: [ChartOptionToken]
+    let tokenControls: [ChartOptionsToken]
     
     private let verticalGap = CGFloat(10)
     private let horizontalGap = CGFloat(0)

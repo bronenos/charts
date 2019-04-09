@@ -14,11 +14,11 @@ protocol IChartGuideContainer: IChartNode {
 }
 
 final class ChartGuideContainer: ChartNode, IChartGuideContainer {
-    let leftGuidesNode: ChartGuideNode
-    let rightGuidesNode: ChartGuideNode
+    let leftGuidesNode: ChartGuideControl
+    let rightGuidesNode: ChartGuideControl
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        leftGuidesNode = ChartGuideNode(
+        leftGuidesNode = ChartGuideControl(
             chart: chart,
             config: config,
             alignment: .left,
@@ -26,7 +26,7 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
             formattingProvider: formattingProvider
         )
         
-        rightGuidesNode = ChartGuideNode(
+        rightGuidesNode = ChartGuideControl(
             chart: chart,
             config: config,
             alignment: .right,

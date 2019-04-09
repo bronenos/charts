@@ -1,5 +1,5 @@
 //
-//  ChartVerticalStepNode.swift
+//  ChartGuideStepNode.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 21/03/2019.
@@ -9,12 +9,12 @@
 import Foundation
 import UIKit
 
-protocol IChartVerticalStepNode: IChartNode {
+protocol IChartGuideStepNode: IChartNode {
     var value: String? { get set }
     var color: UIColor? { get set }
 }
 
-final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
+final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
     private let valueNode = ChartLabelNode()
     private let underlineNode = ChartNode()
     

@@ -34,6 +34,24 @@ struct Chart: Equatable {
         self.children = children
     }
     
+    func obtainMeta(config: ChartConfig, bounds: CGRect) -> ChartSliceMeta? {
+        guard bounds.size.width > 0 else { return nil }
+        guard length > 0 else { return nil }
+        guard config.range.distance > 0 else { return nil }
+        
+        let lastIndex = CGFloat(length - 1)
+        let totalWidth = bounds.size.width / config.range.distance
+        let stepX = totalWidth / lastIndex
+        let startIndex = Int(floor((totalWidth * config.range.start) / stepX))
+        let endIndex = Int(ceil((totalWidth * config.range.end) / stepX))
+        
+        return ChartSliceMeta(
+            totalWidth: totalWidth,
+            stepX: stepX,
+            visibleIndices: (max(0, startIndex) ..< min(length, endIndex))
+        )
+    }
+    
     func visibleLines(config: ChartConfig, addingKeys: Set<String>) -> [ChartLine] {
         return zip(lines, config.lines).compactMap { line, lineConfig in
             if addingKeys.contains(line.key) { return line }

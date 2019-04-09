@@ -1,5 +1,5 @@
 //
-//  ChartTimelineNode.swift
+//  ChartTimelineControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 16/03/2019.
@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-protocol IChartTimelineNode: IChartSlicableNode {
+protocol IChartTimelineControl: class {
 }
 
-final class ChartTimelineNode: ChartNode, IChartTimelineNode {
+final class ChartTimelineControl: ChartNode, IChartTimelineControl {
     private let chart: Chart
     private let formattingProvider: IFormattingProvider
     
@@ -81,7 +81,7 @@ final class ChartTimelineNode: ChartNode, IChartTimelineNode {
     }
     
     private func update() {
-        guard let meta = obtainMeta(chart: chart, config: config) else {
+        guard let meta = chart.obtainMeta(config: config, bounds: bounds) else {
             return
         }
 

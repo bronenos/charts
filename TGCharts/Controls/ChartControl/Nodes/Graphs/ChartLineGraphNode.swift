@@ -94,7 +94,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     }
     
     func update(duration: TimeInterval = 0) {
-        guard let meta = obtainMeta(chart: chart, config: config) else { return }
+        guard let meta = chart.obtainMeta(config: config, bounds: bounds) else { return }
         
         let operation = CalculateOperation(
             chart: chart,

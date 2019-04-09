@@ -1,5 +1,5 @@
 //
-//  ChartOptionToken.swift
+//  ChartOptionsToken.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 07/04/2019.
@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-final class ChartOptionToken: UIButton {
+final class ChartOptionsToken: UIButton {
     init() {
         super.init(frame: .zero)
         
