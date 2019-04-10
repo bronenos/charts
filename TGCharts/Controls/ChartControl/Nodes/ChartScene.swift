@@ -123,6 +123,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         switch chart.type {
         case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
         case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        case .area: return ChartAreaGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
         default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
         }
     }

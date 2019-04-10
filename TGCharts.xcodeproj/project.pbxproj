@@ -74,6 +74,7 @@
 		D4BE0CAD223D8FAC001DEE03 /* ChartTimelineControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAC223D8FAC001DEE03 /* ChartTimelineControl.swift */; };
 		D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */; };
 		D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */; };
+		D4DA1682225DB975009FC1ED /* ChartAreaGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 /* End PBXBuildFile section */
 
@@ -149,6 +150,7 @@
 		D4BE0CAC223D8FAC001DEE03 /* ChartTimelineControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTimelineControl.swift; sourceTree = "<group>"; };
 		D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLabelNode.swift; sourceTree = "<group>"; };
 		D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionScaleScenario.swift; sourceTree = "<group>"; };
+		D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAreaGraphNode.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -193,6 +195,7 @@
 				D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */,
 				D46EE1DD225BC79200183E6E /* ChartDuoGraphNode.swift */,
 				D402B3A0225CF04800A59A18 /* ChartBarGraphNode.swift */,
+				D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */,
 			);
 			path = Graphs;
 			sourceTree = "<group>";
@@ -563,6 +566,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4DA1682225DB975009FC1ED /* ChartAreaGraphNode.swift in Sources */,
 				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D4984A9B225A80180008C552 /* ChartOptionsTypes.swift in Sources */,

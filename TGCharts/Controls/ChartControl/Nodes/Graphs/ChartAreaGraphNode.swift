@@ -1,19 +1,19 @@
 //
-//  ChartBarGraphNode.swift
+//  ChartAreaGraphNode.swift
 //  TGCharts
 //
-//  Created by Stan Potemkin on 09/04/2019.
+//  Created by Stan Potemkin on 10/04/2019.
 //  Copyright © 2019 bronenos. All rights reserved.
 //
 
 import Foundation
 import UIKit
 
-protocol IChartBarGraphNode: IChartGraphNode {
+protocol IChartAreaGraphNode: IChartGraphNode {
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval)
 }
 
-class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
+class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     private let pointerLineNode = ChartNode()
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
@@ -75,7 +75,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                 path.move(to: firstPoint)
                 restPoints.forEach(path.addLine)
                 path.close()
-
+                
                 node.bezierPaths = [path]
             }
             else {
@@ -201,11 +201,11 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
                 points.append(CGPoint(x: currentX, y: currentY))
                 
                 currentX += meta.stepX
-                
-                points.append(CGPoint(x: currentX, y: currentY))
             }
             
             for (oldValue, value) in zip(oldValues, values).reversed() {
+                currentX -= meta.stepX
+                
                 let currentY: CGFloat
                 if lineConfig.visible {
                     currentY = bounds.calculateY(value: oldValue, edge: edge) + extraHeight
@@ -213,10 +213,6 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
                 else {
                     currentY = bounds.calculateY(value: value, edge: edge)
                 }
-                
-                points.append(CGPoint(x: currentX, y: currentY))
-                
-                currentX -= meta.stepX
                 
                 points.append(CGPoint(x: currentX, y: currentY))
             }
