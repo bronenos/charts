@@ -52,10 +52,10 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
         if let pointer = config.pointer {
             let startIndex = meta.visibleIndices.startIndex
             let endIndex = meta.visibleIndices.endIndex
-            let pointedIndex = startIndex + Int(CGFloat(endIndex - startIndex) * pointer)
+            let pointedIndex = startIndex + Int(CGFloat(endIndex - startIndex - 1) * pointer)
             
             let offset = meta.totalWidth * config.range.start
-            let x = -offset + meta.stepX * CGFloat(pointedIndex)
+            let x = -offset + meta.stepX * CGFloat(pointedIndex) + meta.offsetX
             var lowestY = CGFloat(0)
             
             for index in chart.lines.indices {
@@ -88,7 +88,7 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
             pointerLineNode.backgroundColor = DesignBook.shared.color(.chartPointerFocusedLineStroke)
             pointerLineNode.isHidden = !options.contains(.line)
 
-            let visibleLines = chart.visibleLines(config: config, addingKeys: [])
+            let visibleLines = chart.visibleLines(config: config)
             pointerCloudNode.setDate(chart.axis[pointedIndex].date, lines: visibleLines, index: pointedIndex)
             
             let pointerCloudOffscreen = CGFloat(10)

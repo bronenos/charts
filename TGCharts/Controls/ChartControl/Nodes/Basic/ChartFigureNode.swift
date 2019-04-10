@@ -14,6 +14,7 @@ enum ChartFigure {
     case separatePoints
     case roundedSquare
     case nestedBezierPaths
+    case filledPaths
 }
 
 protocol IChartFigureNode: IChartNode {
@@ -117,6 +118,7 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         case .separatePoints: renderSeparatePoints()
         case .roundedSquare: renderRoundedSquare()
         case .nestedBezierPaths: renderNestedBezierPaths()
+        case .filledPaths: renderFilledPaths()
         }
     }
     
@@ -128,9 +130,6 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         guard !restPoints.isEmpty else { return }
 
         let bezierPath = UIBezierPath()
-        bezierPath.lineWidth = width
-        bezierPath.lineJoinStyle = .round
-        bezierPath.lineCapStyle = .round
         bezierPath.move(to: firstPoint)
         restPoints.forEach(bezierPath.addLine)
         
@@ -176,14 +175,30 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         guard !restPaths.isEmpty else { return }
         
         let firstPath = restPaths.removeFirst()
-        firstPath.usesEvenOddFillRule = true
         restPaths.forEach(firstPath.append)
         
         shapeLayer.strokeColor = strokeColor.cgColor
         shapeLayer.lineWidth = width
         shapeLayer.fillRule = .evenOdd
         shapeLayer.fillColor = fillColor.cgColor
+        shapeLayer.fillRule = .evenOdd
         shapeLayer.path = firstPath.cgPath
+    }
+    
+    private func renderFilledPaths() {
+        let parentPath = UIBezierPath()
+        bezierPaths.forEach(parentPath.append)
+        
+        CATransaction.begin()
+        let animation = CABasicAnimation(keyPath: "path")
+        animation.duration = resolvedAnimationDuration
+        animation.fromValue = shapeLayer.presentation()?.path
+        animation.toValue = parentPath.cgPath
+        
+        shapeLayer.fillColor = fillColor.cgColor
+        shapeLayer.path = parentPath.cgPath
+        shapeLayer.add(animation, forKey: animation.keyPath)
+        CATransaction.commit()
     }
     
     private var resolvedAnimationDuration: TimeInterval {

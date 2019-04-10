@@ -81,11 +81,16 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
     }
     
     private func update() {
-        guard let meta = chart.obtainMeta(config: config, bounds: bounds) else {
-            return
-        }
+        guard bounds.width > 0 else { return }
+        guard config.range.distance > 0 else { return }
 
-        let dateWidth = bounds.size.width / 7
+        let meta = chart.obtainMeta(
+            config: config,
+            bounds: bounds,
+            offsetCoef: 0
+        )
+
+        let dateWidth = bounds.width / 7
         let totalWidth = bounds.width / config.range.distance
         let rightEdge = bounds.width + (1.0 - config.range.end) * totalWidth
 

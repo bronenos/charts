@@ -10,23 +10,25 @@ import Foundation
 import UIKit
 
 protocol IChartNavigatorControl: IChartNode {
+    func inject(graph: ChartGraphNode)
     func update(config: ChartConfig, duration: TimeInterval)
 }
 
 final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
     let backDim = ChartNode()
     let spaceNode = ChartNode()
-    let graphNode: ChartLineGraphNode
+    let graphContainer: ChartGraphContainer
     let leftDim = ChartNode()
     let rightDim = ChartNode()
     let sliderNode = ChartSliderNode()
     
     private var range: ChartRange
-    
+    private var currentGraph: ChartGraphNode?
+
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.range = config.range
 
-        graphNode = ChartLineGraphNode(chart: chart, config: config.fullRanged(), formattingProvider: formattingProvider, width: 1)
+        graphContainer = ChartGraphContainer(chart: chart, config: config.fullRanged(), formattingProvider: formattingProvider, enableControls: false)
         
         super.init(frame: .zero)
         
@@ -35,7 +37,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         
         addSubview(backDim)
         addSubview(spaceNode)
-        addSubview(graphNode)
+        addSubview(graphContainer)
         addSubview(leftDim)
         addSubview(rightDim)
         addSubview(sliderNode)
@@ -47,10 +49,15 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         abort()
     }
     
+    func inject(graph: ChartGraphNode) {
+        currentGraph = graph
+        graphContainer.inject(graph: graph)
+    }
+    
     func update(config: ChartConfig, duration: TimeInterval) {
         self.range = config.range
         
-        graphNode.update(config: config.fullRanged(), duration: duration)
+        currentGraph?.update(config: config.fullRanged(), duration: duration)
         sliderNode.setNeedsLayout()
         
         setNeedsLayout()
@@ -63,7 +70,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         leftDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
         rightDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
         sliderNode.updateDesign()
-        graphNode.updateDesign()
+        graphContainer.updateDesign()
     }
     
     override func layoutSubviews() {
@@ -76,7 +83,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         
         backDim.frame = graphFrame
         spaceNode.frame = sliderFrame
-        graphNode.frame = graphFrame
+        graphContainer.frame = graphFrame
         leftDim.frame = bounds.divided(atDistance: sliderLeftX, from: .minXEdge).slice
         rightDim.frame = bounds.divided(atDistance: sliderLeftX + sliderWidth, from: .minXEdge).remainder
         sliderNode.frame = sliderFrame

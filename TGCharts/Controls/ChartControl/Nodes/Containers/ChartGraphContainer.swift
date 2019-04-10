@@ -11,6 +11,7 @@ import UIKit
 
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
+    func update(config: ChartConfig, duration: TimeInterval)
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
     func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions)
 }
@@ -21,16 +22,18 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
 
     private var innerGraph: ChartGraphNode?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
         pointerContainer = ChartPointerControl(chart: chart, formattingProvider: formattingProvider)
 
         super.init(frame: .zero)
         
         guidesContainer.isUserInteractionEnabled = false
+        guidesContainer.isHidden = !enableControls
         addSubview(guidesContainer)
         
         pointerContainer.isUserInteractionEnabled = false
+        pointerContainer.isHidden = !enableControls
         addSubview(pointerContainer)
     }
     
@@ -47,6 +50,10 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         innerGraph = graph
         innerGraph?.container = self
         insertSubview(graph, belowSubview: guidesContainer)
+    }
+    
+    func update(config: ChartConfig, duration: TimeInterval) {
+        innerGraph?.update(config: config, duration: duration)
     }
     
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {

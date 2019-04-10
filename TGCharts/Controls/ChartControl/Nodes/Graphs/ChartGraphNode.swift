@@ -43,6 +43,16 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    final func configure(figure: ChartFigure, block: @escaping (Int, ChartFigureNode, ChartLine) -> Void) {
+        chart.lines.enumerated().forEach { index, line in
+            let node = ChartFigureNode(figure: figure)
+            block(index, node, line)
+            
+            lineNodes[line.key] = node
+            graphContainer.addSubview(node)
+        }
+    }
+    
     func update(config: ChartConfig, duration: TimeInterval) {
         self.config = config
         

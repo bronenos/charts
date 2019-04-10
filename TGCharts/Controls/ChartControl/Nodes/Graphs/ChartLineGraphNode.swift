@@ -14,25 +14,18 @@ protocol IChartLineGraphNode: IChartGraphNode {
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
-    private let width: CGFloat
-    
     private let pointerLineNode = ChartNode()
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        self.width = width
-        
         super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        chart.lines.forEach { line in
-            let node = ChartFigureNode(figure: .joinedLines)
-            node.strokeColor = line.color
-            node.width = width
-            graphContainer.addSubview(node)
-            lineNodes[line.key] = node
-        }
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)
+        
+        configure(figure: .joinedLines) { _, node, line in
+            node.strokeColor = line.color
+            node.width = width
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -46,12 +39,12 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let coordsY = (cachedResult as? CalculateOperation.Result)?.coordsY else { return }
+        guard let points = (cachedResult as? CalculateOperation.Result)?.points else { return }
         
         placeLines(
             meta: meta,
             offset: meta.totalWidth * config.range.start,
-            coordsY: coordsY,
+            points: points,
             duration: duration
         )
         
@@ -70,16 +63,11 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    func placeLines(meta: ChartSliceMeta, offset: CGFloat, coordsY: [String: [CGFloat]], duration: TimeInterval) {
+    func placeLines(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
             guard let node = lineNodes[line.key] else { return }
-            guard let coords = coordsY[line.key] else { return }
             
-            node.points = line.values.enumerated().map { index, value in
-                let x = -offset + meta.stepX * CGFloat(index)
-                let y = coords[index]
-                return CGPoint(x: x, y: y)
-            }
+            node.points = points[line.key] ?? []
             
             let targetAlpha = CGFloat(lineConfig.visible ? 1.0 : 0)
             if node.alpha != targetAlpha {
@@ -94,23 +82,28 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     }
     
     func update(duration: TimeInterval = 0) {
-        guard let meta = chart.obtainMeta(config: config, bounds: bounds) else { return }
-        
-        let operation = CalculateOperation(
-            chart: chart,
+        let meta = chart.obtainMeta(
             config: config,
-            meta: meta,
             bounds: bounds,
-            completion: { [weak self] result in
-                guard let `self` = self else { return }
-                guard let `result` = result as? CalculateOperation.Result else { return }
-                
-                self.cachedResult = result
-                self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
-            }
+            offsetCoef: 0.5
         )
         
-        enqueueCalculation(operation: operation, duration: duration)
+        enqueueCalculation(
+            operation: CalculateOperation(
+                chart: chart,
+                config: config,
+                meta: meta,
+                bounds: bounds,
+                completion: { [weak self] result in
+                    guard let `self` = self else { return }
+                    guard let `result` = result as? CalculateOperation.Result else { return }
+                    
+                    self.cachedResult = result
+                    self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
+                }
+            ),
+            duration: duration
+        )
     }
 }
 
@@ -118,7 +111,7 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     struct Result {
         let range: ChartRange
         let edge: ChartRange
-        let coordsY: [String: [CGFloat]]
+        let points: [String: [CGPoint]]
     }
     
     private let chart: Chart
@@ -143,12 +136,12 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     
     func calculateResult() -> Any {
         let edge = calculateSliceEdge(meta: meta)
-        let coordsY = calculateNormalizedPoints(edge: edge, with: meta)
+        let points = calculateNormalizedPoints(edge: edge, with: meta)
         
         return Result(
             range: config.range,
             edge: edge,
-            coordsY: coordsY
+            points: points
         )
     }
     
@@ -165,7 +158,7 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     }
     
     private func calculateSliceEdge(meta: ChartSliceMeta) -> ChartRange {
-        let visibleLineKeys = chart.visibleLines(config: config, addingKeys: []).map { $0.key }
+        let visibleLineKeys = chart.visibleLines(config: config).map { $0.key }
         
         let edges: [ChartRange] = chart.axis[meta.visibleIndices].map { item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
@@ -181,12 +174,20 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
         return fittingEdge
     }
     
-    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGFloat]] {
+    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
-        var map = [String: [CGFloat]]()
+        var map = [String: [CGPoint]]()
+        let baseX = -(meta.totalWidth * config.range.start)
+        
         for line in chart.lines {
-            map[line.key] = line.values.map { bounds.calculateY(value: $0, edge: edge) }
+            var currentX = baseX
+            map[line.key] = line.values.enumerated().map { index, value in
+                defer { currentX += meta.stepX }
+                
+                let y = bounds.calculateY(value: value, edge: edge)
+                return CGPoint(x: currentX + meta.offsetX, y: y)
+            }
         }
         
         return map

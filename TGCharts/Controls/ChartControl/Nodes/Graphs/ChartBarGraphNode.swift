@@ -14,25 +14,18 @@ protocol IChartBarGraphNode: IChartGraphNode {
 }
 
 class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
-    private let width: CGFloat
-    
     private let pointerLineNode = ChartNode()
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        self.width = width
-        
         super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        chart.lines.forEach { line in
-            let node = ChartFigureNode(figure: .joinedLines)
-            node.strokeColor = line.color
-            node.width = width
-            graphContainer.addSubview(node)
-            lineNodes[line.key] = node
-        }
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)
+        
+        configure(figure: .filledPaths) { index, node, line in
+            node.fillColor = line.color
+            node.layer.zPosition = -CGFloat(index)
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -46,12 +39,12 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let coordsY = (cachedResult as? CalculateOperation.Result)?.coordsY else { return }
+        guard let blocks = (cachedResult as? CalculateOperation.Result)?.blocks else { return }
         
-        placeLines(
+        placeBars(
             meta: meta,
             offset: meta.totalWidth * config.range.start,
-            coordsY: coordsY,
+            blocks: blocks,
             duration: duration
         )
         
@@ -66,25 +59,15 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
             config: config,
             meta: meta,
             edges: chart.lines.map { _ in edge },
-            options: [.line, .dots]
+            options: [.line]
         )
     }
     
-    func placeLines(meta: ChartSliceMeta, offset: CGFloat, coordsY: [String: [CGFloat]], duration: TimeInterval) {
+    func placeBars(meta: ChartSliceMeta, offset: CGFloat, blocks: [String: [CGRect]], duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
             guard let node = lineNodes[line.key] else { return }
-            guard let coords = coordsY[line.key] else { return }
             
-            node.points = line.values.enumerated().map { index, value in
-                let x = -offset + meta.stepX * CGFloat(index)
-                let y = coords[index]
-                return CGPoint(x: x, y: y)
-            }
-            
-            let targetAlpha = CGFloat(lineConfig.visible ? 1.0 : 0)
-            if node.alpha != targetAlpha {
-                UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
-            }
+            node.bezierPaths = blocks[line.key]?.map({ UIBezierPath(rect: $0) }) ?? []
         }
     }
     
@@ -94,23 +77,28 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     }
     
     func update(duration: TimeInterval = 0) {
-        guard let meta = chart.obtainMeta(config: config, bounds: bounds) else { return }
-        
-        let operation = CalculateOperation(
-            chart: chart,
+        let meta = chart.obtainMeta(
             config: config,
-            meta: meta,
             bounds: bounds,
-            completion: { [weak self] result in
-                guard let `self` = self else { return }
-                guard let `result` = result as? CalculateOperation.Result else { return }
-                
-                self.cachedResult = result
-                self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
-            }
+            offsetCoef: 0
         )
         
-        enqueueCalculation(operation: operation, duration: duration)
+        enqueueCalculation(
+            operation: CalculateOperation(
+                chart: chart,
+                config: config,
+                meta: meta,
+                bounds: bounds,
+                completion: { [weak self] result in
+                    guard let `self` = self else { return }
+                    guard let `result` = result as? CalculateOperation.Result else { return }
+                    
+                    self.cachedResult = result
+                    self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
+                }
+            ),
+            duration: duration
+        )
     }
 }
 
@@ -118,7 +106,7 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     struct Result {
         let range: ChartRange
         let edge: ChartRange
-        let coordsY: [String: [CGFloat]]
+        let blocks: [String: [CGRect]]
     }
     
     private let chart: Chart
@@ -143,12 +131,12 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     
     func calculateResult() -> Any {
         let edge = calculateSliceEdge(meta: meta)
-        let coordsY = calculateNormalizedPoints(edge: edge, with: meta)
+        let blocks = calculateNormalizedBlocks(edge: edge, with: meta)
         
         return Result(
             range: config.range,
             edge: edge,
-            coordsY: coordsY
+            blocks: blocks
         )
     }
     
@@ -165,28 +153,41 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     }
     
     private func calculateSliceEdge(meta: ChartSliceMeta) -> ChartRange {
-        let visibleLineKeys = chart.visibleLines(config: config, addingKeys: []).map { $0.key }
+        let visibleLineKeys = chart.visibleLines(config: config).map { $0.key }
         
-        let edges: [ChartRange] = chart.axis[meta.visibleIndices].map { item in
+        let sums: [Int] = chart.axis[meta.visibleIndices].map { item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
-            let lowerValue = CGFloat(visibleValues.min() ?? 0)
-            let upperValue = CGFloat(visibleValues.max() ?? 0)
-            return ChartRange(start: lowerValue, end: upperValue)
+            let summarizedValues = visibleValues.reduce(0, +)
+            return summarizedValues
         }
         
-        let fittingLowerValue = edges.map({ $0.start }).min() ?? 0
-        let fittingUpperValue = edges.map({ $0.end }).max() ?? 0
-        let fittingEdge = ChartRange(start: fittingLowerValue, end: fittingUpperValue)
-        
-        return fittingEdge
+        return ChartRange(start: 0, end: CGFloat(sums.max() ?? 0))
     }
     
-    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGFloat]] {
+    private func calculateNormalizedBlocks(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGRect]] {
         guard bounds.size != .zero else { return [:] }
         
-        var map = [String: [CGFloat]]()
-        for line in chart.lines {
-            map[line.key] = line.values.map { bounds.calculateY(value: $0, edge: edge) }
+        let baseX = -(meta.totalWidth * config.range.start)
+        var map = [String: [CGRect]]()
+        var values = [Int](repeating: 0, count: chart.axis.count)
+        
+        for (line, lineConfig) in zip(chart.lines, config.lines) {
+            let oldValues = values
+            
+            if lineConfig.visible {
+                line.values.enumerated().forEach { index, value in values[index] += value }
+            }
+            
+            var currentX = baseX
+            map[line.key] = zip(oldValues, values).enumerated().map { index, item in
+                defer { currentX += meta.stepX }
+                
+                let leftX = currentX + meta.offsetX
+                let lowerY = bounds.calculateY(value: item.0, edge: edge)
+                let upperY = bounds.calculateY(value:  item.1, edge: edge)
+                let height = (lineConfig.visible ? lowerY - upperY + bounds.height * 0.15 : 1)
+                return CGRect(x: leftX, y: upperY, width: meta.stepX, height: height)
+            }
         }
         
         return map

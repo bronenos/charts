@@ -38,14 +38,13 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     
     private let chart: Chart
     private var config: ChartConfig
-    private var currentGraph: ChartGraphNode?
     
     init(chart: Chart, config: ChartConfig, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
         
         headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
-        graphContainer = ChartGraphContainer(chart: chart, config: config, formattingProvider: formattingProvider)
+        graphContainer = ChartGraphContainer(chart: chart, config: config, formattingProvider: formattingProvider, enableControls: true)
         timelineNode = ChartTimelineControl(chart: chart, config: config, formattingProvider: formattingProvider)
         navigatorNode = ChartNavigatorControl(chart: chart, config: config, formattingProvider: formattingProvider)
         optionsNode = ChartOptionsControl()
@@ -58,14 +57,11 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         addSubview(navigatorNode)
         addSubview(optionsNode)
         
-        let graphNode: ChartGraphNode
-        switch chart.type {
-        case .duo: graphNode = ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
-        default: graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
-        }
+        let mainGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        graphContainer.inject(graph: mainGraph)
         
-        currentGraph = graphNode
-        graphContainer.inject(graph: graphNode)
+        let miniGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider, width: 1)
+        navigatorNode.inject(graph: miniGraph)
         
         populateOptions(chart: chart, config: config)
         updateDesign()
@@ -82,7 +78,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     func update(config: ChartConfig, duration: TimeInterval) {
         self.config = config
         
-        currentGraph?.update(config: config, duration: duration)
+        graphContainer.update(config: config, duration: duration)
         timelineNode.update(config: config, duration: 0)
         navigatorNode.update(config: config, duration: duration)
         populateOptions(chart: chart, config: config)
@@ -121,6 +117,14 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             graphContainer: graphContainer,
             optionsNode: optionsNode
         )
+    }
+    
+    private func obtainGraph(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) -> ChartGraphNode {
+        switch chart.type {
+        case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        }
     }
     
     private func populateOptions(chart: Chart, config: ChartConfig) {
