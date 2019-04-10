@@ -17,7 +17,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     private let pointerLineNode = ChartNode()
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider, extraMargin: width)
+        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)

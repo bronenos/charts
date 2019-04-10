@@ -52,16 +52,27 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
             let leftBound = meta.totalWidth * config.range.start
             let rightBound = leftBound + bounds.width
             let pointedX = leftBound + (rightBound - leftBound) * pointer
-            let pointedIndex = Int(round(pointedX / meta.stepX))
             
-            let x = CGFloat(pointedIndex) * meta.stepX - leftBound
+            let pointedIndex = round(pointedX / meta.stepX)
+            let normalizedPointedIndex: Int
+            if pointedIndex * meta.stepX < leftBound {
+                normalizedPointedIndex = Int(ceil(pointedX / meta.stepX))
+            }
+            else if pointedIndex * meta.stepX > rightBound {
+                normalizedPointedIndex = Int(floor(pointedX / meta.stepX))
+            }
+            else {
+                normalizedPointedIndex = Int(pointedIndex)
+            }
+            
+            let x = CGFloat(normalizedPointedIndex) * meta.stepX - leftBound
             
             for index in chart.lines.indices {
                 let line = chart.lines[index]
                 let edge = edges[index]
                 let node = pointerDotNodes[index]
                 
-                let value = line.values[pointedIndex]
+                let value = line.values[normalizedPointedIndex]
                 let y = bounds.calculateY(value: value, edge: edge)
                 
                 let path = UIBezierPath(
@@ -86,7 +97,7 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
             pointerLineNode.isHidden = !options.contains(.line)
 
             let visibleLines = chart.visibleLines(config: config)
-            pointerCloudNode.setDate(chart.axis[pointedIndex].date, lines: visibleLines, index: pointedIndex)
+            pointerCloudNode.setDate(chart.axis[normalizedPointedIndex].date, lines: visibleLines, index: normalizedPointedIndex)
             
             let pointerCloudOffscreen = CGFloat(10)
             let pointerCloudWidth = pointerCloudNode.sizeThatFits(.zero).width

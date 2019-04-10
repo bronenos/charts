@@ -19,30 +19,26 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     let chart: Chart
     private(set) var config: ChartConfig
-    let extraMargin: CGFloat
 
     let graphContainer = ChartView()
-    let graphContainerMask = UIView()
     var lineNodes = [String: ChartFigureNode]()
 
     let calculationQueue = OperationQueue()
     var cachedResult: CalculateOperation.Result?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, extraMargin: CGFloat) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
-        self.extraMargin = extraMargin
         
         super.init(frame: .zero)
+        
+        clipsToBounds = true
         
         calculationQueue.maxConcurrentOperationCount = 1
         calculationQueue.qualityOfService = .userInteractive
         
         graphContainer.tag = ChartControlTag.graph.rawValue
         addSubview(graphContainer)
-        
-        graphContainerMask.backgroundColor = UIColor.white
-        graphContainer.mask = graphContainerMask
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -98,7 +94,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         graphContainer.frame = bounds
-        graphContainerMask.frame = bounds.insetBy(dx: -extraMargin, dy: 0)
         update()
     }
 }

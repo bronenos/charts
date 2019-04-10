@@ -16,8 +16,8 @@ protocol IChartAreaGraphNode: IChartGraphNode {
 class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     private let pointerLineNode = ChartNode()
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider, extraMargin: 0)
+    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)
