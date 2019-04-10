@@ -23,6 +23,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     let graphContainer = ChartView()
     var lineNodes = [String: ChartFigureNode]()
 
+    private var lastMeta: ChartSliceMeta?
     let calculationQueue = OperationQueue()
     var cachedResult: CalculateOperation.Result?
     
@@ -59,27 +60,18 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         self.config = config
         
         if duration > 0 {
-            lineNodes.values.forEach { node in
-                node.overwriteNextAnimation(duration: duration)
-            }
+            lineNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
         }
         
-        update(duration: duration)
+        enqueueRecalculation(duration: duration)
     }
     
-    func update(duration: TimeInterval = 0) {
+    func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
         abort()
     }
     
-    final func enqueueCalculation(operation: Operation, duration: TimeInterval) {
-        if let _ = cachedResult {
-            if calculationQueue.operations.isEmpty {
-                calculationQueue.addOperation(operation)
-            }
-        }
-        else {
-            operation.main()
-        }
+    func adjustPointer(meta: ChartSliceMeta) {
+        abort()
     }
     
     override func updateDesign() {
@@ -94,7 +86,39 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         graphContainer.frame = bounds
-        update()
+        enqueueRecalculation(duration: 0)
+    }
+    
+    private func enqueueRecalculation(duration: TimeInterval) {
+        let meta = chart.obtainMeta(
+            config: config,
+            bounds: bounds
+        )
+        
+        if meta != lastMeta {
+            lastMeta = meta
+            enqueueCalculation(
+                operation: obtainCalculationOperation(
+                    meta: meta,
+                    duration: duration
+                ),
+                duration: duration
+            )
+        }
+        else {
+            adjustPointer(meta: meta)
+        }
+    }
+    
+    private func enqueueCalculation(operation: Operation, duration: TimeInterval) {
+        if let _ = cachedResult {
+            if calculationQueue.operations.isEmpty {
+                calculationQueue.addOperation(operation)
+            }
+        }
+        else {
+            operation.main()
+        }
     }
 }
 

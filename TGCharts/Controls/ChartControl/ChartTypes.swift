@@ -46,7 +46,7 @@ struct ChartConfig: Equatable {
     static func ==(lhs: ChartConfig, rhs: ChartConfig) -> Bool {
         guard lhs.lines == rhs.lines else { return false }
         guard lhs.range == rhs.range else { return false }
-        guard lhs.pointer == rhs.pointer else { return false }
+//        guard lhs.pointer == rhs.pointer else { return false }
         return true
     }
 }
@@ -81,7 +81,10 @@ struct ChartMargins {
     var total: CGFloat { return left + right }
 }
 
-struct ChartSliceMeta {
+struct ChartSliceMeta: Equatable {
+    let bounds: CGRect
+    let config: ChartConfig
+    let range: ChartRange
     let totalWidth: CGFloat
     let stepX: CGFloat
     let visibleIndices: Range<Int>

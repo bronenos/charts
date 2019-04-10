@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 
 protocol IChartLineGraphNode: IChartGraphNode {
-    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval)
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
@@ -32,7 +31,36 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         abort()
     }
     
-    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
+    override func obtainCalculationOperation(meta: ChartSliceMeta,
+                                             duration: TimeInterval) -> CalculateOperation {
+        return LineCalculateOperation(
+            chart: chart,
+            config: config,
+            meta: meta,
+            bounds: bounds,
+            completion: { [weak self] result in
+                guard let `self` = self else { return }
+                guard let primaryEdge = result.edges.first else { abort() }
+                
+                self.cachedResult = result
+                self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
+            }
+        )
+    }
+    
+    override func adjustPointer(meta: ChartSliceMeta) {
+        guard let edge = cachedResult?.edges.first else { return }
+        
+        container?.adjustPointer(
+            chart: chart,
+            config: config,
+            meta: meta,
+            edges: chart.lines.map { _ in edge },
+            options: [.line, .dots]
+        )
+    }
+    
+    private func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
         guard let points = cachedResult?.points else { return }
         
@@ -49,16 +77,13 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             duration: duration
         )
         
-        container?.adjustPointer(
-            chart: chart,
-            config: config,
-            meta: meta,
-            edges: chart.lines.map { _ in edge },
-            options: [.line, .dots]
-        )
+        adjustPointer(meta: meta)
     }
     
-    func placeLines(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
+    internal func placeLines(meta: ChartSliceMeta,
+                            offset: CGFloat,
+                            points: [String: [CGPoint]],
+                            duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
             guard let node = lineNodes[line.key] else { return }
             
@@ -69,30 +94,6 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
             }
         }
-    }
-    
-    override func update(duration: TimeInterval = 0) {
-        let meta = chart.obtainMeta(
-            config: config,
-            bounds: bounds
-        )
-        
-        enqueueCalculation(
-            operation: LineCalculateOperation(
-                chart: chart,
-                config: config,
-                meta: meta,
-                bounds: bounds,
-                completion: { [weak self] result in
-                    guard let `self` = self else { return }
-                    guard let primaryEdge = result.edges.first else { abort() }
-                    
-                    self.cachedResult = result
-                    self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
-                }
-            ),
-            duration: duration
-        )
     }
 }
 

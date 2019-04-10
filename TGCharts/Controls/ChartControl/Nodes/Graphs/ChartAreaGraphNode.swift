@@ -49,13 +49,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
             duration: duration
         )
         
-        container?.adjustPointer(
-            chart: chart,
-            config: config,
-            meta: meta,
-            edges: chart.lines.map { _ in edge },
-            options: [.line]
-        )
+        adjustPointer(meta: meta)
     }
     
     func placeBars(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
@@ -79,27 +73,31 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         }
     }
     
-    override func update(duration: TimeInterval = 0) {
-        let meta = chart.obtainMeta(
+    override func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
+        return AreaCalculateOperation(
+            chart: chart,
             config: config,
-            bounds: bounds
+            meta: meta,
+            bounds: bounds,
+            completion: { [weak self] result in
+                guard let `self` = self else { return }
+                guard let primaryEdge = result.edges.first else { return }
+                
+                self.cachedResult = result
+                self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
+            }
         )
+    }
+    
+    override func adjustPointer(meta: ChartSliceMeta) {
+        guard let edge = cachedResult?.edges.first else { return }
         
-        enqueueCalculation(
-            operation: AreaCalculateOperation(
-                chart: chart,
-                config: config,
-                meta: meta,
-                bounds: bounds,
-                completion: { [weak self] result in
-                    guard let `self` = self else { return }
-                    guard let primaryEdge = result.edges.first else { return }
-                    
-                    self.cachedResult = result
-                    self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
-                }
-            ),
-            duration: duration
+        container?.adjustPointer(
+            chart: chart,
+            config: config,
+            meta: meta,
+            edges: chart.lines.map { _ in edge },
+            options: [.line]
         )
     }
 }

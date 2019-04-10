@@ -32,35 +32,33 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             duration: duration
         )
         
+        adjustPointer(meta: meta)
+    }
+    
+    override func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
+        return DuoCalculateOperation(
+            chart: chart,
+            config: config,
+            meta: meta,
+            bounds: bounds,
+            completion: { [weak self] result in
+                guard let `self` = self else { return }
+                
+                self.cachedResult = result
+                self.update(chart: self.chart, meta: meta, edges: result.edges, duration: duration)
+            }
+        )
+    }
+    
+    override func adjustPointer(meta: ChartSliceMeta) {
+        guard let edges = cachedResult?.edges else { return }
+        
         container?.adjustPointer(
             chart: chart,
             config: config,
             meta: meta,
             edges: edges,
             options: [.line, .dots]
-        )
-    }
-    
-    override func update(duration: TimeInterval = 0) {
-        let meta = chart.obtainMeta(
-            config: config,
-            bounds: bounds
-        )
-        
-        enqueueCalculation(
-            operation: DuoCalculateOperation(
-                chart: chart,
-                config: config,
-                meta: meta,
-                bounds: bounds,
-                completion: { [weak self] result in
-                    guard let `self` = self else { return }
-                    
-                    self.cachedResult = result
-                    self.update(chart: self.chart, meta: meta, edges: result.edges, duration: duration)
-                }
-            ),
-            duration: duration
         )
     }
 }
@@ -78,15 +76,21 @@ fileprivate final class DuoCalculateOperation: CalculateOperation {
     }
     
     private func calculateSliceEdges(meta: ChartSliceMeta) -> [ChartRange] {
+        let allLineKeys = chart.lines.map { $0.key }
         let visibleLineKeys = chart.visibleLines(config: config).map { $0.key }
         let visibleItems = chart.axis[meta.visibleIndices]
         
         var result = [String: ChartRange]()
+        
         for key in visibleLineKeys {
             let visibleValues = visibleItems.compactMap { $0.values[key] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
             let upperValue = CGFloat(visibleValues.max() ?? 0)
             result[key] = ChartRange(start: lowerValue, end: upperValue)
+        }
+        
+        for key in Set(allLineKeys).subtracting(visibleLineKeys) {
+            result[key] = ChartRange(start: 0, end: 0)
         }
         
         return chart.lines.compactMap { result[$0.key] }

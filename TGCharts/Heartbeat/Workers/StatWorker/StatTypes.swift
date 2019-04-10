@@ -35,7 +35,15 @@ struct Chart: Equatable {
     }
     
     func obtainMeta(config: ChartConfig, bounds: CGRect) -> ChartSliceMeta {
-        let emptySlice = ChartSliceMeta(totalWidth: 0, stepX: 0, visibleIndices: (0 ..< 1))
+        let emptySlice = ChartSliceMeta(
+            bounds: bounds,
+            config: config,
+            range: config.range,
+            totalWidth: 0,
+            stepX: 0,
+            visibleIndices: (0 ..< 1)
+        )
+        
         guard bounds.size.width > 0 else { return emptySlice }
         guard length > 0 else { return emptySlice }
         guard config.range.distance > 0 else { return emptySlice }
@@ -46,6 +54,9 @@ struct Chart: Equatable {
         let endIndex = Int(ceil((totalWidth * config.range.end) / stepX))
         
         return ChartSliceMeta(
+            bounds: bounds,
+            config: config,
+            range: config.range,
             totalWidth: totalWidth,
             stepX: stepX,
             visibleIndices: (max(0, startIndex) ..< min(length, endIndex))
