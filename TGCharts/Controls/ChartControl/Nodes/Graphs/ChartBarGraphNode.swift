@@ -39,12 +39,12 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let blocks = (cachedResult as? CalculateOperation.Result)?.blocks else { return }
+        guard let points = (cachedResult as? CalculateOperation.Result)?.points else { return }
         
         placeBars(
             meta: meta,
             offset: meta.totalWidth * config.range.start,
-            blocks: blocks,
+            points: points,
             duration: duration
         )
         
@@ -63,11 +63,24 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    func placeBars(meta: ChartSliceMeta, offset: CGFloat, blocks: [String: [CGRect]], duration: TimeInterval) {
+    func placeBars(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
             guard let node = lineNodes[line.key] else { return }
             
-            node.bezierPaths = blocks[line.key]?.map({ UIBezierPath(rect: $0) }) ?? []
+            if let point = points[line.key] {
+                guard let firstPoint = point.first else { return }
+                let restPoints = point.dropFirst()
+                
+                let path = UIBezierPath()
+                path.move(to: firstPoint)
+                restPoints.forEach(path.addLine)
+                path.close()
+
+                node.bezierPaths = [path]
+            }
+            else {
+                node.bezierPaths = []
+            }
         }
     }
     
@@ -106,7 +119,7 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     struct Result {
         let range: ChartRange
         let edge: ChartRange
-        let blocks: [String: [CGRect]]
+        let points: [String: [CGPoint]]
     }
     
     private let chart: Chart
@@ -131,12 +144,12 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
     
     func calculateResult() -> Any {
         let edge = calculateSliceEdge(meta: meta)
-        let blocks = calculateNormalizedBlocks(edge: edge, with: meta)
+        let points = calculateNormalizedPoints(edge: edge, with: meta)
         
         return Result(
             range: config.range,
             edge: edge,
-            blocks: blocks
+            points: points
         )
     }
     
@@ -164,11 +177,12 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
         return ChartRange(start: 0, end: CGFloat(sums.max() ?? 0))
     }
     
-    private func calculateNormalizedBlocks(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGRect]] {
+    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
         let baseX = -(meta.totalWidth * config.range.start)
-        var map = [String: [CGRect]]()
+        let extraHeight = bounds.height * 0.15
+        var map = [String: [CGPoint]]()
         var values = [Int](repeating: 0, count: chart.axis.count)
         
         for (line, lineConfig) in zip(chart.lines, config.lines) {
@@ -179,15 +193,32 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
             }
             
             var currentX = baseX
-            map[line.key] = zip(oldValues, values).enumerated().map { index, item in
-                defer { currentX += meta.stepX }
+            var points = [CGPoint]()
+            
+            for value in values {
+                let currentY = bounds.calculateY(value: value, edge: edge)
+                points.append(CGPoint(x: currentX, y: currentY))
                 
-                let leftX = currentX + meta.offsetX
-                let lowerY = bounds.calculateY(value: item.0, edge: edge)
-                let upperY = bounds.calculateY(value:  item.1, edge: edge)
-                let height = (lineConfig.visible ? lowerY - upperY + bounds.height * 0.15 : 1)
-                return CGRect(x: leftX, y: upperY, width: meta.stepX, height: height)
+                currentX += meta.stepX
+                points.append(CGPoint(x: currentX, y: currentY))
             }
+            
+            for (oldValue, value) in zip(oldValues, values).reversed() {
+                let currentY: CGFloat
+                if lineConfig.visible {
+                    currentY = bounds.calculateY(value: oldValue, edge: edge) + extraHeight
+                }
+                else {
+                    currentY = bounds.calculateY(value: value, edge: edge)
+                }
+                
+                points.append(CGPoint(x: currentX, y: currentY))
+                
+                currentX -= meta.stepX
+                points.append(CGPoint(x: currentX, y: currentY))
+            }
+            
+            map[line.key] = points
         }
         
         return map
