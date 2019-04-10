@@ -15,9 +15,9 @@ protocol IChartDuoGraphNode: IChartLineGraphNode {
 class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     private let pointerLineNode = ChartNode()
     
-    func update(chart: Chart, meta: ChartSliceMeta, edges: [String: ChartRange], duration: TimeInterval) {
+    func update(chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let points = (cachedResult as? CalculateOperation.Result)?.points else { return }
+        guard let points = cachedResult?.points else { return }
 
         placeLines(
             meta: meta,
@@ -27,8 +27,8 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
         
         container?.adjustGuides(
-            left: visibleGuide(lineIndex: 0, edges: edges),
-            right: visibleGuide(lineIndex: 1, edges: edges),
+            left: config.lines[0].visible ? edges[0] : nil,
+            right: config.lines[1].visible ? edges[1] : nil,
             duration: duration
         )
         
@@ -36,7 +36,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             chart: chart,
             config: config,
             meta: meta,
-            edges: chart.lines.compactMap { edges[$0.key] },
+            edges: edges,
             options: [.line, .dots]
         )
     }
@@ -49,14 +49,13 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
         
         enqueueCalculation(
-            operation: CalculateOperation(
+            operation: DuoCalculateOperation(
                 chart: chart,
                 config: config,
                 meta: meta,
                 bounds: bounds,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    guard let `result` = result as? CalculateOperation.Result else { return }
                     
                     self.cachedResult = result
                     self.update(chart: self.chart, meta: meta, edges: result.edges, duration: duration)
@@ -65,37 +64,10 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             duration: duration
         )
     }
-    
-    private func visibleGuide(lineIndex: Int, edges: [String: ChartRange]) -> ChartRange? {
-        guard config.lines[lineIndex].visible else { return nil }
-        return edges[config.lines[lineIndex].key]
-    }
 }
 
-fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
-    struct Result {
-        let range: ChartRange
-        let edges: [String: ChartRange]
-        let points: [String: [CGPoint]]
-    }
-    
-    private let chart: Chart
-    private let config: ChartConfig
-    private let meta: ChartSliceMeta
-    private let bounds: CGRect
-    private let completion: ((Any) -> Void)
-    
-    private let callerQueue = OperationQueue.current ?? .main
-    
-    init(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, bounds: CGRect, completion: @escaping ((Any) -> Void)) {
-        self.chart = chart
-        self.config = config
-        self.meta = meta
-        self.bounds = bounds
-        self.completion = completion
-    }
-    
-    func calculateResult() -> Any {
+fileprivate final class DuoCalculateOperation: CalculateOperation {
+    override func calculateResult() -> Result {
         let edges = calculateSliceEdges(meta: meta)
         let points = calculateNormalizedPoints(edges: edges, with: meta)
         
@@ -106,13 +78,7 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
         )
     }
     
-    override func main() {
-        let result = calculateResult()
-        let block = completion
-        callerQueue.addOperation { block(result) }
-    }
-    
-    private func calculateSliceEdges(meta: ChartSliceMeta) -> [String: ChartRange] {
+    private func calculateSliceEdges(meta: ChartSliceMeta) -> [ChartRange] {
         let visibleLineKeys = chart.visibleLines(config: config).map { $0.key }
         let visibleItems = chart.axis[meta.visibleIndices]
         
@@ -124,21 +90,21 @@ fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
             result[key] = ChartRange(start: lowerValue, end: upperValue)
         }
         
-        return result
+        return chart.lines.compactMap { result[$0.key] }
     }
     
-    private func calculateNormalizedPoints(edges: [String: ChartRange], with meta: ChartSliceMeta) -> [String: [CGPoint]] {
+    private func calculateNormalizedPoints(edges: [ChartRange], with meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
         var map = [String: [CGPoint]]()
         let baseX = -(meta.totalWidth * config.range.start)
         
-        chart.lines.forEach { line in
+        zip(chart.lines, edges).forEach { line, edge in
             var currentX = baseX
             map[line.key] = line.values.enumerated().map { index, value in
                 defer { currentX += meta.stepX }
                 
-                let y = edges[line.key].flatMap({ bounds.calculateY(value: value, edge: $0) }) ?? bounds.height
+                let y = bounds.calculateY(value: value, edge: edge)
                 return CGPoint(x: currentX + meta.offsetX, y: y)
             }
         }

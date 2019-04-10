@@ -32,14 +32,9 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         abort()
     }
     
-    override func update(config: ChartConfig, duration: TimeInterval) {
-        super.update(config: config, duration: duration)
-        update(duration: duration)
-    }
-    
     func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
         guard bounds.size != .zero else { return }
-        guard let points = (cachedResult as? CalculateOperation.Result)?.points else { return }
+        guard let points = cachedResult?.points else { return }
         
         placeBars(
             meta: meta,
@@ -84,12 +79,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         }
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        update()
-    }
-    
-    func update(duration: TimeInterval = 0) {
+    override func update(duration: TimeInterval = 0) {
         let meta = chart.obtainMeta(
             config: config,
             bounds: bounds,
@@ -97,17 +87,17 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
         
         enqueueCalculation(
-            operation: CalculateOperation(
+            operation: BarCalculateOperation(
                 chart: chart,
                 config: config,
                 meta: meta,
                 bounds: bounds,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    guard let `result` = result as? CalculateOperation.Result else { return }
+                    guard let primaryEdge = result.edges.first else { return }
                     
                     self.cachedResult = result
-                    self.update(chart: self.chart, meta: meta, edge: result.edge, duration: duration)
+                    self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
                 }
             ),
             duration: duration
@@ -115,54 +105,16 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     }
 }
 
-fileprivate final class CalculateOperation: Operation, ChartCalculateOperation {
-    struct Result {
-        let range: ChartRange
-        let edge: ChartRange
-        let points: [String: [CGPoint]]
-    }
-    
-    private let chart: Chart
-    private let config: ChartConfig
-    private let meta: ChartSliceMeta
-    private let bounds: CGRect
-    private let completion: ((Any) -> Void)
-    
-    private let callerQueue = OperationQueue.current ?? .main
-    
-    init(chart: Chart,
-         config: ChartConfig,
-         meta: ChartSliceMeta,
-         bounds: CGRect,
-         completion: @escaping ((Any) -> Void)) {
-        self.chart = chart
-        self.config = config
-        self.meta = meta
-        self.bounds = bounds
-        self.completion = completion
-    }
-    
-    func calculateResult() -> Any {
+fileprivate final class BarCalculateOperation: CalculateOperation {
+    override func calculateResult() -> Result {
         let edge = calculateSliceEdge(meta: meta)
         let points = calculateNormalizedPoints(edge: edge, with: meta)
         
         return Result(
             range: config.range,
-            edge: edge,
+            edges: [edge],
             points: points
         )
-    }
-    
-    override func main() {
-        let result = calculateResult()
-        
-        if Thread.isMainThread {
-            completion(result)
-        }
-        else {
-            let block = completion
-            callerQueue.addOperation { block(result) }
-        }
     }
     
     private func calculateSliceEdge(meta: ChartSliceMeta) -> ChartRange {

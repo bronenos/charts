@@ -58,28 +58,6 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         guard edge != lastEdge else { return }
         defer { lastEdge = edge }
         
-        func _layout(guides: [ChartGuideStepNode],
-                     usingEdge: ChartRange,
-                     startY: CGFloat,
-                     height: CGFloat,
-                     alpha: CGFloat) {
-            let stepY = height / CGFloat(numberOfVerticalGuides)
-            let stepValue = usingEdge.distance / CGFloat(numberOfVerticalGuides)
-            
-            (0 ..< numberOfVerticalGuides).forEach { step in
-                let height = CGFloat(20)
-                let value = Int(usingEdge.start + CGFloat(step) * stepValue)
-                let currentY = bounds.height - (startY + CGFloat(step) * stepY) - height
-                let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
-                
-                let guide = guides[step]
-                guide.frame = CGRect(x: 0, y: currentY, width: bounds.width, height: 20)
-                guide.value = (usingEdge.distance == 0 ? String() : formattingProvider.format(guide: value))
-                guide.color = color
-                guide.alpha = alpha
-            }
-        }
-        
         if let lastEdge = lastEdge, !isMinorEdgeChange(fromEdge: lastEdge, toEdge: edge) {
             let scalingCoef = lastEdge.distance / edge.distance
             let startDiff = edge.start - lastEdge.start
@@ -91,7 +69,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             let sourceToHeight = bounds.height / relativeHeight
             let destinationToHeight = bounds.height
             
-            _layout(
+            layoutGuides(
                 guides: guidesPair.primary,
                 usingEdge: lastEdge,
                 startY: adjustFromPosition,
@@ -99,7 +77,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
                 alpha: 1.0
             )
             
-            _layout(
+            layoutGuides(
                 guides: guidesPair.secondary,
                 usingEdge: edge,
                 startY: relativeFromPosition,
@@ -111,7 +89,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             UIView.animate(
                 withDuration: (duration > 0 ? duration : 0.15),
                 animations: { [unowned self] in
-                    _layout(
+                    self.layoutGuides(
                         guides: guidesPair.primary,
                         usingEdge: lastEdge,
                         startY: adjustFromPosition,
@@ -119,7 +97,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
                         alpha: 0
                     )
                     
-                    _layout(
+                    self.layoutGuides(
                         guides: guidesPair.secondary,
                         usingEdge: edge,
                         startY: 0,
@@ -136,7 +114,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             )
         }
         else {
-            _layout(
+            layoutGuides(
                 guides: guidesPair.primary,
                 usingEdge: edge,
                 startY: 0,
@@ -176,6 +154,28 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         case .none: return ([], [])
         case .some(.primary): return (primaryGuides, secondaryGuides)
         case .some(.secondary): return (secondaryGuides, primaryGuides)
+        }
+    }
+    
+    private func layoutGuides(guides: [ChartGuideStepNode],
+                              usingEdge: ChartRange,
+                              startY: CGFloat,
+                              height: CGFloat,
+                              alpha: CGFloat) {
+        let stepY = height / CGFloat(numberOfVerticalGuides)
+        let stepValue = usingEdge.distance / CGFloat(numberOfVerticalGuides)
+        
+        (0 ..< numberOfVerticalGuides).forEach { step in
+            let height = CGFloat(20)
+            let value = Int(usingEdge.start + CGFloat(step) * stepValue)
+            let currentY = bounds.height - (startY + CGFloat(step) * stepY) - height
+            let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
+            
+            let guide = guides[step]
+            guide.frame = CGRect(x: 0, y: currentY, width: bounds.width, height: 20)
+            guide.value = (usingEdge.distance == 0 ? String() : formattingProvider.format(guide: value))
+            guide.color = color
+            guide.alpha = alpha
         }
     }
 }
