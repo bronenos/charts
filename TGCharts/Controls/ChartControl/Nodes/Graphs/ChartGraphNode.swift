@@ -11,6 +11,7 @@ import UIKit
 
 protocol IChartGraphNode {
     var container: IChartGraphContainer? { get set }
+    func update(config: ChartConfig, duration: TimeInterval)
 }
 
 class ChartGraphNode: ChartNode, IChartGraphNode {
@@ -18,25 +19,30 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     let chart: Chart
     private(set) var config: ChartConfig
-    
+    let extraMargin: CGFloat
+
     let graphContainer = ChartView()
+    let graphContainerMask = UIView()
     var lineNodes = [String: ChartFigureNode]()
 
     let calculationQueue = OperationQueue()
     var cachedResult: CalculateOperation.Result?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, extraMargin: CGFloat) {
         self.chart = chart
         self.config = config
+        self.extraMargin = extraMargin
         
         super.init(frame: .zero)
         
         calculationQueue.maxConcurrentOperationCount = 1
         calculationQueue.qualityOfService = .userInteractive
         
-        graphContainer.clipsToBounds = true
         graphContainer.tag = ChartControlTag.graph.rawValue
         addSubview(graphContainer)
+        
+        graphContainerMask.backgroundColor = UIColor.white
+        graphContainer.mask = graphContainerMask
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -69,7 +75,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
     
-    func enqueueCalculation(operation: Operation, duration: TimeInterval) {
+    final func enqueueCalculation(operation: Operation, duration: TimeInterval) {
         if let _ = cachedResult {
             if calculationQueue.operations.isEmpty {
                 calculationQueue.addOperation(operation)
@@ -92,6 +98,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         graphContainer.frame = bounds
+        graphContainerMask.frame = bounds.insetBy(dx: -extraMargin, dy: 0)
         update()
     }
 }

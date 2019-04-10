@@ -17,7 +17,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     private let pointerLineNode = ChartNode()
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
+        super.init(chart: chart, config: config, formattingProvider: formattingProvider, extraMargin: width)
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)
@@ -74,8 +74,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     override func update(duration: TimeInterval = 0) {
         let meta = chart.obtainMeta(
             config: config,
-            bounds: bounds,
-            offsetCoef: 0.5
+            bounds: bounds
         )
         
         enqueueCalculation(
@@ -138,7 +137,7 @@ fileprivate final class LineCalculateOperation: CalculateOperation {
                 defer { currentX += meta.stepX }
                 
                 let y = bounds.calculateY(value: value, edge: edge)
-                return CGPoint(x: currentX + meta.offsetX, y: y)
+                return CGPoint(x: currentX, y: y)
             }
         }
         

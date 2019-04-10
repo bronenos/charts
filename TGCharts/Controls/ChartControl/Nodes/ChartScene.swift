@@ -122,8 +122,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     private func obtainGraph(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) -> ChartGraphNode {
         switch chart.type {
         case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
-        case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
-        case .area: return ChartAreaGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
+        case .area: return ChartAreaGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
         default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
         }
     }

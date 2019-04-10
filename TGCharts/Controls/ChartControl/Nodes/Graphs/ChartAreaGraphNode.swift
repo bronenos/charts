@@ -16,8 +16,8 @@ protocol IChartAreaGraphNode: IChartGraphNode {
 class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     private let pointerLineNode = ChartNode()
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+        super.init(chart: chart, config: config, formattingProvider: formattingProvider, extraMargin: 0)
         
         pointerLineNode.isHidden = true
         addSubview(pointerLineNode)
@@ -82,8 +82,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     override func update(duration: TimeInterval = 0) {
         let meta = chart.obtainMeta(
             config: config,
-            bounds: bounds,
-            offsetCoef: 0
+            bounds: bounds
         )
         
         enqueueCalculation(

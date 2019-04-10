@@ -31,7 +31,7 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
         self.rangeUpdateBlock = rangeUpdateBlock
     }
     
-    func interactionDidStart(at point: CGPoint) {
+    func interactionDidStart(at point: CGPoint, event: UIEvent?) {
     }
     
     func interactionDidMove(to point: CGPoint) {

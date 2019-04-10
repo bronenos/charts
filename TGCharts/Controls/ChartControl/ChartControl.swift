@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol IChartInteracting: class {
-    func interactionDidStart(at point: CGPoint)
+    func interactionDidStart(at point: CGPoint, event: UIEvent?)
     func interactionDidMove(to point: CGPoint)
     func interactionDidEnd(at point: CGPoint)
 }
@@ -112,7 +112,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         super.touchesBegan(touches, with: event)
         
         if let point = touches.first?.location(in: self) {
-            interactor.interactionDidStart(at: point)
+            interactor.interactionDidStart(at: point, event: event)
         }
     }
     

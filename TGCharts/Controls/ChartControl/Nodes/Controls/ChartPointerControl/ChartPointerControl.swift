@@ -37,7 +37,6 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
         
         addSubview(pointerLineNode)
         
-        clippedContainer.clipsToBounds = true
         pointerDotNodes.forEach(clippedContainer.addSubview)
         addSubview(clippedContainer)
         
@@ -50,13 +49,12 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
     
     func update(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions) {
         if let pointer = config.pointer {
-            let startIndex = meta.visibleIndices.startIndex
-            let endIndex = meta.visibleIndices.endIndex
-            let pointedIndex = startIndex + Int(CGFloat(endIndex - startIndex - 1) * pointer)
+            let leftBound = meta.totalWidth * config.range.start
+            let rightBound = leftBound + bounds.width
+            let pointedX = leftBound + (rightBound - leftBound) * pointer
+            let pointedIndex = Int(round(pointedX / meta.stepX))
             
-            let offset = meta.totalWidth * config.range.start
-            let x = -offset + meta.stepX * CGFloat(pointedIndex) + meta.offsetX
-            var lowestY = CGFloat(0)
+            let x = CGFloat(pointedIndex) * meta.stepX - leftBound
             
             for index in chart.lines.indices {
                 let line = chart.lines[index]
@@ -65,7 +63,6 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
                 
                 let value = line.values[pointedIndex]
                 let y = bounds.calculateY(value: value, edge: edge)
-                lowestY = max(lowestY, y)
                 
                 let path = UIBezierPath(
                     arcCenter: .zero,

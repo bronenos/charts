@@ -41,7 +41,7 @@ final class ChartInteractor: IChartInteractor {
         self.pointer = nil
     }
     
-    func interactionDidStart(at point: CGPoint) {
+    func interactionDidStart(at point: CGPoint, event: UIEvent?) {
         guard let node = scene.hitTest(point, with: nil) else { return }
         guard let sliderNode = scene.viewWithTag(ChartControlTag.slider.rawValue) else { return }
         guard let navigatorNode = scene.viewWithTag(ChartControlTag.navigator.rawValue) else { return }
@@ -82,6 +82,7 @@ final class ChartInteractor: IChartInteractor {
 
         case .graph:
             scenario = ChartInteractionPointScenario(
+                sceneNode: scene,
                 graphNode: graphNode,
                 pointUpdateBlock: { [weak self] pointer in self?.updatePointer(pointer) }
             )
@@ -92,7 +93,7 @@ final class ChartInteractor: IChartInteractor {
         }
         
         if let scenario = scenario {
-            scenario.interactionDidStart(at: point)
+            scenario.interactionDidStart(at: point, event: event)
             delegate?.interactorDidBegin()
         }
     }

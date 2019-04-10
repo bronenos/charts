@@ -44,8 +44,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     override func update(duration: TimeInterval = 0) {
         let meta = chart.obtainMeta(
             config: config,
-            bounds: bounds,
-            offsetCoef: 0.5
+            bounds: bounds
         )
         
         enqueueCalculation(
@@ -105,7 +104,7 @@ fileprivate final class DuoCalculateOperation: CalculateOperation {
                 defer { currentX += meta.stepX }
                 
                 let y = bounds.calculateY(value: value, edge: edge)
-                return CGPoint(x: currentX + meta.offsetX, y: y)
+                return CGPoint(x: currentX, y: y)
             }
         }
         

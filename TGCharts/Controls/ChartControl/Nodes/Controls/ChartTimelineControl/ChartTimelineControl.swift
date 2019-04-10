@@ -86,8 +86,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
 
         let meta = chart.obtainMeta(
             config: config,
-            bounds: bounds,
-            offsetCoef: 0
+            bounds: bounds
         )
 
         let dateWidth = bounds.width / 7

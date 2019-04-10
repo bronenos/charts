@@ -34,21 +34,20 @@ struct Chart: Equatable {
         self.children = children
     }
     
-    func obtainMeta(config: ChartConfig, bounds: CGRect, offsetCoef: CGFloat) -> ChartSliceMeta {
-        let emptySlice = ChartSliceMeta(totalWidth: 0, stepX: 0, offsetX: 0, visibleIndices: (0 ..< 1))
+    func obtainMeta(config: ChartConfig, bounds: CGRect) -> ChartSliceMeta {
+        let emptySlice = ChartSliceMeta(totalWidth: 0, stepX: 0, visibleIndices: (0 ..< 1))
         guard bounds.size.width > 0 else { return emptySlice }
         guard length > 0 else { return emptySlice }
         guard config.range.distance > 0 else { return emptySlice }
         
         let totalWidth = bounds.size.width / config.range.distance
-        let stepX = totalWidth / CGFloat(length)
+        let stepX = totalWidth / CGFloat(length - 1)
         let startIndex = Int(floor((totalWidth * config.range.start) / stepX))
         let endIndex = Int(ceil((totalWidth * config.range.end) / stepX))
         
         return ChartSliceMeta(
             totalWidth: totalWidth,
             stepX: stepX,
-            offsetX: stepX * offsetCoef,
             visibleIndices: (max(0, startIndex) ..< min(length, endIndex))
         )
     }
