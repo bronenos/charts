@@ -35,12 +35,8 @@ struct ChartConfig: Equatable {
         return nil
     }
     
-    func fullRanged() -> ChartConfig {
-        return ChartConfig(
-            lines: lines,
-            range: ChartRange(start: 0, end: 1.0),
-            pointer: pointer
-        )
+    func withRange(range: ChartRange) -> ChartConfig {
+        return ChartConfig(lines: lines, range: range, pointer: pointer)
     }
     
     static func ==(lhs: ChartConfig, rhs: ChartConfig) -> Bool {
@@ -65,7 +61,10 @@ struct ChartLineConfig: Equatable {
 struct ChartRange: Equatable {
     let start: CGFloat
     let end: CGFloat
-    var distance: CGFloat { return end - start }
+    
+    var distance: CGFloat {
+        return end - start
+    }
     
     static func ==(lhs: ChartRange, rhs: ChartRange) -> Bool {
         guard lhs.start == rhs.start else { return false }

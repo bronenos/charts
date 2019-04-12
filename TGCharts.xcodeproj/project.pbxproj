@@ -61,6 +61,9 @@
 		D46BA28F225B799C001EFED6 /* graph_data in Resources */ = {isa = PBXBuildFile; fileRef = D46BA28E225B799C001EFED6 /* graph_data */; };
 		D46EE1DE225BC79200183E6E /* ChartDuoGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EE1DD225BC79200183E6E /* ChartDuoGraphNode.swift */; };
 		D46EE1E0225BCE8000183E6E /* ChartGuideContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EE1DF225BCE8000183E6E /* ChartGuideContainer.swift */; };
+		D479B959225FA56900C99897 /* CGFloatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D479B958225FA56900C99897 /* CGFloatExtensions.swift */; };
+		D479B95C225FBE6900C99897 /* NavigatingCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D479B95B225FBE6900C99897 /* NavigatingCalculator.swift */; };
+		D48190452260CCA7004CBEF6 /* GlobalExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48190442260CCA7004CBEF6 /* GlobalExtensions.swift */; };
 		D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */; };
 		D4984A96225A6B150008C552 /* ChartHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A95225A6B150008C552 /* ChartHeader.swift */; };
 		D4984A98225A78BD0008C552 /* ChartOptionsControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A97225A78BD0008C552 /* ChartOptionsControl.swift */; };
@@ -137,6 +140,9 @@
 		D46BA28E225B799C001EFED6 /* graph_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = graph_data; sourceTree = "<group>"; };
 		D46EE1DD225BC79200183E6E /* ChartDuoGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDuoGraphNode.swift; sourceTree = "<group>"; };
 		D46EE1DF225BCE8000183E6E /* ChartGuideContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGuideContainer.swift; sourceTree = "<group>"; };
+		D479B958225FA56900C99897 /* CGFloatExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGFloatExtensions.swift; sourceTree = "<group>"; };
+		D479B95B225FBE6900C99897 /* NavigatingCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigatingCalculator.swift; sourceTree = "<group>"; };
+		D48190442260CCA7004CBEF6 /* GlobalExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalExtensions.swift; sourceTree = "<group>"; };
 		D48EEF5B2237C6ED00C232E6 /* ChartGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGraphNode.swift; sourceTree = "<group>"; };
 		D4984A95225A6B150008C552 /* ChartHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartHeader.swift; sourceTree = "<group>"; };
 		D4984A97225A78BD0008C552 /* ChartOptionsControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptionsControl.swift; sourceTree = "<group>"; };
@@ -405,10 +411,12 @@
 		D461827B2235A401006B72A7 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				D48190442260CCA7004CBEF6 /* GlobalExtensions.swift */,
 				D46182892235C902006B72A7 /* UIColorExtensions.swift */,
 				D42B7A5722398B8A00733F2F /* CGRectExtensions.swift */,
 				D45B78A8223A673D002134ED /* CGPointExtensions.swift */,
 				D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */,
+				D479B958225FA56900C99897 /* CGFloatExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -419,6 +427,7 @@
 				D4F4610A2238C60B00EDDF90 /* global.swift */,
 				D46182842235AF56006B72A7 /* BroadcastObservable */,
 				D461827F2235A553006B72A7 /* JsonReader */,
+				D479B95A225FBE5900C99897 /* NavigatingCalculator */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -459,6 +468,14 @@
 				D48EEF5A2237C6D300C232E6 /* Nodes */,
 			);
 			path = ChartControl;
+			sourceTree = "<group>";
+		};
+		D479B95A225FBE5900C99897 /* NavigatingCalculator */ = {
+			isa = PBXGroup;
+			children = (
+				D479B95B225FBE6900C99897 /* NavigatingCalculator.swift */,
+			);
+			path = NavigatingCalculator;
 			sourceTree = "<group>";
 		};
 		D48EEF5A2237C6D300C232E6 /* Nodes */ = {
@@ -578,6 +595,7 @@
 				D46EE1E0225BCE8000183E6E /* ChartGuideContainer.swift in Sources */,
 				D461823B22346760006B72A7 /* LocaleProvider.swift in Sources */,
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
+				D48190452260CCA7004CBEF6 /* GlobalExtensions.swift in Sources */,
 				D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */,
 				D4984AA3225B4AE00008C552 /* ChartPointerControl.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
@@ -619,7 +637,9 @@
 				D42B7A4E22396D6800733F2F /* ChartSliderNode.swift in Sources */,
 				D461824B2234D7E4006B72A7 /* RootRouter.swift in Sources */,
 				D46182882235AFB6006B72A7 /* BroadcastObserver.swift in Sources */,
+				D479B959225FA56900C99897 /* CGFloatExtensions.swift in Sources */,
 				D42B7A562239893E00733F2F /* ChartFigureNode.swift in Sources */,
+				D479B95C225FBE6900C99897 /* NavigatingCalculator.swift in Sources */,
 				D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */,
 				D461824122346BEC006B72A7 /* FormattingProvider.swift in Sources */,
 				D45B789F223A521A002134ED /* ChartSliderArrowNode.swift in Sources */,

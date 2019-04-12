@@ -31,7 +31,6 @@ protocol IChartControlDelegate: class {
 
 final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
     let chart: Chart
-    private(set) var config: ChartConfig
 
     private weak var delegate: IChartControlDelegate?
 
@@ -39,13 +38,35 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     private let scene: ChartSceneNode
     private let interactor: IChartInteractor
     
-    private let startupRange = ChartRange(start: 0.75, end: 1.0)
-    
+    private let startupDistance: CGFloat
+    private let startupRange: ChartRange
+    private(set) var config: ChartConfig
+
     init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
-        self.config = startupConfig(chart: chart, range: startupRange)
-        self.scene = ChartSceneNode(chart: chart, config: config, localeProvider: localeProvider, formattingProvider: formattingProvider)
-        self.interactor = ChartInteractor(scene: scene, range: startupRange)
+        
+        startupDistance = CGFloat(1.0 / 12.0)
+        startupRange = ChartRange(start: 1.0 - startupDistance, end: 1.0)
+        config = startupConfig(chart: chart, range: startupRange)
+
+        let navigatorOptions = ChartNavigatorOptions(
+            caretStandardWidth: 95,
+            caretStandardDistance: startupDistance
+        )
+        
+        scene = ChartSceneNode(
+            chart: chart,
+            navigatorOptions: navigatorOptions,
+            config: config,
+            localeProvider: localeProvider,
+            formattingProvider: formattingProvider
+        )
+        
+        interactor = ChartInteractor(
+            scene: scene,
+            navigatorOptions: navigatorOptions,
+            range: startupRange
+        )
         
         super.init(frame: .zero)
         

@@ -88,7 +88,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
             config: config,
             bounds: bounds
         )
-
+        
         let dateWidth = bounds.width / 7
         let totalWidth = bounds.width / config.range.distance
         let rightEdge = bounds.width + (1.0 - config.range.end) * totalWidth

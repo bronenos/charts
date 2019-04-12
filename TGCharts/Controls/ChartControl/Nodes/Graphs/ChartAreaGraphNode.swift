@@ -54,7 +54,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     
     func placeBars(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
-            guard let node = lineNodes[line.key] else { return }
+            guard let node = figureNodes[line.key] else { return }
             
             if let point = points[line.key] {
                 guard let firstPoint = point.first else { return }

@@ -39,14 +39,39 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     private let chart: Chart
     private var config: ChartConfig
     
-    init(chart: Chart, config: ChartConfig, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+    init(chart: Chart,
+         navigatorOptions: ChartNavigatorOptions,
+         config: ChartConfig,
+         localeProvider: ILocaleProvider,
+         formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
         
-        headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
-        graphContainer = ChartGraphContainer(chart: chart, config: config, formattingProvider: formattingProvider, enableControls: true)
-        timelineNode = ChartTimelineControl(chart: chart, config: config, formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorControl(chart: chart, config: config, formattingProvider: formattingProvider)
+        headerNode = ChartHeader(
+            zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"),
+            formattingProvider: formattingProvider
+        )
+        
+        graphContainer = ChartGraphContainer(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider,
+            enableControls: true
+        )
+        
+        timelineNode = ChartTimelineControl(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider
+        )
+        
+        navigatorNode = ChartNavigatorControl(
+            chart: chart,
+            config: config,
+            options: navigatorOptions,
+            formattingProvider: formattingProvider
+        )
+        
         optionsNode = ChartOptionsControl()
 
         super.init(frame: .zero)
@@ -77,6 +102,9 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     
     func update(config: ChartConfig, duration: TimeInterval) {
         self.config = config
+        
+        setNeedsLayout()
+        layoutIfNeeded()
         
         graphContainer.update(config: config, duration: duration)
         timelineNode.update(config: config, duration: 0)

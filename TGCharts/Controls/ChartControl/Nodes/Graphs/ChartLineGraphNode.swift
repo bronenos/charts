@@ -85,7 +85,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                             points: [String: [CGPoint]],
                             duration: TimeInterval) {
         zip(chart.lines, config.lines).forEach { line, lineConfig in
-            guard let node = lineNodes[line.key] else { return }
+            guard let node = figureNodes[line.key] else { return }
             
             node.points = points[line.key] ?? []
             
@@ -112,7 +112,7 @@ fileprivate final class LineCalculateOperation: CalculateOperation {
     private func calculateSliceEdge(meta: ChartSliceMeta) -> ChartRange {
         let visibleLineKeys = chart.visibleLines(config: config).map { $0.key }
         
-        let edges: [ChartRange] = chart.axis[meta.visibleIndices].map { item in
+        let edges: [ChartRange] = zip(meta.visibleIndices, chart.axis[meta.visibleIndices]).map { index, item in
             let visibleValues = visibleLineKeys.compactMap { item.values[$0] }
             let lowerValue = CGFloat(visibleValues.min() ?? 0)
             let upperValue = CGFloat(visibleValues.max() ?? 0)

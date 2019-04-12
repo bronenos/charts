@@ -20,8 +20,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     let chart: Chart
     private(set) var config: ChartConfig
 
-    let graphContainer = ChartView()
-    var lineNodes = [String: ChartFigureNode]()
+    let figuresContainer = ChartFiguresContainer()
+    var figureNodes = [String: ChartFigureNode]()
 
     private var lastMeta: ChartSliceMeta?
     let calculationQueue = OperationQueue()
@@ -38,8 +38,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         calculationQueue.maxConcurrentOperationCount = 1
         calculationQueue.qualityOfService = .userInteractive
         
-        graphContainer.tag = ChartControlTag.graph.rawValue
-        addSubview(graphContainer)
+        figuresContainer.tag = ChartControlTag.graph.rawValue
+        addSubview(figuresContainer)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -51,8 +51,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             let node = ChartFigureNode(figure: figure)
             block(index, node, line)
             
-            lineNodes[line.key] = node
-            graphContainer.addSubview(node)
+            figureNodes[line.key] = node
+            figuresContainer.addSubview(node)
         }
     }
     
@@ -60,7 +60,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         self.config = config
         
         if duration > 0 {
-            lineNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
+            figureNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
         }
         
         enqueueRecalculation(duration: duration)
@@ -85,15 +85,15 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        graphContainer.frame = bounds
+        figuresContainer.frame = bounds
         enqueueRecalculation(duration: 0)
     }
     
     private func enqueueRecalculation(duration: TimeInterval) {
-        let meta = chart.obtainMeta(
-            config: config,
-            bounds: bounds
-        )
+        guard bounds.size != .zero else { return }
+        
+        let meta = chart.obtainMeta(config: config, bounds: bounds)
+        guard meta.range.distance > 0 else { return }
         
         if meta != lastMeta {
             lastMeta = meta
@@ -163,5 +163,12 @@ class CalculateOperation: Operation {
             let block = completion
             callerQueue.addOperation { block(result) }
         }
+    }
+}
+
+final class ChartFiguresContainer: ChartNode {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        subviews.forEach { $0.frame = bounds }
     }
 }

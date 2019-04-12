@@ -41,7 +41,7 @@ struct Chart: Equatable {
             range: config.range,
             totalWidth: 0,
             stepX: 0,
-            visibleIndices: (0 ..< 1)
+            visibleIndices: (0 ..< 0)
         )
         
         guard bounds.size.width > 0 else { return emptySlice }

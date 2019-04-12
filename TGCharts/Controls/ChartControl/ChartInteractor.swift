@@ -22,7 +22,8 @@ protocol IChartInteractorDelegate: class {
 }
 
 final class ChartInteractor: IChartInteractor {
-    private var scene: ChartSceneNode
+    private let scene: ChartSceneNode
+    private let navigatorOptions: ChartNavigatorOptions
     private(set) var range: ChartRange
     private(set) var pointer: CGFloat?
     weak var delegate: IChartInteractorDelegate?
@@ -35,8 +36,9 @@ final class ChartInteractor: IChartInteractor {
 
     private var scenario: IChartInteractorScenario?
 
-    init(scene: ChartSceneNode, range: ChartRange) {
+    init(scene: ChartSceneNode, navigatorOptions: ChartNavigatorOptions, range: ChartRange) {
         self.scene = scene
+        self.navigatorOptions = navigatorOptions
         self.range = range
         self.pointer = nil
     }
@@ -64,8 +66,10 @@ final class ChartInteractor: IChartInteractor {
                 sliderNode: sliderNode,
                 navigatorNode: navigatorNode,
                 startPoint: point,
+                startOrigin: scene.convert(point, to: sliderNode).x,
                 startRange: range,
                 direction: .left,
+                navigatorOptions: navigatorOptions,
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
 
@@ -75,8 +79,10 @@ final class ChartInteractor: IChartInteractor {
                 sliderNode: sliderNode,
                 navigatorNode: navigatorNode,
                 startPoint: point,
+                startOrigin: scene.convert(point, to: sliderNode).x,
                 startRange: range,
                 direction: .right,
+                navigatorOptions: navigatorOptions,
                 rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
             )
 
@@ -88,7 +94,6 @@ final class ChartInteractor: IChartInteractor {
             )
 
         default:
-            print("\(#function) -> tag[\(node.tag)] scenario[-]")
             scenario = nil
         }
         

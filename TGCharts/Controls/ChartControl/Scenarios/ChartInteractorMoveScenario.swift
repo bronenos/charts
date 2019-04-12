@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 final class ChartInteractorMoveScenario: IChartInteractorScenario {
+    private let sceneNode: UIView
     private let sliderNode: UIView
     private let navigatorNode: UIView
-    private let startPoint: CGPoint
     private let originPoint: CGPoint
     private let startRange: ChartRange
     private let rangeUpdateBlock: (ChartRange) -> Void
@@ -23,10 +23,10 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
          startPoint: CGPoint,
          startRange: ChartRange,
          rangeUpdateBlock: @escaping (ChartRange) -> Void) {
+        self.sceneNode = sceneNode
         self.sliderNode = sliderNode
         self.navigatorNode = navigatorNode
-        self.startPoint = startPoint
-        self.originPoint = sliderNode.convert(.zero, to: nil)
+        self.originPoint = sceneNode.convert(startPoint, to: navigatorNode)
         self.startRange = startRange
         self.rangeUpdateBlock = rangeUpdateBlock
     }
@@ -35,8 +35,9 @@ final class ChartInteractorMoveScenario: IChartInteractorScenario {
     }
     
     func interactionDidMove(to point: CGPoint) {
-        let vector = point - startPoint
-        let moveFactor = vector.dx / navigatorNode.bounds.size.width
+        let withinBoundWidth = navigatorNode.bounds.width - sliderNode.bounds.width
+        let moveDistance = sceneNode.convert(point, to: navigatorNode) - originPoint
+        let moveFactor = (moveDistance.dx / withinBoundWidth) * (1.0 - startRange.distance)
         
         if moveFactor > 0 {
             let end = min(1.0, startRange.end + moveFactor)
