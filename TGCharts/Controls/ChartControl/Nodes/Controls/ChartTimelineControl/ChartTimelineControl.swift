@@ -37,7 +37,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
     
     func update(config: ChartConfig, duration: TimeInterval) {
         self.config = config
-        update()
+        update(duration: duration)
     }
     
     override func updateDesign() {
@@ -48,7 +48,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
     override func layoutSubviews() {
         super.layoutSubviews()
         resizeDateNodes(Array(dateNodes.values))
-        update()
+        update(duration: 0)
     }
     
     private func resizeDateNodes(_ nodes: [ChartLabelNode]) {
@@ -69,7 +69,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         }
     }
     
-    private func update() {
+    private func update(duration: TimeInterval) {
         guard bounds.width > 0 else { return }
         guard config.range.distance > 0 else { return }
 
@@ -93,21 +93,41 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         let fadingStartDistance = dateWidth * 0.05
         let fadingEndDistance = dateWidth * 0.2
         
-        for index in (0 ..< leftIndex) {
-            let storageIndex = visibleIndexToStorageIndex(index)
-            possibleNode(index: storageIndex)?.alpha = 0
+        var animatedBlocks = [() -> Void]()
+        func _possibleAnimate(node: ChartLabelNode, index: Int, targetAlpha: CGFloat?) {
+            let transformToApply = nodeTransform(
+                rightEdge: rightEdge,
+                dateWidth: dateWidth,
+                meta: meta,
+                index: index
+            )
+            
+            if node.alpha > 0 {
+                animatedBlocks.append { node.transform = transformToApply }
+            }
+            else {
+                node.transform = transformToApply
+            }
+            
+            if let alpha = targetAlpha {
+                node.alpha = alpha
+            }
+        }
+
+        for index in (0 ..< leftIndex).map(visibleIndexToStorageIndex) {
+            guard let node = possibleNode(index: index) else { continue }
+            _possibleAnimate(node: node, index: index, targetAlpha: nil)
         }
         
-        for index in (rightIndex ..< chart.axis.count) {
-            let storageIndex = visibleIndexToStorageIndex(index)
-            possibleNode(index: storageIndex)?.alpha = 0
+        for index in (rightIndex ..< chart.axis.count).map(visibleIndexToStorageIndex) {
+            guard let node = possibleNode(index: index) else { continue }
+            _possibleAnimate(node: node, index: index, targetAlpha: nil)
         }
         
         for (dateIndex, index) in zip(innerIndices, innerIndices.map(visibleIndexToStorageIndex)) {
             if (index % skippingStep) == 0 {
                 let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
-                node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
-                node.alpha = 1.0
+                _possibleAnimate(node: node, index: index, targetAlpha: 1.0)
             }
             else if (index % skippingSemiStep) == 0 {
                 let primaryIndex = index - skippingSemiStep
@@ -118,28 +138,39 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                     let distance = rightAnchor - primaryLeftAnchor
                     if distance < fadingStartDistance {
                         let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
-                        node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
-                        node.alpha = 1.0
+                        _possibleAnimate(node: node, index: index, targetAlpha: 1.0)
                     }
                     else if distance > fadingEndDistance {
-                        possibleNode(index: index)?.alpha = 0
+                        if let node = possibleNode(index: index) {
+                            _possibleAnimate(node: node, index: index, targetAlpha: 0)
+                        }
                     }
                     else {
                         let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
                         let coef = distance.percent(from: fadingStartDistance, to: fadingEndDistance)
-                        node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
-                        node.alpha = 1.0 - coef
+                        _possibleAnimate(node: node, index: index, targetAlpha: 1.0 - coef)
                     }
                 }
                 else {
                     let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
-                    node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
-                    node.alpha = 1.0
+                    _possibleAnimate(node: node, index: index, targetAlpha: 1.0)
                 }
             }
             else {
-                possibleNode(index: index)?.alpha = 0
+                if let node = possibleNode(index: index) {
+                    _possibleAnimate(node: node, index: index, targetAlpha: 0)
+                }
             }
+        }
+        
+        if duration > 0 {
+            UIView.animate(
+                withDuration: duration,
+                animations: { animatedBlocks.forEach { block in block() } }
+            )
+        }
+        else {
+            animatedBlocks.forEach { block in block() }
         }
     }
     
@@ -163,6 +194,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         node.textColor = DesignBook.shared.color(.chartIndexForeground)
         node.font = UIFont.systemFont(ofSize: 8)
         node.textAlignment = .right
+        node.alpha = 0
         
         addSubview(node)
         dateNodes[index] = node
