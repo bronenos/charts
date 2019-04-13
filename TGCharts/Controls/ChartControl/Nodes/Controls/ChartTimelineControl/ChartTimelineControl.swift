@@ -78,56 +78,34 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
             bounds: bounds
         )
         
+        let axisLength = CGFloat(chart.axis.count)
         let dateWidth = bounds.width / 7
         let totalWidth = bounds.width / config.range.distance
         let rightEdge = bounds.width + (1.0 - config.range.end) * totalWidth
         
-        let leftIndex = Int(floor(CGFloat(chart.axis.count) * config.range.start))
-        let rightIndex = Int(ceil(CGFloat(chart.axis.count) * config.range.end))
+        let leftIndex = Int(floor(axisLength * config.range.start))
+        let rightIndex = Int(min(axisLength, ceil(axisLength * config.range.end) + (dateWidth / meta.stepX)))
         
-        (leftIndex ..< rightIndex).forEach { index in
-            let reversedIndex = chart.axis.count - index - 1
-            guard dateNodes[reversedIndex] == nil else { return }
-            
-            let item = chart.axis[index]
-            let node = ChartLabelNode()
-            
-            node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
-            node.text = formattingProvider.format(date: item.date, style: .shortDate)
-            node.textColor = DesignBook.shared.color(.chartIndexForeground)
-            node.font = UIFont.systemFont(ofSize: 8)
-            node.textAlignment = .right
-            
-            addSubview(node)
-            dateNodes[reversedIndex] = node
-        }
-        
-        dateNodes.forEach { index, node in
-            let leftX = rightEdge - CGFloat(index) * meta.stepX - dateWidth
-            node.transform = CGAffineTransform(translationX: leftX, y: 0)
-        }
-
-        adjustLayout(
-            dateWidth: dateWidth,
-            rightEdge: rightEdge,
-            meta: meta
-        )
-    }
-    
-    private func calculateStep(dateWidth: CGFloat, rightEdge: CGFloat, meta: ChartSliceMeta) -> Int {
-        let skippingNumber = Int(ceil(dateWidth / meta.stepX))
-        return calculateCoveringDuoPower(value: skippingNumber)
-    }
-    
-    private func adjustLayout(dateWidth: CGFloat, rightEdge: CGFloat, meta: ChartSliceMeta) {
         let skippingStep = calculateStep(dateWidth: dateWidth, rightEdge: rightEdge, meta: meta)
         let skippingSemiStep = max(1, skippingStep / 2)
         
         let fadingStartDistance = dateWidth * 0.1
         let fadingEndDistance = dateWidth * 0.3
-
-        for (index, node) in dateNodes {
+        
+        for index in (0 ..< leftIndex) {
+            let storageIndex = visibleIndexToStorageIndex(index)
+            possibleNode(index: storageIndex)?.alpha = 0
+        }
+        
+        for index in (rightIndex ..< chart.axis.count) {
+            let storageIndex = visibleIndexToStorageIndex(index)
+            possibleNode(index: storageIndex)?.alpha = 0
+        }
+        
+        for index in (leftIndex ..< rightIndex).reversed().map(visibleIndexToStorageIndex) {
             if (index % skippingStep) == 0 {
+                let node = ensureNode(index: index, dateWidth: dateWidth)
+                node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                 node.alpha = 1.0
             }
             else if (index % skippingSemiStep) == 0 {
@@ -138,24 +116,71 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                 if primaryLeftAnchor < rightAnchor {
                     let distance = rightAnchor - primaryLeftAnchor
                     if distance < fadingStartDistance {
+                        let node = ensureNode(index: index, dateWidth: dateWidth)
+                        node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                         node.alpha = 1.0
                     }
                     else if distance > fadingEndDistance {
-                        node.alpha = 0
+                        possibleNode(index: index)?.alpha = 0
                     }
                     else {
+                        let node = ensureNode(index: index, dateWidth: dateWidth)
                         let coef = distance.percent(from: fadingStartDistance, to: fadingEndDistance)
+                        node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                         node.alpha = 1.0 - coef
                     }
                 }
                 else {
+                    let node = ensureNode(index: index, dateWidth: dateWidth)
+                    node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                     node.alpha = 1.0
                 }
             }
             else {
-                node.alpha = 0
+                possibleNode(index: index)?.alpha = 0
             }
         }
+    }
+    
+    private func calculateStep(dateWidth: CGFloat, rightEdge: CGFloat, meta: ChartSliceMeta) -> Int {
+        let skippingNumber = Int(ceil(dateWidth / meta.stepX))
+        return calculateCoveringDuoPower(value: skippingNumber)
+    }
+    
+    private func visibleIndexToStorageIndex(_ index: Int) -> Int {
+        return chart.axis.count - index - 1
+    }
+    
+    private func ensureNode(index: Int, dateWidth: CGFloat) -> ChartLabelNode {
+        if let node = dateNodes[index] {
+            return node
+        }
+        
+        let item = chart.axis[index]
+        let node = ChartLabelNode()
+        
+        node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
+        node.text = formattingProvider.format(date: item.date, style: .shortDate)
+        node.textColor = DesignBook.shared.color(.chartIndexForeground)
+        node.font = UIFont.systemFont(ofSize: 8)
+        node.textAlignment = .right
+        
+        addSubview(node)
+        dateNodes[index] = node
+        
+        return node
+    }
+    
+    private func possibleNode(index: Int) -> ChartLabelNode? {
+        return dateNodes[index]
+    }
+    
+    private func nodeTransform(rightEdge: CGFloat,
+                               dateWidth: CGFloat,
+                               meta: ChartSliceMeta,
+                               index: Int) -> CGAffineTransform {
+        let leftX = rightEdge - CGFloat(index) * meta.stepX - dateWidth
+        return CGAffineTransform(translationX: leftX, y: 0)
     }
 }
 
