@@ -46,9 +46,8 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
     }
     
     func update(leftEdge: ChartRange?, rightEdge: ChartRange?, duration: TimeInterval) {
-        let emptyEdge = ChartRange(start: 0, end: 0)
-        leftGuidesNode.update(edge: leftEdge ?? emptyEdge, duration: duration)
-        rightGuidesNode.update(edge: rightEdge ?? emptyEdge, duration: duration)
+        leftGuidesNode.update(edge: leftEdge, duration: duration)
+        rightGuidesNode.update(edge: rightEdge, duration: duration)
     }
     
     override func layoutSubviews() {

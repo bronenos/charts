@@ -107,7 +107,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         layoutIfNeeded()
         
         graphContainer.update(config: config, duration: duration)
-        timelineNode.update(config: config, duration: 0)
+        timelineNode.update(config: config, duration: duration)
         navigatorNode.update(config: config, duration: duration)
         populateOptions(chart: chart, config: config)
     }

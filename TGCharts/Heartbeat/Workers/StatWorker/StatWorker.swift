@@ -84,7 +84,7 @@ final class StatWorker: IStatWorker {
                 }
             }
             
-            DispatchQueue.main.async { self?.storeAndBroadcast(charts: charts) }
+            DispatchQueue.main.async { self?.storeAndBroadcast(charts: [charts[0]]) }
         }
     }
     

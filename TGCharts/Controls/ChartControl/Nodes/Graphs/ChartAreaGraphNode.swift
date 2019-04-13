@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 
 protocol IChartAreaGraphNode: IChartGraphNode {
-    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval)
 }
 
 class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
@@ -30,26 +29,6 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     
     required init?(coder aDecoder: NSCoder) {
         abort()
-    }
-    
-    func update(chart: Chart, meta: ChartSliceMeta, edge: ChartRange, duration: TimeInterval) {
-        guard bounds.size != .zero else { return }
-        guard let points = cachedResult?.points else { return }
-        
-        placeBars(
-            meta: meta,
-            offset: meta.totalWidth * config.range.start,
-            points: points,
-            duration: duration
-        )
-        
-        container?.adjustGuides(
-            left: edge,
-            right: nil,
-            duration: duration
-        )
-        
-        adjustPointer(meta: meta)
     }
     
     func placeBars(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
@@ -73,24 +52,49 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         }
     }
     
-    override func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
+    override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
+                                                   date: Date,
+                                                   duration: TimeInterval,
+                                                   completion: @escaping (CalculatePointsResult) -> Void) -> CalculatePointsOperation {
         return AreaCalculateOperation(
             chart: chart,
             config: config,
             meta: meta,
             bounds: bounds,
-            completion: { [weak self] result in
-                guard let `self` = self else { return }
-                guard let primaryEdge = result.edges.first else { return }
-                
-                self.cachedResult = result
-                self.update(chart: self.chart, meta: meta, edge: primaryEdge, duration: duration)
-            }
+            source: date,
+            completion: completion
         )
     }
     
-    override func adjustPointer(meta: ChartSliceMeta) {
-        guard let edge = cachedResult?.edges.first else { return }
+    override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
+                                                  edges: [ChartRange],
+                                                  duration: TimeInterval,
+                                                  completion: @escaping (CalculateFocusResult) -> Void) -> CalculateFocusOperation {
+        abort()
+    }
+    
+    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
+        guard bounds.size != .zero else { return }
+        guard let points = cachedPointsResult?.points else { return }
+        
+        placeBars(
+            meta: meta,
+            offset: meta.totalWidth * config.range.start,
+            points: points,
+            duration: duration
+        )
+    }
+    
+    override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
+        container?.adjustGuides(
+            left: edges.first ?? ChartRange(start: 0, end: 0),
+            right: nil,
+            duration: duration
+        )
+    }
+    
+    override func updatePointer(meta: ChartSliceMeta) {
+        guard let edge = cachedPointsResult?.edges.first else { return }
         
         container?.adjustPointer(
             chart: chart,
@@ -102,12 +106,12 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     }
 }
 
-fileprivate final class AreaCalculateOperation: CalculateOperation {
-    override func calculateResult() -> Result {
+fileprivate final class AreaCalculateOperation: CalculatePointsOperation {
+    override func calculateResult() -> CalculatePointsResult {
         let edge = calculateSliceEdge(meta: meta)
         let points = calculateNormalizedPoints(edge: edge, with: meta)
         
-        return Result(
+        return CalculatePointsResult(
             range: config.range,
             edges: [edge],
             points: points

@@ -15,60 +15,52 @@ protocol IChartDuoGraphNode: IChartLineGraphNode {
 class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     private let pointerLineNode = ChartNode()
     
-    func update(chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
-        guard bounds.size != .zero else { return }
-        guard let points = cachedResult?.points else { return }
-
-        placeLines(
-            meta: meta,
-            offset: meta.totalWidth * config.range.start,
-            points: points,
-            duration: duration
-        )
-        
-        container?.adjustGuides(
-            left: config.lines[0].visible ? edges[0] : nil,
-            right: config.lines[1].visible ? edges[1] : nil,
-            duration: duration
-        )
-        
-        adjustPointer(meta: meta)
-    }
-    
-    override func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
+    override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
+                                                   date: Date,
+                                                   duration: TimeInterval,
+                                                   completion: @escaping (CalculatePointsResult) -> Void) -> CalculatePointsOperation {
         return DuoCalculateOperation(
             chart: chart,
             config: config,
             meta: meta,
             bounds: bounds,
-            completion: { [weak self] result in
-                guard let `self` = self else { return }
-                
-                self.cachedResult = result
-                self.update(chart: self.chart, meta: meta, edges: result.edges, duration: duration)
-            }
+            source: date,
+            completion: completion
         )
     }
     
-    override func adjustPointer(meta: ChartSliceMeta) {
-        guard let edges = cachedResult?.edges else { return }
-        
+    override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
+                                                  edges: [ChartRange],
+                                                  duration: TimeInterval,
+                                                  completion: @escaping (CalculateFocusResult) -> Void) -> CalculateFocusOperation {
+        abort()
+    }
+    
+    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
+        super.updateChart(chart, meta: meta, edges: edges, duration: duration)
+    }
+    
+    override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
+        super.updateGuides(edges: edges, duration: duration)
+    }
+    
+    override func updatePointer(meta: ChartSliceMeta) {
         container?.adjustPointer(
             chart: chart,
             config: config,
             meta: meta,
-            edges: edges,
+            edges: cachedPointsResult?.edges ?? [],
             options: [.line, .dots]
         )
     }
 }
 
-fileprivate final class DuoCalculateOperation: CalculateOperation {
-    override func calculateResult() -> Result {
+fileprivate final class DuoCalculateOperation: CalculatePointsOperation {
+    override func calculateResult() -> CalculatePointsResult {
         let edges = calculateSliceEdges(meta: meta)
         let points = calculateNormalizedPoints(edges: edges, with: meta)
         
-        return Result(
+        return CalculatePointsResult(
             range: config.range,
             edges: edges,
             points: points

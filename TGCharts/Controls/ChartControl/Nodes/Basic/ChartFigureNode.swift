@@ -25,11 +25,12 @@ protocol IChartFigureNode: IChartNode {
     var strokeColor: UIColor { get set }
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
-    func overwriteNextAnimation(duration: TimeInterval)
+    func updateFocus(_ focus: UIEdgeInsets?, duration: TimeInterval)
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
     private let shapeLayer = CAShapeLayer()
+    private var rootBezierPath = UIBezierPath()
     
     private let standardAnimationDuration = TimeInterval(0.075)
     private var nextAnimationDuration: TimeInterval?
@@ -49,56 +50,91 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     var figure = ChartFigure.joinedLines {
         didSet {
             guard figure != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     override var frame: CGRect {
         didSet {
             guard frame.size != oldValue.size else { return }
-            update()
+            updateFigure()
         }
     }
     
     var points = [CGPoint]() {
         didSet {
             guard points != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     var bezierPaths = [UIBezierPath]() {
         didSet {
             guard bezierPaths != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     var width = CGFloat(0) {
         didSet {
             guard width != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     var strokeColor = UIColor.clear {
         didSet {
-            guard strokeColor != oldValue else { return }
-            update()
+            shapeLayer.strokeColor = strokeColor.cgColor
         }
     }
     
     var fillColor = UIColor.clear {
         didSet {
-            guard fillColor != oldValue else { return }
-            update()
+            shapeLayer.fillColor = fillColor.cgColor
         }
     }
     
     var radius = CGFloat(0) {
         didSet {
             guard radius != oldValue else { return }
-            update()
+            updateFigure()
+        }
+    }
+    
+    func updateFocus(_ focus: UIEdgeInsets?, duration: TimeInterval) {
+        let path: CGPath
+        if let focus = focus {
+            var targetTransform = CGAffineTransform.identity
+            
+            let scaleX = 1.0 / (focus.right - focus.left)
+            let scaleY = 1.0 / (focus.top - focus.bottom)
+            targetTransform = targetTransform.scaledBy(x: scaleX, y: scaleY)
+            
+            let moveX = -(bounds.width * focus.left)
+            let moveY = -(bounds.height * (1.0 - focus.top))
+            targetTransform = targetTransform.translatedBy(x: moveX, y: moveY)
+            
+            let transformedBezierPath = UIBezierPath(cgPath: rootBezierPath.cgPath)
+            transformedBezierPath.apply(targetTransform)
+            path = transformedBezierPath.cgPath
+        }
+        else {
+            path = rootBezierPath.cgPath
+        }
+
+        if duration > 0 {
+            CATransaction.begin()
+            let animation = CABasicAnimation(keyPath: "path")
+            animation.duration = duration
+            animation.fromValue = shapeLayer.presentation()?.path
+            animation.toValue = path
+            
+            shapeLayer.path = path
+            shapeLayer.add(animation, forKey: animation.keyPath)
+            CATransaction.commit()
+        }
+        else {
+            shapeLayer.path = path
         }
     }
     
@@ -112,7 +148,9 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         shapeLayer.frame = layer.bounds
     }
     
-    private func update() {
+    private func updateFigure() {
+        rootBezierPath.removeAllPoints()
+        
         switch figure {
         case .joinedLines: renderJoinedLines()
         case .separatePoints: renderSeparatePoints()
@@ -129,80 +167,56 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         let firstPoint = restPoints.removeFirst()
         guard !restPoints.isEmpty else { return }
 
-        let bezierPath = UIBezierPath()
-        bezierPath.move(to: firstPoint)
-        restPoints.forEach(bezierPath.addLine)
-        
-        CATransaction.begin()
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.duration = resolvedAnimationDuration
-        animation.fromValue = shapeLayer.presentation()?.path
-        animation.toValue = bezierPath.cgPath
+        rootBezierPath.move(to: firstPoint)
+        restPoints.forEach(rootBezierPath.addLine)
         
         shapeLayer.lineWidth = width
         shapeLayer.strokeColor = strokeColor.cgColor
         shapeLayer.fillColor = fillColor.cgColor
         shapeLayer.lineJoin = .round
         shapeLayer.lineCap = .round
-        shapeLayer.path = bezierPath.cgPath
-        shapeLayer.add(animation, forKey: animation.keyPath)
-        CATransaction.commit()
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderSeparatePoints() {
-        let bezierPath = UIBezierPath()
-        
         points.forEach { point in
             let offset = width * 0.5
             let rect = CGRect(x: point.x, y: point.y, width: 0, height: 0).insetBy(dx: offset, dy: offset)
             let bezierSubpath = UIBezierPath(roundedRect: rect, cornerRadius: offset)
-            bezierPath.append(bezierSubpath)
+            rootBezierPath.append(bezierSubpath)
         }
         
         shapeLayer.strokeColor = strokeColor.cgColor
-        shapeLayer.path = bezierPath.cgPath
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderRoundedSquare() {
-        let bezierPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+        rootBezierPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
         
         shapeLayer.fillColor = fillColor.cgColor
-        shapeLayer.path = bezierPath.cgPath
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderNestedBezierPaths() {
         var restPaths = bezierPaths
         guard !restPaths.isEmpty else { return }
         
-        let firstPath = restPaths.removeFirst()
-        restPaths.forEach(firstPath.append)
+        rootBezierPath = restPaths.removeFirst()
+        restPaths.forEach(rootBezierPath.append)
         
         shapeLayer.strokeColor = strokeColor.cgColor
         shapeLayer.lineWidth = width
         shapeLayer.fillRule = .evenOdd
         shapeLayer.fillColor = fillColor.cgColor
         shapeLayer.fillRule = .evenOdd
-        shapeLayer.path = firstPath.cgPath
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderFilledPaths() {
-        let parentPath = UIBezierPath()
-        bezierPaths.forEach(parentPath.append)
-        
-        CATransaction.begin()
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.duration = resolvedAnimationDuration
-        animation.fromValue = shapeLayer.presentation()?.path
-        animation.toValue = parentPath.cgPath
+        rootBezierPath = UIBezierPath()
+        bezierPaths.forEach(rootBezierPath.append)
         
         shapeLayer.fillColor = fillColor.cgColor
-        shapeLayer.path = parentPath.cgPath
-        shapeLayer.add(animation, forKey: animation.keyPath)
-        CATransaction.commit()
-    }
-    
-    private var resolvedAnimationDuration: TimeInterval {
-        defer { nextAnimationDuration = nil }
-        return nextAnimationDuration ?? standardAnimationDuration
+        shapeLayer.path = rootBezierPath.cgPath
     }
 }

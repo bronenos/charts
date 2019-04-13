@@ -76,11 +76,11 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         let range: ChartRange = convert(direction) { value in
             switch value {
             case .left:
-                let start = startRange.end - targetDistance
+                let start = max(0, startRange.end - targetDistance)
                 return ChartRange(start: start, end: startRange.end)
                 
             case .right:
-                let end = startRange.start + targetDistance
+                let end = min(1.0, startRange.start + targetDistance)
                 return ChartRange(start: startRange.start, end: end)
             }
         }

@@ -85,12 +85,13 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         
         let leftIndex = Int(floor(axisLength * config.range.start))
         let rightIndex = Int(min(axisLength, ceil(axisLength * config.range.end) + (dateWidth / meta.stepX)))
+        let innerIndices = (leftIndex ..< rightIndex).reversed()
         
         let skippingStep = calculateStep(dateWidth: dateWidth, rightEdge: rightEdge, meta: meta)
         let skippingSemiStep = max(1, skippingStep / 2)
         
-        let fadingStartDistance = dateWidth * 0.1
-        let fadingEndDistance = dateWidth * 0.3
+        let fadingStartDistance = dateWidth * 0.05
+        let fadingEndDistance = dateWidth * 0.2
         
         for index in (0 ..< leftIndex) {
             let storageIndex = visibleIndexToStorageIndex(index)
@@ -102,9 +103,9 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
             possibleNode(index: storageIndex)?.alpha = 0
         }
         
-        for index in (leftIndex ..< rightIndex).reversed().map(visibleIndexToStorageIndex) {
+        for (dateIndex, index) in zip(innerIndices, innerIndices.map(visibleIndexToStorageIndex)) {
             if (index % skippingStep) == 0 {
-                let node = ensureNode(index: index, dateWidth: dateWidth)
+                let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
                 node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                 node.alpha = 1.0
             }
@@ -116,7 +117,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                 if primaryLeftAnchor < rightAnchor {
                     let distance = rightAnchor - primaryLeftAnchor
                     if distance < fadingStartDistance {
-                        let node = ensureNode(index: index, dateWidth: dateWidth)
+                        let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
                         node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                         node.alpha = 1.0
                     }
@@ -124,14 +125,14 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                         possibleNode(index: index)?.alpha = 0
                     }
                     else {
-                        let node = ensureNode(index: index, dateWidth: dateWidth)
+                        let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
                         let coef = distance.percent(from: fadingStartDistance, to: fadingEndDistance)
                         node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                         node.alpha = 1.0 - coef
                     }
                 }
                 else {
-                    let node = ensureNode(index: index, dateWidth: dateWidth)
+                    let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
                     node.transform = nodeTransform(rightEdge: rightEdge, dateWidth: dateWidth, meta: meta, index: index)
                     node.alpha = 1.0
                 }
@@ -151,16 +152,14 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         return chart.axis.count - index - 1
     }
     
-    private func ensureNode(index: Int, dateWidth: CGFloat) -> ChartLabelNode {
+    private func ensureNode(index: Int, date: Date, dateWidth: CGFloat) -> ChartLabelNode {
         if let node = dateNodes[index] {
             return node
         }
         
-        let item = chart.axis[index]
         let node = ChartLabelNode()
-        
         node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
-        node.text = formattingProvider.format(date: item.date, style: .shortDate)
+        node.text = formattingProvider.format(date: date, style: .shortDate)
         node.textColor = DesignBook.shared.color(.chartIndexForeground)
         node.font = UIFont.systemFont(ofSize: 8)
         node.textAlignment = .right

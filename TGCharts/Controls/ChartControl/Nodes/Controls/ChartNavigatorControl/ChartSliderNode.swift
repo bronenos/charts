@@ -23,7 +23,7 @@ final class ChartSliderNode: ChartFigureNode, IChartSliderNode {
     let leftArrowNode = ChartSliderArrowNode(direction: .left)
     let rightArrowNode = ChartSliderArrowNode(direction: .right)
     
-    private let sideTappableMargin = CGFloat(20)
+    private let sideTappableMargin = CGFloat(10)
     
     init() {
         super.init(figure: .nestedBezierPaths)

@@ -14,19 +14,34 @@ protocol IChartGraphNode {
     func update(config: ChartConfig, duration: TimeInterval)
 }
 
+struct CalculatePointsResult {
+    let range: ChartRange
+    let edges: [ChartRange]
+    let points: [String: [CGPoint]]
+}
+
+struct CalculateFocusResult {
+    let edges: [ChartRange]
+    let focus: UIEdgeInsets
+}
+
 class ChartGraphNode: ChartNode, IChartGraphNode {
     weak var container: IChartGraphContainer?
     
     let chart: Chart
     private(set) var config: ChartConfig
 
-    let figuresContainer = ChartFiguresContainer()
+    let figuresContainer = ChartNode()
     var figureNodes = [String: ChartFigureNode]()
+    var orderedNodes = [ChartFigureNode]()
 
     private var lastMeta: ChartSliceMeta?
-    let calculationQueue = OperationQueue()
-    var cachedResult: CalculateOperation.Result?
+    private var hasCalculatedPoints = false
     
+    let calculationQueue = OperationQueue()
+    var cachedPointsResult: CalculatePointsResult?
+    var cachedFocusResult: CalculateFocusResult?
+
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
@@ -46,11 +61,20 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override var frame: CGRect {
+        didSet {
+            guard frame.size != oldValue.size else { return }
+            hasCalculatedPoints = false
+        }
+    }
+    
     final func configure(figure: ChartFigure, block: @escaping (Int, ChartFigureNode, ChartLine) -> Void) {
+        orderedNodes.removeAll()
         chart.lines.enumerated().forEach { index, line in
             let node = ChartFigureNode(figure: figure)
             block(index, node, line)
             
+            orderedNodes.append(node)
             figureNodes[line.key] = node
             figuresContainer.addSubview(node)
         }
@@ -66,11 +90,33 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         enqueueRecalculation(duration: duration)
     }
     
-    func obtainCalculationOperation(meta: ChartSliceMeta, duration: TimeInterval) -> CalculateOperation {
+    func obtainPointsCalculationOperation(meta: ChartSliceMeta,
+                                          date: Date,
+                                          duration: TimeInterval,
+                                          completion: @escaping (CalculatePointsResult) -> Void) -> CalculatePointsOperation {
+        abort()
+    }
+
+    func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
         abort()
     }
     
-    func adjustPointer(meta: ChartSliceMeta) {
+    func obtainFocusCalculationOperation(meta: ChartSliceMeta,
+                                         edges: [ChartRange],
+                                         duration: TimeInterval,
+                                         completion: @escaping (CalculateFocusResult) -> Void) -> CalculateFocusOperation {
+        abort()
+    }
+    
+    func updateFocus(_ focus: UIEdgeInsets, edges: [ChartRange], duration: TimeInterval) {
+        abort()
+    }
+    
+    func updateGuides(edges: [ChartRange], duration: TimeInterval) {
+        abort()
+    }
+        
+    func updatePointer(meta: ChartSliceMeta) {
         abort()
     }
     
@@ -86,6 +132,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         figuresContainer.frame = bounds
+        figuresContainer.subviews.forEach { $0.frame = bounds }
         enqueueRecalculation(duration: 0)
     }
     
@@ -95,45 +142,63 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let meta = chart.obtainMeta(config: config, bounds: bounds)
         guard meta.range.distance > 0 else { return }
         
-        if meta != lastMeta {
-            lastMeta = meta
-            enqueueCalculation(
-                operation: obtainCalculationOperation(
-                    meta: meta,
-                    duration: duration
-                ),
-                duration: duration
+        if let pointsResult = cachedPointsResult, hasCalculatedPoints {
+            let operation = obtainFocusCalculationOperation(
+                meta: meta,
+                edges: pointsResult.edges,
+                duration: duration,
+                completion: { [weak self] result in
+                    guard let `self` = self else { return }
+                    self.cachedFocusResult = result
+                    
+                    self.updateFocus(result.focus, edges: result.edges, duration: duration)
+                    self.updateGuides(edges: result.edges, duration: duration)
+                }
             )
-        }
-        else {
-            adjustPointer(meta: meta)
-        }
-    }
-    
-    private func enqueueCalculation(operation: Operation, duration: TimeInterval) {
-        if let _ = cachedResult {
+            
             if calculationQueue.operations.isEmpty {
                 calculationQueue.addOperation(operation)
             }
         }
+        else if meta != lastMeta {
+            lastMeta = meta
+            
+            let operation = obtainPointsCalculationOperation(
+                meta: meta,
+                date: Date(),
+                duration: duration,
+                completion: { [weak self] result in
+                    guard let `self` = self else { return }
+                    self.cachedPointsResult = result
+                    self.hasCalculatedPoints = true
+                    
+                    self.updateChart(self.chart, meta: meta, edges: result.edges, duration: duration)
+                    self.updateGuides(edges: result.edges, duration: duration)
+                }
+            )
+            
+            if let _ = cachedPointsResult {
+                if calculationQueue.operations.isEmpty {
+                    calculationQueue.addOperation(operation)
+                }
+            }
+            else {
+                operation.main()
+            }
+        }
         else {
-            operation.main()
+            updatePointer(meta: meta)
         }
     }
 }
 
-class CalculateOperation: Operation {
-    struct Result {
-        let range: ChartRange
-        let edges: [ChartRange]
-        let points: [String: [CGPoint]]
-    }
-    
+class CalculateOperation<Type, Source>: Operation {
     let chart: Chart
     let config: ChartConfig
     let meta: ChartSliceMeta
     let bounds: CGRect
-    let completion: ((Result) -> Void)
+    let source: Source
+    let completion: ((Type) -> Void)
     
     private let callerQueue = OperationQueue.current ?? .main
     
@@ -141,15 +206,17 @@ class CalculateOperation: Operation {
          config: ChartConfig,
          meta: ChartSliceMeta,
          bounds: CGRect,
-         completion: @escaping ((Result) -> Void)) {
+         source: Source,
+         completion: @escaping ((Type) -> Void)) {
         self.chart = chart
         self.config = config
         self.meta = meta
         self.bounds = bounds
+        self.source = source
         self.completion = completion
     }
     
-    func calculateResult() -> Result {
+    func calculateResult() -> Type {
         abort()
     }
     
@@ -166,9 +233,14 @@ class CalculateOperation: Operation {
     }
 }
 
-final class ChartFiguresContainer: ChartNode {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        subviews.forEach { $0.frame = bounds }
+class CalculatePointsOperation: CalculateOperation<CalculatePointsResult, Date> {
+    override func calculateResult() -> CalculatePointsResult {
+        abort()
+    }
+}
+
+class CalculateFocusOperation: CalculateOperation<CalculateFocusResult, [ChartRange]> {
+    override func calculateResult() -> CalculateFocusResult {
+        abort()
     }
 }
