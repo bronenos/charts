@@ -1,0 +1,71 @@
+//
+//  ChartDuoGraphNode.swift
+//  TGCharts
+//
+//  Created by Stan Potemkin on 08/04/2019.
+//  Copyright © 2019 bronenos. All rights reserved.
+//
+
+import Foundation
+import UIKit
+
+protocol IChartDuoGraphNode: IChartLineGraphNode {
+}
+
+class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
+    private let pointerLineNode = ChartNode()
+    
+    override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
+        return super.shouldReset(newConfig: newConfig, oldConfig: oldConfig)
+    }
+    
+    override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
+                                                   date: Date,
+                                                   duration: TimeInterval,
+                                                   completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
+        return ChartDuoPointsOperation(
+            chart: chart,
+            config: config,
+            meta: meta,
+            bounds: bounds,
+            source: date,
+            completion: completion
+        )
+    }
+    
+    override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
+                                                  edges: [ChartRange],
+                                                  duration: TimeInterval,
+                                                  completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
+        return ChartDuoFocusOperation(
+            chart: chart,
+            config: config,
+            meta: meta,
+            bounds: bounds,
+            source: edges,
+            completion: completion
+        )
+    }
+    
+    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
+        super.updateChart(chart, meta: meta, edges: edges, duration: duration)
+    }
+    
+    override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+        super.updateFocus(focuses, edges: edges, duration: duration)
+    }
+    
+    override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
+        super.updateGuides(edges: edges, duration: duration)
+    }
+    
+    override func updatePointer(meta: ChartSliceMeta) {
+        container?.adjustPointer(
+            chart: chart,
+            config: config,
+            meta: meta,
+            edges: cachedPointsResult?.edges ?? [],
+            options: [.line, .dots]
+        )
+    }
+}

@@ -32,9 +32,6 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     private let shapeLayer = CAShapeLayer()
     private var rootBezierPath = UIBezierPath()
     
-    private let standardAnimationDuration = TimeInterval(0.075)
-    private var nextAnimationDuration: TimeInterval?
-
     init(figure: ChartFigure) {
         super.init(frame: .zero)
         
@@ -136,10 +133,6 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         else {
             shapeLayer.path = path
         }
-    }
-    
-    func overwriteNextAnimation(duration: TimeInterval) {
-        nextAnimationDuration = duration
     }
     
     override func layoutSubviews() {

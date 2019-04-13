@@ -18,11 +18,12 @@ struct CalculatePointsResult {
     let range: ChartRange
     let edges: [ChartRange]
     let points: [String: [CGPoint]]
+    let focuses: [UIEdgeInsets]
 }
 
 struct CalculateFocusResult {
     let edges: [ChartRange]
-    let focus: UIEdgeInsets
+    let focuses: [UIEdgeInsets]
 }
 
 class ChartGraphNode: ChartNode, IChartGraphNode {
@@ -81,19 +82,25 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func update(config: ChartConfig, duration: TimeInterval) {
-        self.config = config
-        
-        if duration > 0 {
-            figureNodes.values.forEach { $0.overwriteNextAnimation(duration: duration) }
+        if shouldReset(newConfig: config, oldConfig: self.config) {
+            cachedPointsResult = nil
+            cachedFocusResult = nil
+            hasCalculatedPoints = false
         }
         
+        self.config = config
+        
         enqueueRecalculation(duration: duration)
+    }
+    
+    func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
+        abort()
     }
     
     func obtainPointsCalculationOperation(meta: ChartSliceMeta,
                                           date: Date,
                                           duration: TimeInterval,
-                                          completion: @escaping (CalculatePointsResult) -> Void) -> CalculatePointsOperation {
+                                          completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         abort()
     }
 
@@ -104,12 +111,14 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     func obtainFocusCalculationOperation(meta: ChartSliceMeta,
                                          edges: [ChartRange],
                                          duration: TimeInterval,
-                                         completion: @escaping (CalculateFocusResult) -> Void) -> CalculateFocusOperation {
+                                         completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
         abort()
     }
     
-    func updateFocus(_ focus: UIEdgeInsets, edges: [ChartRange], duration: TimeInterval) {
-        abort()
+    func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+        zip(figureNodes.values, focuses).forEach { node, focus in
+            node.updateFocus(focus, duration: duration)
+        }
     }
     
     func updateGuides(edges: [ChartRange], duration: TimeInterval) {
@@ -151,7 +160,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     guard let `self` = self else { return }
                     self.cachedFocusResult = result
                     
-                    self.updateFocus(result.focus, edges: result.edges, duration: duration)
+                    self.updateFocus(result.focuses, edges: result.edges, duration: duration)
                     self.updateGuides(edges: result.edges, duration: duration)
                 }
             )
@@ -173,6 +182,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     self.hasCalculatedPoints = true
                     
                     self.updateChart(self.chart, meta: meta, edges: result.edges, duration: duration)
+                    self.updateFocus(result.focuses, edges: result.edges, duration: duration)
                     self.updateGuides(edges: result.edges, duration: duration)
                 }
             )
@@ -189,58 +199,5 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         else {
             updatePointer(meta: meta)
         }
-    }
-}
-
-class CalculateOperation<Type, Source>: Operation {
-    let chart: Chart
-    let config: ChartConfig
-    let meta: ChartSliceMeta
-    let bounds: CGRect
-    let source: Source
-    let completion: ((Type) -> Void)
-    
-    private let callerQueue = OperationQueue.current ?? .main
-    
-    init(chart: Chart,
-         config: ChartConfig,
-         meta: ChartSliceMeta,
-         bounds: CGRect,
-         source: Source,
-         completion: @escaping ((Type) -> Void)) {
-        self.chart = chart
-        self.config = config
-        self.meta = meta
-        self.bounds = bounds
-        self.source = source
-        self.completion = completion
-    }
-    
-    func calculateResult() -> Type {
-        abort()
-    }
-    
-    override func main() {
-        let result = calculateResult()
-        
-        if Thread.isMainThread {
-            completion(result)
-        }
-        else {
-            let block = completion
-            callerQueue.addOperation { block(result) }
-        }
-    }
-}
-
-class CalculatePointsOperation: CalculateOperation<CalculatePointsResult, Date> {
-    override func calculateResult() -> CalculatePointsResult {
-        abort()
-    }
-}
-
-class CalculateFocusOperation: CalculateOperation<CalculateFocusResult, [ChartRange]> {
-    override func calculateResult() -> CalculateFocusResult {
-        abort()
     }
 }
