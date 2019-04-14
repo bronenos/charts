@@ -16,12 +16,13 @@ protocol IChartGraphNode {
 
 struct CalculatePointsResult {
     let range: ChartRange
-    let edges: [ChartRange]
+    let context: ChartFocusOperationContext
     let points: [String: [CGPoint]]
     let focuses: [UIEdgeInsets]
 }
 
 struct CalculateFocusResult {
+    let context: ChartFocusOperationContext
     let edges: [ChartRange]
     let focuses: [UIEdgeInsets]
 }
@@ -83,14 +84,20 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     func update(config: ChartConfig, duration: TimeInterval) {
         if shouldReset(newConfig: config, oldConfig: self.config) {
-            cachedPointsResult = nil
-            cachedFocusResult = nil
-            hasCalculatedPoints = false
+            discardCache()
         }
         
         self.config = config
         
         enqueueRecalculation(duration: duration)
+    }
+    
+    override func discardCache() {
+        super.discardCache()
+        cachedPointsResult = nil
+        cachedFocusResult = nil
+        hasCalculatedPoints = false
+        lastMeta = nil
     }
     
     func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
@@ -109,14 +116,14 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                         edges: [ChartRange],
+                                         context: ChartFocusOperationContext,
                                          duration: TimeInterval,
                                          completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
         abort()
     }
     
     func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
-        zip(figureNodes.values, focuses).forEach { node, focus in
+        zip(orderedNodes, focuses).forEach { node, focus in
             node.updateFocus(focus, duration: duration)
         }
     }
@@ -154,7 +161,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         if let pointsResult = cachedPointsResult, hasCalculatedPoints {
             let operation = obtainFocusCalculationOperation(
                 meta: meta,
-                edges: pointsResult.edges,
+                context: pointsResult.context,
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
@@ -181,9 +188,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     self.cachedPointsResult = result
                     self.hasCalculatedPoints = true
                     
-                    self.updateChart(self.chart, meta: meta, edges: result.edges, duration: duration)
-                    self.updateFocus(result.focuses, edges: result.edges, duration: duration)
-                    self.updateGuides(edges: result.edges, duration: duration)
+                    self.updateChart(self.chart, meta: meta, edges: result.context.totalEdges, duration: duration)
+                    self.updateFocus(result.focuses, edges: result.context.totalEdges, duration: duration)
+                    self.updateGuides(edges: result.context.totalEdges, duration: duration)
                 }
             )
             

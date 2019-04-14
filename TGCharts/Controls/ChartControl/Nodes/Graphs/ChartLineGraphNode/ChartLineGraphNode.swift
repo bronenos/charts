@@ -53,13 +53,13 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: date,
+            context: date,
             completion: completion
         )
     }
     
     override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                                  edges: [ChartRange],
+                                                  context: ChartFocusOperationContext,
                                                   duration: TimeInterval,
                                                   completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
         return ChartLineFocusOperation(
@@ -67,7 +67,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: edges,
+            context: context,
             completion: completion
         )
     }
@@ -101,7 +101,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     }
     
     override func updatePointer(meta: ChartSliceMeta) {
-        guard let edge = cachedPointsResult?.edges.first else { return }
+        guard let edge = cachedPointsResult?.context.totalEdges.first else { return }
         
         container?.adjustPointer(
             chart: chart,

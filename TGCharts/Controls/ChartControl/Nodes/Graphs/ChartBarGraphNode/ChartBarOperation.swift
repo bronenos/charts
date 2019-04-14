@@ -28,15 +28,20 @@ class ChartBarPointsOperation: ChartPointsOperation {
             with: meta
         )
         
+        let context = ChartFocusOperationContext(
+            totalEdges: [totalEdge],
+            sliceEdges: [sliceEdge]
+        )
+        
         let focuses = calculateStackedFocuses(
             config: config,
-            totalEdge: [totalEdge],
+            context: context,
             sliceEdge: sliceEdge
         )
         
         return CalculatePointsResult(
             range: config.range,
-            edges: [totalEdge],
+            context: context,
             points: points,
             focuses: focuses
         )
@@ -110,11 +115,15 @@ class ChartBarFocusOperation: ChartFocusOperation {
         
         let focuses = calculateStackedFocuses(
             config: config,
-            totalEdge: [currentEdge],
+            context: ChartFocusOperationContext(
+                totalEdges: context.totalEdges,
+                sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+            ),
             sliceEdge: sliceEdge
         )
         
         return CalculateFocusResult(
+            context: context,
             edges: [currentEdge],
             focuses: focuses
         )
@@ -144,8 +153,8 @@ extension Operation {
         return ChartRange(start: 0, end: maximalValue)
     }
     
-    func calculateStackedFocuses(config: ChartConfig, totalEdge: [ChartRange], sliceEdge: ChartRange) -> [UIEdgeInsets] {
-        guard let totalEdge = totalEdge.first else {
+    func calculateStackedFocuses(config: ChartConfig, context: ChartFocusOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+        guard let totalEdge = context.totalEdges.first else {
             return []
         }
         

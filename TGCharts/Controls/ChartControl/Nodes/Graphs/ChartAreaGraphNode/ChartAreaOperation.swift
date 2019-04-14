@@ -28,15 +28,20 @@ class ChartAreaPointsOperation: ChartPointsOperation {
             with: meta
         )
         
+        let context = ChartFocusOperationContext(
+            totalEdges: [totalEdge],
+            sliceEdges: [sliceEdge]
+        )
+        
         let focuses = calculateStackedFocuses(
             config: config,
-            totalEdge: [totalEdge],
+            context: context,
             sliceEdge: sliceEdge
         )
         
         return CalculatePointsResult(
             range: config.range,
-            edges: [totalEdge],
+            context: context,
             points: points,
             focuses: focuses
         )
@@ -106,11 +111,15 @@ class ChartAreaFocusOperation: ChartFocusOperation {
 
         let focuses = calculateStackedFocuses(
             config: config,
-            totalEdge: source,
+            context: ChartFocusOperationContext(
+                totalEdges: context.totalEdges,
+                sliceEdges: [sliceEdge]
+            ),
             sliceEdge: sliceEdge
         )
         
         return CalculateFocusResult(
+            context: context,
             edges: [currentEdge],
             focuses: focuses
         )

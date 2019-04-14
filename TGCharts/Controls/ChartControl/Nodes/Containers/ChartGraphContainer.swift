@@ -64,6 +64,11 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         pointerContainer.update(chart: chart, config: config, meta: meta, edges: edges, options: options)
     }
     
+    override func discardCache() {
+        super.discardCache()
+        innerGraph?.discardCache()
+    }
+
     override func updateDesign() {
         super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)

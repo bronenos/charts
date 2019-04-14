@@ -9,12 +9,17 @@
 import Foundation
 import UIKit
 
-class ChartOperation<Type, Source>: Operation {
+struct ChartFocusOperationContext {
+    let totalEdges: [ChartRange]
+    let sliceEdges: [ChartRange]
+}
+
+class ChartOperation<Type, Context>: Operation {
     let chart: Chart
     let config: ChartConfig
     let meta: ChartSliceMeta
     let bounds: CGRect
-    let source: Source
+    let context: Context
     let completion: ((Type) -> Void)
     
     private let callerQueue = OperationQueue.current ?? .main
@@ -23,13 +28,13 @@ class ChartOperation<Type, Source>: Operation {
          config: ChartConfig,
          meta: ChartSliceMeta,
          bounds: CGRect,
-         source: Source,
+         context: Context,
          completion: @escaping ((Type) -> Void)) {
         self.chart = chart
         self.config = config
         self.meta = meta
         self.bounds = bounds
-        self.source = source
+        self.context = context
         self.completion = completion
     }
     
@@ -56,7 +61,7 @@ class ChartPointsOperation: ChartOperation<CalculatePointsResult, Date> {
     }
 }
 
-class ChartFocusOperation: ChartOperation<CalculateFocusResult, [ChartRange]> {
+class ChartFocusOperation: ChartOperation<CalculateFocusResult, ChartFocusOperationContext> {
     override func calculateResult() -> CalculateFocusResult {
         abort()
     }

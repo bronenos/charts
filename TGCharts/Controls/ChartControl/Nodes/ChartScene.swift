@@ -121,6 +121,12 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         navigatorNode.updateDesign()
     }
     
+    override func discardCache() {
+        super.discardCache()
+        graphContainer.discardCache()
+        navigatorNode.discardCache()
+    }
+    
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         let layout = getLayout(size: bounds.size)
         return layout.totalSize

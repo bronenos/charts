@@ -67,13 +67,13 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: date,
+            context: date,
             completion: completion
         )
     }
     
     override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                                  edges: [ChartRange],
+                                                  context: ChartFocusOperationContext,
                                                   duration: TimeInterval,
                                                   completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
         return ChartBarFocusOperation(
@@ -81,7 +81,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: edges,
+            context: context,
             completion: completion
         )
     }

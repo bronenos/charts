@@ -87,6 +87,11 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         graphContainer.updateDesign()
     }
     
+    override func discardCache() {
+        super.discardCache()
+        graphContainer.discardCache()
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         

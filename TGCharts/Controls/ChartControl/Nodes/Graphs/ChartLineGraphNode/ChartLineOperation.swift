@@ -22,19 +22,23 @@ class ChartLinePointsOperation: ChartPointsOperation {
         )
         
         let points = calculateNormalizedPoints(
-            edge: sliceEdge,
+            edge: totalEdge,
             with: meta
+        )
+        
+        let context = ChartFocusOperationContext(
+            totalEdges: [totalEdge],
+            sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
         )
         
         let focuses = calculateLineFocuses(
             config: config,
-            totalEdge: [totalEdge],
-            sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+            context: context
         )
         
         return CalculatePointsResult(
             range: config.range,
-            edges: [sliceEdge],
+            context: context,
             points: points,
             focuses: focuses
         )
@@ -71,11 +75,14 @@ class ChartLineFocusOperation: ChartFocusOperation {
         
         let focuses = calculateLineFocuses(
             config: config,
-            totalEdge: source,
-            sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+            context: ChartFocusOperationContext(
+                totalEdges: context.totalEdges,
+                sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+            )
         )
         
         return CalculateFocusResult(
+            context: context,
             edges: [sliceEdge],
             focuses: focuses
         )
@@ -112,17 +119,23 @@ extension Operation {
         )
     }
     
-    func calculateLineFocuses(config: ChartConfig, totalEdge: [ChartRange], sliceEdges: [ChartRange]) -> [UIEdgeInsets] {
-        guard let totalEdge = totalEdge.first else {
+    func calculateLineFocuses(config: ChartConfig, context: ChartFocusOperationContext) -> [UIEdgeInsets] {
+        guard let totalEdge = context.totalEdges.first else {
             return []
         }
         
-        return sliceEdges.map { sliceEdge in
-            let top = sliceEdge.end.percent(from: totalEdge.start, to: totalEdge.end)
-            let left = config.range.start
-            let bottom = sliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
-            let right = config.range.end
-            return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        let left = config.range.start
+        let right = config.range.end
+
+        return context.sliceEdges.map { sliceEdge in
+            if sliceEdge.distance > 0 {
+                let top = sliceEdge.end.percent(from: totalEdge.start, to: totalEdge.end)
+                let bottom = sliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
+                return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+            }
+            else {
+                return UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
+            }
         }
     }
 }

@@ -122,7 +122,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     func interactorDidInformToUpdate() {
         config.range = interactor.range
         config.pointer = interactor.pointer
-        render(duration: 0.085)
+        render(duration: 0.075)
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

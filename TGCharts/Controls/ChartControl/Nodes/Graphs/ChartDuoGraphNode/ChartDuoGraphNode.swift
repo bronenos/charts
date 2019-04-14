@@ -28,13 +28,13 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: date,
+            context: date,
             completion: completion
         )
     }
     
     override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                                  edges: [ChartRange],
+                                                  context: ChartFocusOperationContext,
                                                   duration: TimeInterval,
                                                   completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
         return ChartDuoFocusOperation(
@@ -42,7 +42,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            source: edges,
+            context: context,
             completion: completion
         )
     }
@@ -56,15 +56,19 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     }
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
-        super.updateGuides(edges: edges, duration: duration)
+        container?.adjustGuides(
+            left: (config.lines[0].visible ? edges.first : ChartRange(start: 0, end: 0)),
+            right: (config.lines[1].visible ? edges.last : ChartRange(start: 0, end: 0)),
+            duration: duration
+        )
     }
-    
+
     override func updatePointer(meta: ChartSliceMeta) {
         container?.adjustPointer(
             chart: chart,
             config: config,
             meta: meta,
-            edges: cachedPointsResult?.edges ?? [],
+            edges: cachedPointsResult?.context.totalEdges ?? [],
             options: [.line, .dots]
         )
     }
