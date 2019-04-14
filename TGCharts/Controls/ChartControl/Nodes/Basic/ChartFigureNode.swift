@@ -25,12 +25,15 @@ protocol IChartFigureNode: IChartNode {
     var strokeColor: UIColor { get set }
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
-    func updateEye(_ eye: UIEdgeInsets?, duration: TimeInterval)
+    func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval)
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
     private let shapeLayer = CAShapeLayer()
     private var rootBezierPath = UIBezierPath()
+    
+    var minimalScaledWidth = CGFloat(0)
+    var width = CGFloat(1)
     
     init(figure: ChartFigure) {
         super.init(frame: .zero)
@@ -72,13 +75,6 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         }
     }
     
-    var width = CGFloat(0) {
-        didSet {
-            guard width != oldValue else { return }
-            updateFigure()
-        }
-    }
-    
     var strokeColor = UIColor.clear {
         didSet {
             shapeLayer.strokeColor = strokeColor.cgColor
@@ -98,21 +94,22 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         }
     }
     
-    func updateEye(_ eye: UIEdgeInsets?, duration: TimeInterval) {
+    func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval) {
         let path: CGPath
-        if let eye = eye {
+        if let insets = insets {
             var targetTransform = CGAffineTransform.identity
             
-            let scaleX = 1.0 / (eye.right - eye.left)
-            let scaleY = 1.0 / (eye.top - eye.bottom)
+            let scaleX = 1.0 / (insets.right - insets.left)
+            let scaleY = 1.0 / (insets.top - insets.bottom)
             targetTransform = targetTransform.scaledBy(x: scaleX, y: scaleY)
             
-            let moveX = -(bounds.width * eye.left)
-            let moveY = -(bounds.height * (1.0 - eye.top))
+            let moveX = -(bounds.width * insets.left)
+            let moveY = -(bounds.height * (1.0 - insets.top))
             targetTransform = targetTransform.translatedBy(x: moveX, y: moveY)
             
             let transformedBezierPath = UIBezierPath(cgPath: rootBezierPath.cgPath)
             transformedBezierPath.apply(targetTransform)
+            
             path = transformedBezierPath.cgPath
         }
         else {
@@ -126,11 +123,13 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
             animation.fromValue = shapeLayer.presentation()?.path
             animation.toValue = path
             
+            shapeLayer.lineWidth = max(minimalScaledWidth, width * scale)
             shapeLayer.path = path
             shapeLayer.add(animation, forKey: animation.keyPath)
             CATransaction.commit()
         }
         else {
+            shapeLayer.lineWidth = max(minimalScaledWidth, width * scale)
             shapeLayer.path = path
         }
     }

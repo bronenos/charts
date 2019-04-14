@@ -71,6 +71,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         super.updateDesign()
         
         tableView.backgroundColor = DesignBook.shared.color(.spaceBackground)
+        rightBarButton.tintColor = DesignBook.shared.color(.actionForeground)
         dataSource.updateDesign()
     }
     

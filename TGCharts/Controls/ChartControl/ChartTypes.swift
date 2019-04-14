@@ -10,17 +10,13 @@ import Foundation
 import UIKit
 
 struct ChartConfig: Equatable {
+    let standardDistance: CGFloat
     var lines: [ChartLineConfig]
     var range: ChartRange
     var pointer: CGFloat?
     
-    init() {
-        lines = []
-        range = ChartRange(start: 0, end: 1.0)
-        pointer = nil
-    }
-    
-    init(lines: [ChartLineConfig], range: ChartRange, pointer: CGFloat?) {
+    init(standardDistance: CGFloat, lines: [ChartLineConfig], range: ChartRange, pointer: CGFloat?) {
+        self.standardDistance = standardDistance
         self.lines = lines
         self.range = range
         self.pointer = pointer
@@ -36,7 +32,12 @@ struct ChartConfig: Equatable {
     }
     
     func withRange(range: ChartRange) -> ChartConfig {
-        return ChartConfig(lines: lines, range: range, pointer: pointer)
+        return ChartConfig(
+            standardDistance: standardDistance,
+            lines: lines,
+            range: range,
+            pointer: pointer
+        )
     }
     
     static func ==(lhs: ChartConfig, rhs: ChartConfig) -> Bool {

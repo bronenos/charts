@@ -24,6 +24,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         configure(figure: .joinedLines) { _, node, line in
             node.strokeColor = line.color
             node.width = width
+            node.minimalScaledWidth = 0.75
         }
     }
     
@@ -69,7 +70,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         }
     }
     
-    override func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+    override func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         super.updateEyes(eyes, edges: edges, duration: duration)
         
         zip(orderedNodes, config.lines).forEach { node, lineConfig in

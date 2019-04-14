@@ -14,17 +14,22 @@ protocol IChartGraphNode {
     func update(config: ChartConfig, duration: TimeInterval)
 }
 
+struct ChartGraphEye {
+    let edges: UIEdgeInsets
+    let scaleFactor: CGFloat
+}
+
 struct CalculatePointsResult {
     let range: ChartRange
     let context: ChartEyeOperationContext
     let points: [String: [CGPoint]]
-    let eyes: [UIEdgeInsets]
+    let eyes: [ChartGraphEye]
 }
 
 struct CalculateEyesResult {
     let context: ChartEyeOperationContext
     let edges: [ChartRange]
-    let eyes: [UIEdgeInsets]
+    let eyes: [ChartGraphEye]
 }
 
 class ChartGraphNode: ChartNode, IChartGraphNode {
@@ -117,9 +122,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
     
-    func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
-        zip(orderedNodes, eyes).forEach { node, eye in
-            node.updateEye(eye, duration: duration)
+    func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
+        for (node, eye) in zip(orderedNodes, eyes) {
+            node.setEye(insets: eye.edges, scale: eye.scaleFactor, duration: duration)
         }
     }
     

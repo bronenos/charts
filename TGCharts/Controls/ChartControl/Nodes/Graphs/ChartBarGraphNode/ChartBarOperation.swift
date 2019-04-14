@@ -150,7 +150,7 @@ fileprivate extension Operation {
         return ChartRange(start: 0, end: CGFloat(maximalValue))
     }
     
-    func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+    func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [ChartGraphEye] {
         guard let totalEdge = context.totalEdges.first else {
             return []
         }
@@ -161,10 +161,12 @@ fileprivate extension Operation {
             
             if totalEdge.distance > 0 {
                 let top = sliceEdge.end / totalEdge.end
-                return UIEdgeInsets(top: top, left: left, bottom: 0, right: right)
+                let edges = UIEdgeInsets(top: top, left: left, bottom: 0, right: right)
+                return ChartGraphEye(edges: edges, scaleFactor: 1.0)
             }
             else {
-                return UIEdgeInsets(top: 10.0, left: left, bottom: 0, right: right)
+                let edges = UIEdgeInsets(top: 10.0, left: left, bottom: 0, right: right)
+                return ChartGraphEye(edges: edges, scaleFactor: 1.0)
             }
         }
     }

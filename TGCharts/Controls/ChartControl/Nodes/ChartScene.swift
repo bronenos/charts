@@ -82,10 +82,10 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         addSubview(navigatorNode)
         addSubview(optionsNode)
         
-        let mainGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        let mainGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider)
         graphContainer.inject(graph: mainGraph)
         
-        let miniGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider, width: 1)
+        let miniGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider)
         navigatorNode.inject(graph: miniGraph)
         
         populateOptions(chart: chart, config: config, animated: false)
@@ -153,12 +153,12 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         )
     }
     
-    private func obtainGraph(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) -> ChartGraphNode {
+    private func obtainGraph(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) -> ChartGraphNode {
         switch chart.type {
-        case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
         case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
         case .area: return ChartAreaGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: width)
+        default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
         }
     }
     

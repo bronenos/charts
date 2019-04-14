@@ -38,20 +38,20 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     private let scene: ChartSceneNode
     private let interactor: IChartInteractor
     
-    private let startupDistance: CGFloat
-    private let startupRange: ChartRange
+    private let standardDistance: CGFloat
+    private let standardRange: ChartRange
     private(set) var config: ChartConfig
 
     init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         
-        startupDistance = CGFloat(1.0 / 12.0)
-        startupRange = ChartRange(start: 1.0 - startupDistance, end: 1.0)
-        config = startupConfig(chart: chart, range: startupRange)
+        standardDistance = CGFloat(1.0 / 12.0)
+        standardRange = ChartRange(start: 1.0 - standardDistance, end: 1.0)
+        config = startupConfig(chart: chart, standardDistance: standardDistance, range: standardRange)
 
         let navigatorOptions = ChartNavigatorOptions(
             caretStandardWidth: 95,
-            caretStandardDistance: startupDistance
+            caretStandardDistance: standardDistance
         )
         
         scene = ChartSceneNode(
@@ -65,7 +65,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         interactor = ChartInteractor(
             scene: scene,
             navigatorOptions: navigatorOptions,
-            range: startupRange
+            range: standardRange
         )
         
         super.init(frame: .zero)
@@ -162,8 +162,9 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     }
 }
 
-fileprivate func startupConfig(chart: Chart, range: ChartRange) -> ChartConfig {
+fileprivate func startupConfig(chart: Chart, standardDistance: CGFloat, range: ChartRange) -> ChartConfig {
     return ChartConfig(
+        standardDistance: standardDistance,
         lines: chart.lines.map { line in
             ChartLineConfig(key: line.key, visible: true)
         },

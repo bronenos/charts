@@ -144,9 +144,10 @@ fileprivate extension Operation {
         return map
     }
     
-    func calculateEye(config: ChartConfig) -> UIEdgeInsets {
+    func calculateEye(config: ChartConfig) -> ChartGraphEye {
         let left = config.range.start
         let right = config.range.end
-        return UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
+        let edges = UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
+        return ChartGraphEye(edges: edges, scaleFactor: 1.0)
     }
 }

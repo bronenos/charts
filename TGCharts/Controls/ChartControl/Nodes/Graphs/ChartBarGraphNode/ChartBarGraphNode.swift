@@ -86,7 +86,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         }
     }
     
-    override func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+    override func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         super.updateEyes(eyes, edges: edges, duration: duration)
     }
     

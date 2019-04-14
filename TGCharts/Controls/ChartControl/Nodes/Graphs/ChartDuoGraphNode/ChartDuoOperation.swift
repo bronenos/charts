@@ -128,7 +128,7 @@ fileprivate extension Operation {
         }
     }
     
-    func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdges: [ChartRange]) -> [UIEdgeInsets] {
+    func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdges: [ChartRange]) -> [ChartGraphEye] {
         let allHidden = sliceEdges.allSatisfy { $0.distance == 0 }
         
         return config.lines.indices.map { index in
@@ -142,16 +142,22 @@ fileprivate extension Operation {
             if sliceEdge.distance > 0 {
                 let top = sliceEdge.end.percent(inside: totalEdge)
                 let bottom = sliceEdge.start.percent(inside: totalEdge)
-                return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+                let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+                let scaleFactor = (config.standardDistance / config.range.distance)
+                return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
             else if allHidden {
                 let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
-                return UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
+                let edges = UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
+                let scaleFactor = (config.standardDistance / config.range.distance)
+                return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
             else {
                 let top = contextualSliceEdge.end.percent(inside: totalEdge)
                 let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
-                return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+                let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+                let scaleFactor = (config.standardDistance / config.range.distance)
+                return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
         }
     }
