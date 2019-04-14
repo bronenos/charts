@@ -128,7 +128,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        let layout = getLayout(size: bounds.size)
+        let layout = getLayout(size: size)
         return layout.totalSize
     }
     
@@ -232,6 +232,7 @@ fileprivate struct Layout {
     }
     
     var totalSize: CGSize {
-        return CGSize(width: bounds.width, height: optionsNodeFrame.maxY)
+        let height = optionsNodeFrame.maxY
+        return CGSize(width: bounds.width, height: height)
     }
 }

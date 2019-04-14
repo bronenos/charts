@@ -50,7 +50,7 @@ final class ChartSliderNode: ChartFigureNode, IChartSliderNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        let outerPath = UIBezierPath(roundedRect: bounds, cornerRadius: 2)
+        let outerPath = UIBezierPath(roundedRect: bounds, cornerRadius: 6)
         let innerPath = UIBezierPath(rect: bounds.insetBy(dx: horizontalGap, dy: verticalGap))
         bezierPaths = [outerPath, innerPath]
         

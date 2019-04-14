@@ -12,9 +12,6 @@ import UIKit
 fileprivate let standardHeaderHeight = CGFloat(25)
 
 final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate, DesignBookUpdatable {
-    var switchDesignHandler: (() -> Void)?
-    
-    private var designSwitcherCell = UITableViewCell()
     private weak var tableView: UITableView?
     
     private var sectionTitle: String?

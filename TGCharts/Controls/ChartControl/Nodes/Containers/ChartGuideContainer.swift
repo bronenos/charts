@@ -50,6 +50,12 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
         rightGuidesNode.update(edge: rightEdge, duration: duration)
     }
     
+    override func updateDesign() {
+        super.updateDesign()
+        leftGuidesNode.updateDesign()
+        rightGuidesNode.updateDesign()
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         leftGuidesNode.frame = bounds

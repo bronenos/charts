@@ -25,7 +25,7 @@ final class ChartOptionsToken: UIView {
         addSubview(titleLabel)
         
         enabledLabel.text = String("✓")
-        enabledLabel.textColor = DesignBook.shared.color(.primaryBackground)
+        enabledLabel.textColor = DesignBook.shared.color(.optionForeground)
         enabledLabel.font = DesignBook.shared.font(size: 15, weight: .medium)
         enabledLabel.sizeToFit()
         addSubview(enabledLabel)
@@ -50,7 +50,7 @@ final class ChartOptionsToken: UIView {
 
         func _block() {
             if isEnabled {
-                titleLabel.textColor = DesignBook.shared.color(.primaryBackground)
+                titleLabel.textColor = DesignBook.shared.color(.optionForeground)
                 backgroundColor = color
             }
             else {

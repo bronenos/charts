@@ -21,7 +21,7 @@ enum DesignBookColor {
     case primaryForeground
     case secondaryForeground
     case chartIndexForeground
-    case chartPointerStepperLineStroke
+    case chartGuidesLineStroke
     case chartPointerFocusedLineStroke
     case chartPointerCloudBackground
     case chartPointerCloudForeground
@@ -29,6 +29,7 @@ enum DesignBookColor {
     case navigatorCoverBackground
     case sliderBackground
     case sliderForeground
+    case optionForeground
     case actionForeground
 }
 

@@ -89,9 +89,9 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
     override func updateDesign() {
         super.updateDesign()
         primaryGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
-        primaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
+        primaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
         secondaryGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
-        secondaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartPointerStepperLineStroke) }
+        secondaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
     }
     
     private func isMinorEdgeChange(fromEdge: ChartRange, toEdge: ChartRange) -> Bool {
@@ -237,7 +237,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             let height = CGFloat(20)
             let value = Int(usingEdge.start + CGFloat(step) * stepValue)
             let currentY = bounds.height - (startY + CGFloat(step) * stepY) - height
-            let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartPointerStepperLineStroke)
+            let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartGuidesLineStroke)
             
             let guide = guides[step]
             guide.frame = CGRect(x: 0, y: currentY, width: bounds.width, height: 20)

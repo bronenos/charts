@@ -78,14 +78,15 @@ final class LightDesignBook: DesignBook {
         case .primaryForeground: return UIColor.black
         case .secondaryForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
         case .chartIndexForeground: return UIColor(red: 0.52, green: 0.55, blue: 0.57, alpha: 1.0)
-        case .chartPointerStepperLineStroke: return UIColor(red: 0.94, green: 0.94, blue: 0.94, alpha: 0.35)
+        case .chartGuidesLineStroke: return UIColor(hex: "182D3B").withAlphaComponent(0.1)
         case .chartPointerFocusedLineStroke: return UIColor(red: 0.77, green: 0.78, blue: 0.78, alpha: 0.35)
         case .chartPointerCloudBackground: return UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
         case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.75, green: 0.79, blue: 0.84, alpha: 0.85)
+        case .sliderBackground: return UIColor(red: 0.71, green: 0.78, blue: 0.88, alpha: 1.0)
         case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        case .optionForeground: return UIColor.white
         case .actionForeground: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
         }
     }
@@ -108,14 +109,15 @@ final class DarkDesignBook: DesignBook {
         case .primaryForeground: return UIColor.white
         case .secondaryForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
         case .chartIndexForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
-        case .chartPointerStepperLineStroke: return UIColor(red: 0.08, green: 0.11, blue: 0.15, alpha: 0.35)
+        case .chartGuidesLineStroke: return UIColor(hex: "8596AB").withAlphaComponent(0.2)
         case .chartPointerFocusedLineStroke: return UIColor(red: 0.06, green: 0.08, blue: 0.11, alpha: 0.35)
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
         case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.16, green: 0.21, blue: 0.28, alpha: 0.85)
+        case .sliderBackground: return UIColor(red: 0.27, green: 0.31, blue: 0.35, alpha: 1.0)
         case .sliderForeground: return UIColor.white
+        case .optionForeground: return UIColor.white
         case .actionForeground: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
         }
     }

@@ -19,6 +19,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     var router: IStatRouter!
     weak var interactor: IStatInteractor!
     
+    private let rightBarButton = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
     private let tableView = UITableView(frame: .zero, style: .grouped)
     
     private let dataSource = StatDataSource()
@@ -27,12 +28,12 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
         
+        rightBarButton.target = self
+        rightBarButton.action = #selector(handleDesignToggle)
+        navigationItem.rightBarButtonItem = rightBarButton
+        
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
-        
-        dataSource.switchDesignHandler = { [weak self] in
-            self?.interactor.toggleDesign()
-        }
         
         NotificationCenter.default.addObserver(
             self,
@@ -63,7 +64,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     }
     
     func setDesignSwitcher(title: String) {
-        dataSource.setDesignSwitcherTitle(title)
+        rightBarButton.title = title
     }
     
     override func updateDesign() {
@@ -102,6 +103,10 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     
     func chartControlDidEndInteraction() {
         tableView.isScrollEnabled = true
+    }
+    
+    @objc private func handleDesignToggle() {
+        interactor.toggleDesign()
     }
     
     @objc private func handleOrientationChange() {
