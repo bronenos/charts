@@ -51,11 +51,11 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                                  context: ChartFocusOperationContext,
+    override func obtainEyesCalculationOperation(meta: ChartSliceMeta,
+                                                  context: ChartEyeOperationContext,
                                                   duration: TimeInterval,
-                                                  completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
-        return ChartBarFocusOperation(
+                                                  completion: @escaping (CalculateEyesResult) -> Void) -> ChartEyesOperation {
+        return ChartBarEyesOperation(
             chart: chart,
             config: config,
             meta: meta,
@@ -86,13 +86,13 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         }
     }
     
-    override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
-        super.updateFocus(focuses, edges: edges, duration: duration)
+    override func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+        super.updateEyes(eyes, edges: edges, duration: duration)
     }
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
         container?.adjustGuides(
-            left: edges.first ?? ChartRange(start: 0, end: 0),
+            left: edges.first ?? .empty,
             right: nil,
             duration: duration
         )

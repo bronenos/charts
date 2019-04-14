@@ -16,15 +16,15 @@ protocol IChartGraphNode {
 
 struct CalculatePointsResult {
     let range: ChartRange
-    let context: ChartFocusOperationContext
+    let context: ChartEyeOperationContext
     let points: [String: [CGPoint]]
-    let focuses: [UIEdgeInsets]
+    let eyes: [UIEdgeInsets]
 }
 
-struct CalculateFocusResult {
-    let context: ChartFocusOperationContext
+struct CalculateEyesResult {
+    let context: ChartEyeOperationContext
     let edges: [ChartRange]
-    let focuses: [UIEdgeInsets]
+    let eyes: [UIEdgeInsets]
 }
 
 class ChartGraphNode: ChartNode, IChartGraphNode {
@@ -38,7 +38,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     var orderedNodes = [ChartFigureNode]()
 
     let calculationQueue = OperationQueue()
-    var cachedFocusContext: ChartFocusOperationContext?
+    var cachedEyesContext: ChartEyeOperationContext?
     private var lastMeta: ChartSliceMeta?
 
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
@@ -91,7 +91,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     override func discardCache() {
         super.discardCache()
-        cachedFocusContext = nil
+        cachedEyesContext = nil
         lastMeta = nil
     }
     
@@ -106,20 +106,20 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
 
-    func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                         context: ChartFocusOperationContext,
-                                         duration: TimeInterval,
-                                         completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
+    func obtainEyesCalculationOperation(meta: ChartSliceMeta,
+                                        context: ChartEyeOperationContext,
+                                        duration: TimeInterval,
+                                        completion: @escaping (CalculateEyesResult) -> Void) -> ChartEyesOperation {
         abort()
     }
-    
+
     func updateChart(points: [String: [CGPoint]]) {
         abort()
     }
     
-    func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
-        zip(orderedNodes, focuses).forEach { node, focus in
-            node.updateFocus(focus, duration: duration)
+    func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+        zip(orderedNodes, eyes).forEach { node, eye in
+            node.updateEye(eye, duration: duration)
         }
     }
     
@@ -153,16 +153,16 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let meta = chart.obtainMeta(config: config, bounds: bounds)
         guard meta.range.distance > 0 else { return }
         
-        if let focusContext = cachedFocusContext {
-            let operation = obtainFocusCalculationOperation(
+        if let eyesContext = cachedEyesContext {
+            let operation = obtainEyesCalculationOperation(
                 meta: meta,
-                context: focusContext,
+                context: eyesContext,
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.cachedFocusContext = result.context
+                    self.cachedEyesContext = result.context
                     
-                    self.updateFocus(result.focuses, edges: result.edges, duration: duration)
+                    self.updateEyes(result.eyes, edges: result.edges, duration: duration)
                     self.updateGuides(edges: result.edges, duration: duration)
                     self.updatePointer(meta: meta, totalEdges: result.context.totalEdges)
                 }
@@ -181,15 +181,15 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.cachedFocusContext = result.context
+                    self.cachedEyesContext = result.context
                     
                     self.updateChart(points: result.points)
-                    self.updateFocus(result.focuses, edges: result.context.totalEdges, duration: duration)
+                    self.updateEyes(result.eyes, edges: result.context.totalEdges, duration: duration)
                     self.updateGuides(edges: result.context.totalEdges, duration: duration)
                 }
             )
             
-            if let _ = cachedFocusContext {
+            if let _ = cachedEyesContext {
                 if calculationQueue.operations.isEmpty {
                     calculationQueue.addOperation(operation)
                 }

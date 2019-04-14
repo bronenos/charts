@@ -25,7 +25,7 @@ protocol IChartFigureNode: IChartNode {
     var strokeColor: UIColor { get set }
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
-    func updateFocus(_ focus: UIEdgeInsets?, duration: TimeInterval)
+    func updateEye(_ eye: UIEdgeInsets?, duration: TimeInterval)
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
@@ -98,17 +98,17 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         }
     }
     
-    func updateFocus(_ focus: UIEdgeInsets?, duration: TimeInterval) {
+    func updateEye(_ eye: UIEdgeInsets?, duration: TimeInterval) {
         let path: CGPath
-        if let focus = focus {
+        if let eye = eye {
             var targetTransform = CGAffineTransform.identity
             
-            let scaleX = 1.0 / (focus.right - focus.left)
-            let scaleY = 1.0 / (focus.top - focus.bottom)
+            let scaleX = 1.0 / (eye.right - eye.left)
+            let scaleY = 1.0 / (eye.top - eye.bottom)
             targetTransform = targetTransform.scaledBy(x: scaleX, y: scaleY)
             
-            let moveX = -(bounds.width * focus.left)
-            let moveY = -(bounds.height * (1.0 - focus.top))
+            let moveX = -(bounds.width * eye.left)
+            let moveY = -(bounds.height * (1.0 - eye.top))
             targetTransform = targetTransform.translatedBy(x: moveX, y: moveY)
             
             let transformedBezierPath = UIBezierPath(cgPath: rootBezierPath.cgPath)

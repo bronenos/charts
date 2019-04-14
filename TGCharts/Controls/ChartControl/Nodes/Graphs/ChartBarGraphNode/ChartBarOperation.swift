@@ -11,16 +11,12 @@ import UIKit
 
 class ChartBarPointsOperation: ChartPointsOperation {
     override func calculateResult() -> CalculatePointsResult {
-        let sliceEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
-            indices: meta.visibleIndices
-        )
-
-        let totalEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
+        let totalEdge = calculateSliceEdge(
             indices: chart.axis.indices
+        )
+        
+        let sliceEdge = calculateSliceEdge(
+            indices: meta.visibleIndices
         )
 
         let points = calculateNormalizedPoints(
@@ -28,13 +24,12 @@ class ChartBarPointsOperation: ChartPointsOperation {
             with: meta
         )
         
-        let context = ChartFocusOperationContext(
+        let context = ChartEyeOperationContext(
             totalEdges: [totalEdge],
-            sliceEdges: [sliceEdge]
+            lineEdges: [sliceEdge]
         )
         
-        let focuses = calculateStackedFocuses(
-            config: config,
+        let eyes = calculateEyes(
             context: context,
             sliceEdge: sliceEdge
         )
@@ -43,7 +38,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
             range: config.range,
             context: context,
             points: points,
-            focuses: focuses
+            eyes: eyes
         )
     }
     
@@ -54,7 +49,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
         let extraHeight = bounds.height * 0.15
         
         var map = [String: [CGPoint]]()
-        var values = [Int](repeating: 0, count: chart.axis.count)
+        var values = clone(0, number: chart.axis.count)
         
         for (line, lineConfig) in zip(chart.lines, config.lines) {
             let oldValues = values
@@ -97,43 +92,50 @@ class ChartBarPointsOperation: ChartPointsOperation {
         
         return map
     }
+    
+    func calculateSliceEdge(indices: Range<Int>) -> ChartRange {
+        return _calculateSliceEdge(chart: chart, config: config, indices: indices)
+    }
+    
+    func calculateEyes(context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+        return _calculateEyes(config: config, context: context, sliceEdge: sliceEdge)
+    }
 }
 
-class ChartBarFocusOperation: ChartFocusOperation {
-    override func calculateResult() -> CalculateFocusResult {
-        let sliceEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
+class ChartBarEyesOperation: ChartEyesOperation {
+    override func calculateResult() -> CalculateEyesResult {
+        let sliceEdge = calculateSliceEdge(
             indices: meta.visibleIndices
         )
         
-        let currentEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
-            indices: chart.axis.indices
-        )
-        
-        let focuses = calculateStackedFocuses(
-            config: config,
-            context: ChartFocusOperationContext(
+        let eyes = calculateEyes(
+            context: ChartEyeOperationContext(
                 totalEdges: context.totalEdges,
-                sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+                lineEdges: clone(sliceEdge, number: chart.lines.count)
             ),
             sliceEdge: sliceEdge
         )
         
-        return CalculateFocusResult(
+        return CalculateEyesResult(
             context: context,
-            edges: [currentEdge],
-            focuses: focuses
+            edges: context.totalEdges,
+            eyes: eyes
         )
+    }
+    
+    func calculateSliceEdge(indices: Range<Int>) -> ChartRange {
+        return _calculateSliceEdge(chart: chart, config: config, indices: indices)
+    }
+    
+    func calculateEyes(context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+        return _calculateEyes(config: config, context: context, sliceEdge: sliceEdge)
     }
 }
 
-extension Operation {
-    func calculateStackedSliceEdge(chart: Chart, config: ChartConfig, indices: Range<Int>) -> ChartRange {
-        var currentGrowingValues = [Int](repeating: 0, count: indices.count)
-        var lineMaximalValues = [Int](repeating: 0, count: chart.lines.count)
+fileprivate extension Operation {
+    func _calculateSliceEdge(chart: Chart, config: ChartConfig, indices: Range<Int>) -> ChartRange {
+        var currentGrowingValues = clone(0, number: indices.count)
+        var lineMaximalValues = clone(0, number: chart.lines.count)
         
         for (lineIndex, line) in chart.lines.enumerated() {
             if config.lines[lineIndex].visible {
@@ -145,15 +147,11 @@ extension Operation {
             lineMaximalValues[lineIndex] = currentGrowingValues.max() ?? 0
         }
         
-        let edges = lineMaximalValues.map { value in
-            return ChartRange(start: 0, end: CGFloat(value))
-        }
-        
-        let maximalValue = edges.map({ $0.end }).max() ?? 0
-        return ChartRange(start: 0, end: maximalValue)
+        let maximalValue = lineMaximalValues.max() ?? 0
+        return ChartRange(start: 0, end: CGFloat(maximalValue))
     }
     
-    func calculateStackedFocuses(config: ChartConfig, context: ChartFocusOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+    func _calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
         guard let totalEdge = context.totalEdges.first else {
             return []
         }

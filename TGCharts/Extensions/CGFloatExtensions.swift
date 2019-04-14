@@ -22,6 +22,14 @@ extension CGFloat {
         return value
     }
     
+    func percent(inside range: ChartRange) -> CGFloat {
+        let base = range.end - range.start
+        guard base != 0 else { return 0 }
+        
+        let value = (self - range.start) / base
+        return value
+    }
+    
     func triangulate(from: CGFloat, to: CGFloat) -> CGFloat {
         return from + (to - from) * self
     }

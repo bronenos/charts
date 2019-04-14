@@ -49,11 +49,11 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    override func obtainFocusCalculationOperation(meta: ChartSliceMeta,
-                                                  context: ChartFocusOperationContext,
+    override func obtainEyesCalculationOperation(meta: ChartSliceMeta,
+                                                  context: ChartEyeOperationContext,
                                                   duration: TimeInterval,
-                                                  completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
-        return ChartLineFocusOperation(
+                                                  completion: @escaping (CalculateEyesResult) -> Void) -> ChartEyesOperation {
+        return ChartLineEyesOperation(
             chart: chart,
             config: config,
             meta: meta,
@@ -69,8 +69,8 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         }
     }
     
-    override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
-        super.updateFocus(focuses, edges: edges, duration: duration)
+    override func updateEyes(_ eyes: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
+        super.updateEyes(eyes, edges: edges, duration: duration)
         
         zip(orderedNodes, config.lines).forEach { node, lineConfig in
             let targetAlpha = CGFloat(lineConfig.visible ? 1.0 : 0)
@@ -82,7 +82,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
         container?.adjustGuides(
-            left: edges.first ?? ChartRange(start: 0, end: 0),
+            left: edges.first ?? .empty,
             right: nil,
             duration: duration
         )
@@ -93,7 +93,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             chart: chart,
             config: config,
             meta: meta,
-            edges: chart.lines.map { _ in totalEdges.first ?? ChartRange(start: 0, end: 0) },
+            edges: chart.lines.map { _ in totalEdges.first ?? .empty },
             options: [.line, .dots]
         )
     }

@@ -59,6 +59,8 @@ struct ChartLineConfig: Equatable {
 }
 
 struct ChartRange: Equatable {
+    static let empty = ChartRange(start: 0, end: 0)
+    
     let start: CGFloat
     let end: CGFloat
     

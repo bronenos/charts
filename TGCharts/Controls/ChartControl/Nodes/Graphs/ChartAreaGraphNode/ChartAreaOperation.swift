@@ -9,32 +9,30 @@
 import Foundation
 import UIKit
 
-class ChartAreaPointsOperation: ChartPointsOperation {
+class ChartAreaPointsOperation: ChartBarPointsOperation {
     override func calculateResult() -> CalculatePointsResult {
-        let sliceEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
+        let totalEdge = calculateSliceEdge(
+            indices: chart.axis.indices
+        )
+        
+        let sliceEdge = calculateSliceEdge(
             indices: meta.visibleIndices
         )
         
-        let totalEdge = calculateStackedSliceEdge(
+        let points = calculatePoints(
+            bounds: bounds,
             chart: chart,
             config: config,
-            indices: chart.axis.indices
-        )
-
-        let points = calculateNormalizedPoints(
-            edge: totalEdge,
-            with: meta
+            totalEdge: totalEdge,
+            meta: meta
         )
         
-        let context = ChartFocusOperationContext(
+        let context = ChartEyeOperationContext(
             totalEdges: [totalEdge],
-            sliceEdges: [sliceEdge]
+            lineEdges: [sliceEdge]
         )
         
-        let focuses = calculateStackedFocuses(
-            config: config,
+        let eyes = calculateEyes(
             context: context,
             sliceEdge: sliceEdge
         )
@@ -43,18 +41,46 @@ class ChartAreaPointsOperation: ChartPointsOperation {
             range: config.range,
             context: context,
             points: points,
-            focuses: focuses
+            eyes: eyes
         )
     }
-    
-    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGPoint]] {
+}
+
+class ChartAreaEyesOperation: ChartBarEyesOperation {
+    override func calculateResult() -> CalculateEyesResult {
+        let sliceEdge = calculateSliceEdge(
+            indices: meta.visibleIndices
+        )
+        
+        let eyes = calculateEyes(
+            context: ChartEyeOperationContext(
+                totalEdges: context.totalEdges,
+                lineEdges: [sliceEdge]
+            ),
+            sliceEdge: sliceEdge
+        )
+        
+        return CalculateEyesResult(
+            context: context,
+            edges: context.totalEdges,
+            eyes: eyes
+        )
+    }
+}
+
+fileprivate extension Operation {
+    func calculatePoints(bounds: CGRect,
+                         chart: Chart,
+                         config: ChartConfig,
+                         totalEdge: ChartRange,
+                         meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
         let stepX = bounds.width / CGFloat(chart.axis.count)
         let extraHeight = bounds.height * 0.15
         
         var map = [String: [CGPoint]]()
-        var values = [Int](repeating: 0, count: chart.axis.count)
+        var values = clone(0, number: chart.axis.count)
         
         for (line, lineConfig) in zip(chart.lines, config.lines) {
             let oldValues = values
@@ -67,7 +93,7 @@ class ChartAreaPointsOperation: ChartPointsOperation {
             var points = [CGPoint]()
             
             for value in values {
-                let currentY = bounds.calculateY(value: value, edge: edge)
+                let currentY = bounds.calculateY(value: value, edge: totalEdge)
                 
                 points.append(CGPoint(x: currentX, y: currentY))
                 
@@ -79,10 +105,10 @@ class ChartAreaPointsOperation: ChartPointsOperation {
                 
                 let currentY: CGFloat
                 if lineConfig.visible {
-                    currentY = bounds.calculateY(value: oldValue, edge: edge) + extraHeight
+                    currentY = bounds.calculateY(value: oldValue, edge: totalEdge) + extraHeight
                 }
                 else {
-                    currentY = bounds.calculateY(value: value, edge: edge)
+                    currentY = bounds.calculateY(value: value, edge: totalEdge)
                 }
                 
                 points.append(CGPoint(x: currentX, y: currentY))
@@ -92,36 +118,5 @@ class ChartAreaPointsOperation: ChartPointsOperation {
         }
         
         return map
-    }
-}
-
-class ChartAreaFocusOperation: ChartFocusOperation {
-    override func calculateResult() -> CalculateFocusResult {
-        let sliceEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
-            indices: meta.visibleIndices
-        )
-        
-        let currentEdge = calculateStackedSliceEdge(
-            chart: chart,
-            config: config,
-            indices: chart.axis.indices
-        )
-
-        let focuses = calculateStackedFocuses(
-            config: config,
-            context: ChartFocusOperationContext(
-                totalEdges: context.totalEdges,
-                sliceEdges: [sliceEdge]
-            ),
-            sliceEdge: sliceEdge
-        )
-        
-        return CalculateFocusResult(
-            context: context,
-            edges: [currentEdge],
-            focuses: focuses
-        )
     }
 }

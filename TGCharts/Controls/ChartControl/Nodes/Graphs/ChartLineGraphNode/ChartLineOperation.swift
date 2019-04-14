@@ -11,41 +11,73 @@ import UIKit
 
 class ChartLinePointsOperation: ChartPointsOperation {
     override func calculateResult() -> CalculatePointsResult {
-        let totalEdge = calculateLineEdge(
+        let totalEdge = calculateEdge(
             lines: chart.lines,
             indices: chart.axis.indices
         )
         
-        let sliceEdge = calculateLineEdge(
+        let sliceEdge = calculateEdge(
             lines: chart.visibleLines(config: config),
             indices: meta.visibleIndices
         )
         
-        let points = calculateNormalizedPoints(
-            edge: totalEdge,
-            with: meta
+        let points = calculatePoints(
+            bounds: bounds,
+            chart: chart,
+            totalEdge: totalEdge
         )
         
-        let context = ChartFocusOperationContext(
+        let context = ChartEyeOperationContext(
             totalEdges: [totalEdge],
-            sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+            lineEdges: clone(sliceEdge, number: chart.lines.count)
         )
         
-        let focuses = calculateLineFocuses(
+        let eyes = calculateEyes(
             config: config,
             context: context,
-            sliceEdges: context.sliceEdges
+            sliceEdges: context.lineEdges
         )
         
         return CalculatePointsResult(
             range: config.range,
             context: context,
             points: points,
-            focuses: focuses
+            eyes: eyes
         )
     }
-    
-    func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGPoint]] {
+}
+
+class ChartLineEyesOperation: ChartEyesOperation {
+    override func calculateResult() -> CalculateEyesResult {
+        let sliceEdges = clone(
+            calculateEdge(
+                lines: chart.visibleLines(config: config),
+                indices: meta.visibleIndices
+            ),
+            number: chart.lines.count
+        )
+
+        let eyes = calculateEyes(
+            config: config,
+            context: context,
+            sliceEdges: sliceEdges
+        )
+        
+        return CalculateEyesResult(
+            context: ChartEyeOperationContext(
+                totalEdges: context.totalEdges,
+                lineEdges: zip(context.lineEdges, sliceEdges).map { contextualEdge, edge in
+                    return (edge.distance > 0 ? edge : contextualEdge)
+                }
+            ),
+            edges: [sliceEdges.first ?? .empty],
+            eyes: eyes
+        )
+    }
+}
+
+fileprivate extension Operation {
+    func calculatePoints(bounds: CGRect, chart: Chart, totalEdge: ChartRange) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         let stepX = bounds.width / CGFloat(chart.axis.count - 1)
         
@@ -56,54 +88,15 @@ class ChartLinePointsOperation: ChartPointsOperation {
             map[line.key] = line.values.enumerated().map { index, value in
                 defer { currentX += stepX }
                 
-                let y = bounds.calculateY(value: value, edge: edge)
+                let y = bounds.calculateY(value: value, edge: totalEdge)
                 return CGPoint(x: currentX, y: y)
             }
         }
         
         return map
     }
-}
-
-class ChartLineFocusOperation: ChartFocusOperation {
-    override func calculateResult() -> CalculateFocusResult {
-        let lines = chart.visibleLines(config: config)
-        
-        let sliceEdge = calculateLineEdge(
-            lines: lines,
-            indices: meta.visibleIndices
-        )
-        
-        let edgess = [ChartRange](repeating: sliceEdge, count: chart.lines.count)
-        
-        let context = ChartFocusOperationContext(
-            totalEdges: self.context.totalEdges,
-            sliceEdges: zip(self.context.sliceEdges, edgess).map { contextualEdge, edge in
-                if edge.distance > 0 {
-                    return edge
-                }
-                else {
-                    return contextualEdge
-                }
-            }
-        )
-        
-        let focuses = calculateLineFocuses(
-            config: config,
-            context: self.context,
-            sliceEdges: edgess
-        )
-        
-        return CalculateFocusResult(
-            context: context,
-            edges: [sliceEdge],
-            focuses: focuses
-        )
-    }
-}
-
-extension Operation {
-    func calculateLineEdge(lines: [ChartLine], indices: Range<Int>) -> ChartRange {
+    
+    func calculateEdge(lines: [ChartLine], indices: Range<Int>) -> ChartRange {
         var lowerValue = Int.max
         var upperValue = Int.min
         
@@ -112,7 +105,7 @@ extension Operation {
             upperValue = firstValue
         }
         else {
-            return ChartRange(start: 0, end: 0)
+            return .empty
         }
         
         indices.forEach { index in
@@ -132,24 +125,22 @@ extension Operation {
         )
     }
     
-    func calculateLineFocuses(config: ChartConfig,
-                              context: ChartFocusOperationContext,
+    func calculateEyes(config: ChartConfig,
+                              context: ChartEyeOperationContext,
                               sliceEdges: [ChartRange]) -> [UIEdgeInsets] {
-        guard let totalEdge = context.totalEdges.first else {
-            return []
-        }
+        guard let totalEdge = context.totalEdges.first else { return [] }
         
         let left = config.range.start
         let right = config.range.end
         
-        return zip(context.sliceEdges, sliceEdges).map { contextualSliceEdge, sliceEdge in
+        return zip(context.lineEdges, sliceEdges).map { contextualSliceEdge, sliceEdge in
             if sliceEdge.distance > 0 {
-                let top = sliceEdge.end.percent(from: totalEdge.start, to: totalEdge.end)
-                let bottom = sliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
+                let top = sliceEdge.end.percent(inside: totalEdge)
+                let bottom = sliceEdge.start.percent(inside: totalEdge)
                 return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
             }
             else {
-                let bottom = contextualSliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
+                let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
                 return UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
             }
         }

@@ -9,9 +9,9 @@
 import Foundation
 import UIKit
 
-struct ChartFocusOperationContext {
+struct ChartEyeOperationContext {
     let totalEdges: [ChartRange]
-    let sliceEdges: [ChartRange]
+    let lineEdges: [ChartRange]
 }
 
 class ChartOperation<Type, Context>: Operation {
@@ -61,8 +61,8 @@ class ChartPointsOperation: ChartOperation<CalculatePointsResult, Date> {
     }
 }
 
-class ChartFocusOperation: ChartOperation<CalculateFocusResult, ChartFocusOperationContext> {
-    override func calculateResult() -> CalculateFocusResult {
+class ChartEyesOperation: ChartOperation<CalculateEyesResult, ChartEyeOperationContext> {
+    override func calculateResult() -> CalculateEyesResult {
         abort()
     }
 }

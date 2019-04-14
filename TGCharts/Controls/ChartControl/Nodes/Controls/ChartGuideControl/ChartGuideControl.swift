@@ -80,7 +80,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         }
         else {
             adjustGuides(
-                edge: ChartRange(start: 0, end: 0),
+                edge: .empty,
                 duration: duration
             )
         }

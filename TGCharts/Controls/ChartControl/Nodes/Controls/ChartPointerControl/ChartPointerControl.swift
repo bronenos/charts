@@ -102,8 +102,7 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
             let pointerCloudOffscreen = CGFloat(10)
             let pointerCloudWidth = pointerCloudNode.sizeThatFits(.zero).width
             let pointerCloudLeftX = (bounds.size.width + pointerCloudOffscreen * 2 - pointerCloudWidth) * pointer - pointerCloudOffscreen
-            let pointerNormalizedLeftX = pointerCloudLeftX // max(0, min(bounds.width - pointerCloudWidth, pointerCloudLeftX))
-            pointerCloudNode.frame = CGRect(x: pointerNormalizedLeftX, y: 0, width: pointerCloudWidth, height: bounds.height)
+            pointerCloudNode.frame = CGRect(x: pointerCloudLeftX, y: 0, width: pointerCloudWidth, height: bounds.height)
             
             obtainPointerControls(config: config, onlyVisible: true).forEach { $0.alpha = 1.0 }
         }
