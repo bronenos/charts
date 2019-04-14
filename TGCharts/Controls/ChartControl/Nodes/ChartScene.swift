@@ -20,7 +20,7 @@ enum ChartControlTag: Int {
 
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
-    func update(config: ChartConfig, duration: TimeInterval)
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
 }
 
 protocol IChartSceneDelegate: class {
@@ -82,11 +82,23 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         addSubview(navigatorNode)
         addSubview(optionsNode)
         
-        let mainGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider)
-        graphContainer.inject(graph: mainGraph)
+        graphContainer.inject(
+            graph: obtainGraph(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                enableControls: true
+            )
+        )
         
-        let miniGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider)
-        navigatorNode.inject(graph: miniGraph)
+        navigatorNode.inject(
+            graph: obtainGraph(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                enableControls: false
+            )
+        )
         
         populateOptions(chart: chart, config: config, animated: false)
         updateDesign()
@@ -100,15 +112,15 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         abort()
     }
     
-    func update(config: ChartConfig, duration: TimeInterval) {
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
         self.config = config
         
         setNeedsLayout()
         layoutIfNeeded()
         
-        graphContainer.update(config: config, duration: duration)
+        graphContainer.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
         timelineNode.update(config: config, duration: duration)
-        navigatorNode.update(config: config, duration: duration)
+        navigatorNode.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
         populateOptions(chart: chart, config: config, animated: (duration > 0))
     }
     
@@ -153,12 +165,44 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         )
     }
     
-    private func obtainGraph(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) -> ChartGraphNode {
+    private func obtainGraph(chart: Chart,
+                             config: ChartConfig,
+                             formattingProvider: IFormattingProvider,
+                             enableControls: Bool) -> ChartGraphNode {
         switch chart.type {
-        case .duo: return ChartDuoGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
-        case .bar: return ChartBarGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        case .area: return ChartAreaGraphNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        default: return ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2)
+        case .duo:
+            return ChartDuoGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                width: 2,
+                enableControls: enableControls
+            )
+            
+        case .bar:
+            return ChartBarGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                enableControls: enableControls
+            )
+            
+        case .area:
+            return ChartAreaGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                enableControls: enableControls
+            )
+            
+        default:
+            return ChartLineGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                width: 2,
+                enableControls: enableControls
+            )
         }
     }
     

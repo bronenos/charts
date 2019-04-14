@@ -87,7 +87,7 @@ final class ChartPointerControl: ChartNode, IChartPointerControl {
                 node.strokeColor = line.color
                 node.fillColor = DesignBook.shared.color(.primaryBackground)
                 node.bezierPaths = [path]
-                node.width = 2
+                node.strokeWidth = 2
                 node.isHidden = !options.contains(.dots)
             }
             

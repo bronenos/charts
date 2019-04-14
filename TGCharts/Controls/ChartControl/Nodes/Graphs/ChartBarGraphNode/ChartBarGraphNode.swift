@@ -13,17 +13,34 @@ protocol IChartBarGraphNode: IChartGraphNode {
 }
 
 class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
-    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
+    private let dimmingNode = ChartFigureNode(figure: .filledPaths)
+
+    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+        super.init(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider,
+            enableControls: enableControls
+        )
         
         configure(figure: .filledPaths) { index, node, line in
             node.fillColor = line.color
             node.layer.zPosition = -CGFloat(index)
         }
+        
+        dimmingNode.fillColor = DesignBook.shared.color(.chartPointerDimming)
+        dimmingNode.alpha = 0
+        dimmingNode.isHidden = !enableControls
+        dimmingNode.isUserInteractionEnabled = false
+        figuresContainer.addSubview(dimmingNode)
     }
     
     required init?(coder aDecoder: NSCoder) {
         abort()
+    }
+    
+    override var numberOfSteps: Int {
+        return chart.axis.count
     }
     
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
@@ -33,7 +50,6 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     }
     
     override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
-                                                   date: Date,
                                                    duration: TimeInterval,
                                                    completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         return ChartBarPointsOperation(
@@ -41,7 +57,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            context: date,
+            context: numberOfSteps,
             completion: completion
         )
     }
@@ -95,16 +111,52 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta,
-                                eyes: [ChartGraphEye],
+    override func updatePointer(eyes: [ChartGraphEye],
                                 totalEdges: [ChartRange],
                                 duration: TimeInterval) {
         container?.adjustPointer(
             chart: chart,
             config: config,
             eyes: eyes,
-            options: [.line],
+            options: [],
+            rounder: floor,
             duration: duration
         )
+        
+        if enableControls {
+            layout(duration: 0)
+            
+            let dimmingAlpha = CGFloat(config.pointer == nil ? 0 : 1.0)
+            if dimmingNode.alpha != dimmingAlpha {
+                UIView.animate(withDuration: 0.25) { [weak self] in
+                    self?.dimmingNode.alpha = dimmingAlpha
+                }
+            }
+        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layoutDimmingNodes()
+    }
+    
+    private func layoutDimmingNodes() {
+        guard let pointer = config.pointer else { return }
+        guard let index = calculateIndex(pointer: pointer, rounder: floor) else { return }
+        guard let firstNode = orderedNodes.first else { return }
+        
+        let stepX = bounds.width / CGFloat(numberOfSteps)
+        let baseX = CGFloat(index) * stepX
+        
+        let leftX = firstNode.convertOriginalToEffective(x: baseX)
+        let leftFrame = CGRect(x: 0,y: 0, width: leftX, height: bounds.height)
+        
+        let rightX = firstNode.convertOriginalToEffective(x: baseX + stepX)
+        let rightFrame = CGRect(x: rightX, y: 0, width: bounds.width - rightX, height: bounds.height)
+        
+        dimmingNode.bezierPaths = [
+            UIBezierPath(rect: leftFrame),
+            UIBezierPath(rect: rightFrame)
+        ]
     }
 }

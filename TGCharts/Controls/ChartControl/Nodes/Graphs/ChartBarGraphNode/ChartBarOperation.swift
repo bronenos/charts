@@ -28,7 +28,8 @@ class ChartBarPointsOperation: ChartPointsOperation {
             chart: chart,
             config: config,
             totalEdge: totalEdge,
-            meta: meta
+            meta: meta,
+            numberOfSteps: context
         )
         
         let context = ChartEyeOperationContext(
@@ -81,14 +82,15 @@ fileprivate extension Operation {
                          chart: Chart,
                          config: ChartConfig,
                          totalEdge: ChartRange,
-                         meta: ChartSliceMeta) -> [String: [CGPoint]] {
+                         meta: ChartSliceMeta,
+                         numberOfSteps: Int) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
-        let stepX = bounds.width / CGFloat(chart.axis.count)
+        let stepX = bounds.width / CGFloat(numberOfSteps)
         let extraHeight = bounds.height * 0.15
         
         var map = [String: [CGPoint]]()
-        var values = clone(0, number: chart.axis.count)
+        var values = clone(0, number: numberOfSteps)
         
         for (line, lineConfig) in zip(chart.lines, config.lines) {
             let oldValues = values

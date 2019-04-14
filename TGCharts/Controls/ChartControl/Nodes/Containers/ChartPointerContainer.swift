@@ -31,8 +31,15 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
 
         super.init(frame: .zero)
         
+        lineNode.isHidden = true
         addSubview(lineNode)
-        dotNodes.forEach(addSubview)
+        
+        dotNodes.forEach { node in
+            node.isHidden = true
+            addSubview(node)
+        }
+        
+        cloudNode.alpha = 0
         addSubview(cloudNode)
     }
     
@@ -129,7 +136,7 @@ fileprivate struct Layout {
     private let cloudExtraMove = CGFloat(10)
 
     var lineNodeFrame: CGRect {
-        if let pointedX = pointing.points.first?.x {
+        if let pointedX = pointing.coordX {
             return CGRect(x: pointedX, y: 0, width: 1, height: bounds.height)
         }
         else {
@@ -159,20 +166,20 @@ fileprivate struct Layout {
         let leftX = (bounds.width + cloudOffscreen * 2 - size.width) * pointing.pointer - cloudOffscreen
         let baseFrame = CGRect(x: leftX, y: 0, width: size.width, height: size.height)
         
-        guard let dotPoint = dotNodeFrames.first else {
+        guard let topDotFrame = dotNodeFrames.sorted(by: { $0.minY < $1.minY }).first else {
             return baseFrame
         }
         
-        guard dotPoint.minY < baseFrame.maxY else {
+        guard topDotFrame.minY < baseFrame.maxY else {
             return baseFrame
         }
         
-        if dotPoint.midX > bounds.midX {
-            let leftX = dotPoint.minX - cloudExtraMove - size.width
+        if topDotFrame.midX > bounds.midX {
+            let leftX = topDotFrame.minX - cloudExtraMove - size.width
             return CGRect(x: leftX, y: 0, width: size.width, height: size.height)
         }
         else {
-            let leftX = dotPoint.maxX + cloudExtraMove
+            let leftX = topDotFrame.maxX + cloudExtraMove
             return CGRect(x: leftX, y: 0, width: size.width, height: size.height)
         }
     }
@@ -190,7 +197,7 @@ fileprivate func generateDotNode(line: ChartLine) -> ChartFigureNode {
     let node = ChartFigureNode(figure: .nestedBezierPaths)
     node.strokeColor = line.color
     node.fillColor = DesignBook.shared.color(.primaryBackground)
+    node.strokeWidth = 2
     node.bezierPaths = [path]
-    node.width = 2
     return node
 }

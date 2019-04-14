@@ -16,7 +16,7 @@ struct ChartNavigatorOptions {
 
 protocol IChartNavigatorControl: IChartNode {
     func inject(graph: ChartGraphNode)
-    func update(config: ChartConfig, duration: TimeInterval)
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
 }
 
 final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
@@ -66,7 +66,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         graphContainer.inject(graph: graph)
     }
     
-    func update(config: ChartConfig, duration: TimeInterval) {
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
         self.config = config
         
         setNeedsLayout()
@@ -74,7 +74,8 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         
         currentGraph?.update(
             config: config.withRange(range: calculator.graphCurrentRange),
-            duration: duration
+            duration: duration,
+            needsRecalculate: needsRecalculate
         )
     }
     

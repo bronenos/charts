@@ -90,25 +90,21 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         parentView.addSubview(self)
         
         scene.frame = CGRect(origin: .zero, size: bounds.size)
-        render()
+        render(duration: 0, needsRecalculate: true)
     }
     
     func unlink() {
         removeFromSuperview()
     }
     
-    func render(duration: TimeInterval = 0) {
-        scene.update(config: config, duration: duration)
-    }
-    
     func update() {
         scene.updateDesign()
-        render()
+        render(duration: 0, needsRecalculate: true)
     }
     
     func sceneDidToggleLine(index: Int) {
         config.lines[index].visible.toggle()
-        render(duration: 0.25)
+        render(duration: 0.25, needsRecalculate: true)
     }
     
     func interactorDidBegin() {
@@ -119,10 +115,10 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         delegate?.chartControlDidEndInteraction()
     }
     
-    func interactorDidInformToUpdate() {
+    func interactorDidInformToUpdate(needsRecalculate: Bool) {
         config.range = interactor.range
         config.pointer = interactor.pointer
-        render(duration: 0.075)
+        render(duration: 0.075, needsRecalculate: needsRecalculate)
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -159,6 +155,10 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         if let point = touches.first?.location(in: self) {
             interactor.interactionDidEnd(at: point)
         }
+    }
+    
+    private func render(duration: TimeInterval, needsRecalculate: Bool) {
+        scene.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
     }
 }
 

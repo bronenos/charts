@@ -26,7 +26,8 @@ final class ChartDuoPointsOperation: ChartLinePointsOperation {
             bounds: bounds,
             chart: chart,
             totalEdges: totalEdges,
-            meta: meta
+            meta: meta,
+            numberOfSteps: context
         )
         
         let context = ChartEyeOperationContext(
@@ -77,11 +78,15 @@ final class ChartDuoEyesOperation: ChartLineEyesOperation {
 }
 
 fileprivate extension Operation {
-    func calculatePoints(bounds: CGRect, chart: Chart, totalEdges: [ChartRange], meta: ChartSliceMeta) -> [String: [CGPoint]] {
+    func calculatePoints(bounds: CGRect,
+                         chart: Chart,
+                         totalEdges: [ChartRange],
+                         meta: ChartSliceMeta,
+                         numberOfSteps: Int) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
         var map = [String: [CGPoint]]()
-        let stepX = bounds.width / CGFloat(chart.axis.count - 1)
+        let stepX = bounds.width / CGFloat(numberOfSteps)
         
         zip(chart.lines, totalEdges).forEach { line, edge in
             var currentX = CGFloat(0)

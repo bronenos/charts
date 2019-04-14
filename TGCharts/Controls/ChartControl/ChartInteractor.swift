@@ -18,7 +18,7 @@ protocol IChartInteractor: IChartInteracting {
 protocol IChartInteractorDelegate: class {
     func interactorDidBegin()
     func interactorDidEnd()
-    func interactorDidInformToUpdate()
+    func interactorDidInformToUpdate(needsRecalculate: Bool)
 }
 
 final class ChartInteractor: IChartInteractor {
@@ -122,11 +122,11 @@ final class ChartInteractor: IChartInteractor {
     
     private func updateRange(_ range: ChartRange) {
         self.range = range
-        delegate?.interactorDidInformToUpdate()
+        delegate?.interactorDidInformToUpdate(needsRecalculate: true)
     }
     
     private func updatePointer(_ pointer: CGFloat?) {
         self.pointer = pointer
-        delegate?.interactorDidInformToUpdate()
+        delegate?.interactorDidInformToUpdate(needsRecalculate: false)
     }
 }

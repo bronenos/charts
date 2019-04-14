@@ -12,25 +12,28 @@ import UIKit
 struct ChartGraphPointing {
     let pointer: CGFloat
     let index: Int
+    let coordX: CGFloat?
     let points: [CGPoint]
     
     init() {
         pointer = 0
         index = 0
+        coordX = nil
         points = []
     }
     
-    init(pointer: CGFloat, index: Int, points: [CGPoint]) {
+    init(pointer: CGFloat, index: Int, coordX: CGFloat?, points: [CGPoint]) {
         self.pointer = pointer
         self.index = index
+        self.coordX = coordX
         self.points = points
     }
 }
 
 protocol IChartGraphNode {
     var container: IChartGraphContainer? { get set }
-    func update(config: ChartConfig, duration: TimeInterval)
-    func calculatePointing(pointer: CGFloat) -> ChartGraphPointing
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
+    func calculatePointing(pointer: CGFloat, rounder: (CGFloat) -> CGFloat) -> ChartGraphPointing
 }
 
 struct ChartGraphEye: Equatable {
@@ -55,8 +58,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     weak var container: IChartGraphContainer?
     
     let chart: Chart
+    let enableControls: Bool
     private(set) var config: ChartConfig
-    private var eyes: [ChartGraphEye]
+    private(set) var eyes: [ChartGraphEye]
 
     let figuresContainer = ChartNode()
     var figureNodes = [String: ChartFigureNode]()
@@ -67,8 +71,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     var cachedPoints = [String: [CGPoint]]()
     var cachedEyesContext: ChartEyeOperationContext?
 
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
         self.chart = chart
+        self.enableControls = enableControls
         self.config = config
         self.eyes = chart.axis.indices.map { _ in ChartGraphEye(edges: .zero, scaleFactor: 1.0) }
         
@@ -94,6 +99,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
+    var numberOfSteps: Int {
+        abort()
+    }
+    
     final func configure(figure: ChartFigure, block: @escaping (Int, ChartFigureNode, ChartLine) -> Void) {
         orderedNodes.forEach { node in
             node.removeFromSuperview()
@@ -113,13 +122,71 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
-    func update(config: ChartConfig, duration: TimeInterval) {
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
         if shouldReset(newConfig: config, oldConfig: self.config) {
             discardCache()
         }
         
         self.config = config
-        enqueueRecalculation(duration: duration)
+        
+        if needsRecalculate {
+            enqueueRecalculation(duration: duration)
+        }
+        else {
+            if let context = cachedEyesContext {
+                updatePointer(
+                    eyes: eyes,
+                    totalEdges: context.totalEdges,
+                    duration: duration
+                )
+            }
+            else {
+                enqueueRecalculation(duration: duration)
+            }
+        }
+    }
+    
+    final func calculateIndex(pointer: CGFloat, rounder: (CGFloat) -> CGFloat) -> Int? {
+        guard let firstFigureNode = orderedNodes.first else {
+            return nil
+        }
+        
+        let originalX = firstFigureNode.convertEffectiveToOriginal(
+            x: bounds.width * pointer
+        )
+        
+        let stepX = bounds.width / CGFloat(numberOfSteps)
+        let originalIndex = Int(rounder(originalX / stepX))
+        let normalizedIndex = between(value: originalIndex, minimum: 0, maximum: chart.axis.count - 1)
+        
+        let normalizedPoint = CGPoint(x: CGFloat(normalizedIndex) * stepX, y: 0)
+        let effectivePoint = firstFigureNode.convertOriginalToEffective(point: normalizedPoint)
+        
+        if effectivePoint.x > bounds.maxX {
+            return normalizedIndex - 1
+        }
+        else if effectivePoint.x < bounds.minX {
+            return normalizedIndex + 1
+        }
+        else {
+            return normalizedIndex
+        }
+    }
+    
+    final func calculatePointing(pointer: CGFloat, rounder: (CGFloat) -> CGFloat) -> ChartGraphPointing {
+        guard let index = calculateIndex(pointer: pointer, rounder: rounder) else {
+            return ChartGraphPointing()
+        }
+        
+        return ChartGraphPointing(
+            pointer: pointer,
+            index: index,
+            coordX: orderedNodes.first.flatMap { node in
+                let stepX = bounds.width / CGFloat(numberOfSteps)
+                return node.convertOriginalToEffective(x: CGFloat(index) * stepX)
+            },
+            points: calculatePoints(forIndex: index)
+        )
     }
     
     override func discardCache() {
@@ -133,7 +200,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func obtainPointsCalculationOperation(meta: ChartSliceMeta,
-                                          date: Date,
                                           duration: TimeInterval,
                                           completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         abort()
@@ -162,15 +228,14 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
         
-    func updatePointer(meta: ChartSliceMeta,
-                       eyes: [ChartGraphEye],
+    func updatePointer(eyes: [ChartGraphEye],
                        totalEdges: [ChartRange],
                        duration: TimeInterval) {
         abort()
     }
     
-    func calculatePointing(pointer: CGFloat) -> ChartGraphPointing {
-        return ChartGraphPointing()
+    func calculatePoints(forIndex index: Int) -> [CGPoint] {
+        return []
     }
     
     override func updateDesign() {
@@ -186,7 +251,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         super.layoutSubviews()
         figuresContainer.frame = bounds
         figuresContainer.subviews.forEach { $0.frame = bounds }
-        enqueueRecalculation(duration: 0)
     }
     
     private func enqueueRecalculation(duration: TimeInterval) {
@@ -216,7 +280,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     )
                     
                     self.updatePointer(
-                        meta: meta,
                         eyes: result.eyes,
                         totalEdges: result.context.totalEdges,
                         duration: duration
@@ -233,7 +296,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             
             let operation = obtainPointsCalculationOperation(
                 meta: meta,
-                date: Date(),
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
@@ -267,7 +329,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
         else {
             updatePointer(
-                meta: meta,
                 eyes: [],
                 totalEdges: [],
                 duration: duration

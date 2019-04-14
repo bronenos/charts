@@ -11,9 +11,14 @@ import UIKit
 
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
-    func update(config: ChartConfig, duration: TimeInterval)
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
-    func adjustPointer(chart: Chart, config: ChartConfig, eyes: [ChartGraphEye], options: ChartPointerOptions, duration: TimeInterval)
+    func adjustPointer(chart: Chart,
+                       config: ChartConfig,
+                       eyes: [ChartGraphEye],
+                       options: ChartPointerOptions,
+                       rounder: (CGFloat) -> CGFloat,
+                       duration: TimeInterval)
 }
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
@@ -52,20 +57,25 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         insertSubview(graph, belowSubview: guidesContainer)
     }
     
-    func update(config: ChartConfig, duration: TimeInterval) {
-        innerGraph?.update(config: config, duration: duration)
+    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
+        innerGraph?.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
     }
     
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {
         guidesContainer.update(leftEdge: left, rightEdge: right, duration: duration)
     }
     
-    func adjustPointer(chart: Chart, config: ChartConfig, eyes: [ChartGraphEye], options: ChartPointerOptions, duration: TimeInterval) {
+    func adjustPointer(chart: Chart,
+                       config: ChartConfig,
+                       eyes: [ChartGraphEye],
+                       options: ChartPointerOptions,
+                       rounder: (CGFloat) -> CGFloat,
+                       duration: TimeInterval) {
         pointerContainer.update(
             chart: chart,
             config: config,
             pointing: config.pointer.flatMap { pointer in
-                innerGraph?.calculatePointing(pointer: pointer)
+                innerGraph?.calculatePointing(pointer: pointer, rounder: rounder)
             },
             options: options,
             duration: duration * 2

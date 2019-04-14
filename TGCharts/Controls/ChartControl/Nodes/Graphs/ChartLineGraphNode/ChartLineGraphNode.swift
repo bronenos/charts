@@ -13,12 +13,17 @@ protocol IChartLineGraphNode: IChartGraphNode {
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat, enableControls: Bool) {
+        super.init(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider,
+            enableControls: enableControls
+        )
         
         configure(figure: .joinedLines) { _, node, line in
             node.strokeColor = line.color
-            node.width = width
+            node.strokeWidth = width
             node.minimalScaledWidth = 0.75
         }
     }
@@ -27,12 +32,15 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         abort()
     }
     
+    override var numberOfSteps: Int {
+        return chart.axis.count - 1
+    }
+    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         return false
     }
     
     override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
-                                                   date: Date,
                                                    duration: TimeInterval,
                                                    completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         return ChartLinePointsOperation(
@@ -40,7 +48,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            context: date,
+            context: numberOfSteps,
             completion: completion
         )
     }
@@ -86,8 +94,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta,
-                                eyes: [ChartGraphEye],
+    override func updatePointer(eyes: [ChartGraphEye],
                                 totalEdges: [ChartRange],
                                 duration: TimeInterval) {
         container?.adjustPointer(
@@ -95,32 +102,15 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
             config: config,
             eyes: eyes,
             options: [.line, .dots],
+            rounder: round,
             duration: duration
         )
     }
     
-    override func calculatePointing(pointer: CGFloat) -> ChartGraphPointing {
-        guard let firstFigureNode = orderedNodes.first else {
-            return ChartGraphPointing()
-        }
-        
-        let originalPoint = firstFigureNode.convertEffectiveToOriginal(
-            point: CGPoint(x: bounds.width * pointer, y: 0)
-        )
-        
-        let stepX = bounds.width / CGFloat(chart.axis.indices.count - 1)
-        let originalIndex = Int(round(originalPoint.x / stepX))
-        let normalizedIndex = between(value: originalIndex, minimum: 0, maximum: chart.axis.count - 1)
-        
-        let points: [CGPoint] = zip(chart.lines, orderedNodes).map { line, node in
-            let originalPoint = cachedPoints[line.key]?[normalizedIndex] ?? .zero
+    override func calculatePoints(forIndex index: Int) -> [CGPoint] {
+        return zip(chart.lines, orderedNodes).map { line, node in
+            let originalPoint = cachedPoints[line.key]?[index] ?? .zero
             return node.convertOriginalToEffective(point: originalPoint)
         }
-        
-        return ChartGraphPointing(
-            pointer: pointer,
-            index: normalizedIndex,
-            points: points
-        )
     }
 }

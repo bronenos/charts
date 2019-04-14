@@ -16,5 +16,8 @@ extension UIView {
         if duration > 0 {
             UIView.animate(withDuration: duration, animations: layoutIfNeeded)
         }
+        else {
+            layoutIfNeeded()
+        }
     }
 }

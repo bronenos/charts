@@ -13,12 +13,15 @@ protocol IChartDuoGraphNode: IChartLineGraphNode {
 }
 
 class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
+    override var numberOfSteps: Int {
+        return super.numberOfSteps
+    }
+    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         return super.shouldReset(newConfig: newConfig, oldConfig: oldConfig)
     }
     
     override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
-                                                   date: Date,
                                                    duration: TimeInterval,
                                                    completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         return ChartDuoPointsOperation(
@@ -26,7 +29,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            context: date,
+            context: numberOfSteps,
             completion: completion
         )
     }
@@ -61,8 +64,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
     }
 
-    override func updatePointer(meta: ChartSliceMeta,
-                                eyes: [ChartGraphEye],
+    override func updatePointer(eyes: [ChartGraphEye],
                                 totalEdges: [ChartRange],
                                 duration: TimeInterval) {
         container?.adjustPointer(
@@ -70,6 +72,7 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
             config: config,
             eyes: eyes,
             options: [.line, .dots],
+            rounder: round,
             duration: duration
         )
     }

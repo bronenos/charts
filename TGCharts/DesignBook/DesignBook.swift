@@ -82,6 +82,7 @@ final class LightDesignBook: DesignBook {
         case .chartPointerFocusedLineStroke: return UIColor(red: 0.77, green: 0.78, blue: 0.78, alpha: 0.35)
         case .chartPointerCloudBackground: return UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
+        case .chartPointerDimming: return UIColor.white.withAlphaComponent(0.35)
         case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 0.7)
         case .sliderBackground: return UIColor(red: 0.71, green: 0.78, blue: 0.88, alpha: 1.0)
@@ -113,6 +114,7 @@ final class DarkDesignBook: DesignBook {
         case .chartPointerFocusedLineStroke: return UIColor(red: 0.06, green: 0.08, blue: 0.11, alpha: 0.35)
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
+        case .chartPointerDimming: return UIColor.black.withAlphaComponent(0.35)
         case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 0.7)
         case .sliderBackground: return UIColor(red: 0.27, green: 0.31, blue: 0.35, alpha: 1.0)

@@ -55,7 +55,7 @@ class ChartOperation<Type, Context>: Operation {
     }
 }
 
-class ChartPointsOperation: ChartOperation<CalculatePointsResult, Date> {
+class ChartPointsOperation: ChartOperation<CalculatePointsResult, Int> {
     override func calculateResult() -> CalculatePointsResult {
         abort()
     }

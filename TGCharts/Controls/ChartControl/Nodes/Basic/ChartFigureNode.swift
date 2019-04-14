@@ -21,22 +21,25 @@ protocol IChartFigureNode: IChartNode {
     var figure: ChartFigure { get set }
     var points: [CGPoint] { get set }
     var bezierPaths: [UIBezierPath] { get set }
-    var width: CGFloat { get set }
+    var strokeWidth: CGFloat { get set }
     var strokeColor: UIColor { get set }
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
     func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval)
     func convertEffectiveToOriginal(point: CGPoint) -> CGPoint
+    func convertEffectiveToOriginal(x: CGFloat) -> CGFloat
     func convertOriginalToEffective(point: CGPoint) -> CGPoint
+    func convertOriginalToEffective(x: CGFloat) -> CGFloat
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
     private let shapeLayer = CAShapeLayer()
     private var rootBezierPath = UIBezierPath()
     
+    var strokeWidth = CGFloat(1)
+    var borderWidth = CGFloat(0)
     var minimalScaledWidth = CGFloat(0)
-    var width = CGFloat(1)
-    
+
     private var effectiveTransform = CGAffineTransform.identity
     
     init(figure: ChartFigure) {
@@ -129,13 +132,13 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
             animation.fromValue = shapeLayer.presentation()?.path
             animation.toValue = path
             
-            shapeLayer.lineWidth = max(minimalScaledWidth, width * scale)
+            shapeLayer.lineWidth = max(minimalScaledWidth, strokeWidth * scale)
             shapeLayer.path = path
             shapeLayer.add(animation, forKey: animation.keyPath)
             CATransaction.commit()
         }
         else {
-            shapeLayer.lineWidth = max(minimalScaledWidth, width * scale)
+            shapeLayer.lineWidth = max(minimalScaledWidth, strokeWidth * scale)
             shapeLayer.path = path
         }
     }
@@ -144,8 +147,18 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         return point.applying(effectiveTransform.inverted())
     }
     
+    func convertEffectiveToOriginal(x: CGFloat) -> CGFloat {
+        let point = CGPoint(x: x, y: 0)
+        return convertEffectiveToOriginal(point: point).x
+    }
+    
     func convertOriginalToEffective(point: CGPoint) -> CGPoint {
         return point.applying(effectiveTransform)
+    }
+    
+    func convertOriginalToEffective(x: CGFloat) -> CGFloat {
+        let point = CGPoint(x: x, y: 0)
+        return convertOriginalToEffective(point: point).x
     }
     
     override func layoutSubviews() {
@@ -177,7 +190,7 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         rootBezierPath.move(to: firstPoint)
         restPoints.forEach(rootBezierPath.addLine)
         
-        shapeLayer.lineWidth = width
+        shapeLayer.lineWidth = strokeWidth
         shapeLayer.strokeColor = strokeColor.cgColor
         shapeLayer.fillColor = fillColor.cgColor
         shapeLayer.lineJoin = .round
@@ -187,7 +200,7 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     
     private func renderSeparatePoints() {
         points.forEach { point in
-            let offset = width * 0.5
+            let offset = strokeWidth * 0.5
             let rect = CGRect(x: point.x, y: point.y, width: 0, height: 0).insetBy(dx: offset, dy: offset)
             let bezierSubpath = UIBezierPath(roundedRect: rect, cornerRadius: offset)
             rootBezierPath.append(bezierSubpath)
@@ -212,7 +225,8 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         restPaths.forEach(rootBezierPath.append)
         
         shapeLayer.strokeColor = strokeColor.cgColor
-        shapeLayer.lineWidth = width
+        shapeLayer.lineWidth = strokeWidth
+        shapeLayer.borderWidth = borderWidth
         shapeLayer.fillRule = .evenOdd
         shapeLayer.fillColor = fillColor.cgColor
         shapeLayer.fillRule = .evenOdd

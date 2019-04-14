@@ -13,8 +13,13 @@ protocol IChartAreaGraphNode: IChartGraphNode {
 }
 
 class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
-    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
-        super.init(chart: chart, config: config, formattingProvider: formattingProvider)
+    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+        super.init(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider,
+            enableControls: enableControls
+        )
         
         configure(figure: .filledPaths) { index, node, line in
             node.fillColor = line.color
@@ -26,6 +31,10 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         abort()
     }
     
+    override var numberOfSteps: Int {
+        return chart.axis.count - 1
+    }
+    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         let newVisible = newConfig.lines.map { $0.visible }
         let oldVisible = oldConfig.lines.map { $0.visible }
@@ -33,7 +42,6 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     }
     
     override func obtainPointsCalculationOperation(meta: ChartSliceMeta,
-                                                   date: Date,
                                                    duration: TimeInterval,
                                                    completion: @escaping (CalculatePointsResult) -> Void) -> ChartPointsOperation {
         return ChartAreaPointsOperation(
@@ -41,7 +49,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
             config: config,
             meta: meta,
             bounds: bounds,
-            context: date,
+            context: numberOfSteps,
             completion: completion
         )
     }
@@ -95,8 +103,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta,
-                                eyes: [ChartGraphEye],
+    override func updatePointer(eyes: [ChartGraphEye],
                                 totalEdges: [ChartRange],
                                 duration: TimeInterval) {
         container?.adjustPointer(
@@ -104,6 +111,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
             config: config,
             eyes: eyes,
             options: [.line],
+            rounder: round,
             duration: duration
         )
     }
