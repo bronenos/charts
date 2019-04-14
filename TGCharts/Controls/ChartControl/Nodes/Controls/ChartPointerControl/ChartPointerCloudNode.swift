@@ -31,11 +31,11 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         
         addSubview(overlayNode)
         
-        dateNode.font = UIFont.boldSystemFont(ofSize: 12)
+        dateNode.font = DesignBook.shared.font(size: 12, weight: .medium)
         dateNode.textAlignment = .left
         overlayNode.addSubview(dateNode)
         
-        yearNode.font = UIFont.boldSystemFont(ofSize: 12)
+        yearNode.font = DesignBook.shared.font(size: 12, weight: .medium)
         yearNode.textAlignment = .left
         overlayNode.addSubview(yearNode)
     }
@@ -87,7 +87,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         let valueNode = ChartLabelNode()
         valueNode.text = "\(line.values[index])"
         valueNode.textColor = line.color
-        valueNode.font = UIFont.systemFont(ofSize: 12)
+        valueNode.font = DesignBook.shared.font(size: 12, weight: .regular)
         valueNode.textAlignment = .right
         return valueNode
     }

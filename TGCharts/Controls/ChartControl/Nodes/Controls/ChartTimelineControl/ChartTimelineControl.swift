@@ -192,7 +192,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
         node.text = formattingProvider.format(date: date, style: .shortDate)
         node.textColor = DesignBook.shared.color(.chartIndexForeground)
-        node.font = UIFont.systemFont(ofSize: 8)
+        node.font = DesignBook.shared.font(size: 8, weight: .regular)
         node.textAlignment = .right
         node.alpha = 0
         

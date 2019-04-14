@@ -23,7 +23,7 @@ final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
         
         isUserInteractionEnabled = false
         
-        valueNode.font = UIFont.systemFont(ofSize: 12)
+        valueNode.font = DesignBook.shared.font(size: 12, weight: .regular)
         valueNode.textAlignment = alignment
         addSubview(valueNode)
         
