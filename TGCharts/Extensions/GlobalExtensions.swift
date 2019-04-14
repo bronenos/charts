@@ -8,6 +8,10 @@
 
 import Foundation
 
+func between<Type: Comparable>(value: Type, minimum: Type, maximum: Type) -> Type {
+    return Swift.min(Swift.max(minimum, value), maximum)
+}
+
 func convert<Source, Target>(_ value: Source, block: (Source) -> Target) -> Target {
     return block(value)
 }

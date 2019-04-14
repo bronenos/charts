@@ -15,6 +15,11 @@ protocol IChartInteracting: class {
     func interactionDidEnd(at point: CGPoint)
 }
 
+protocol IChartControlDelegate: class {
+    func chartControlDidBeginInteraction()
+    func chartControlDidEndInteraction()
+}
+
 protocol IChartControl: class {
     var chart: Chart { get }
     var config: ChartConfig { get }
@@ -22,11 +27,6 @@ protocol IChartControl: class {
     func link(to parentView: UIView)
     func unlink()
     func update()
-}
-
-protocol IChartControlDelegate: class {
-    func chartControlDidBeginInteraction()
-    func chartControlDidEndInteraction()
 }
 
 final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChartSceneDelegate {

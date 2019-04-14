@@ -26,6 +26,8 @@ protocol IChartFigureNode: IChartNode {
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
     func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval)
+    func convertEffectiveToOriginal(point: CGPoint) -> CGPoint
+    func convertOriginalToEffective(point: CGPoint) -> CGPoint
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
@@ -34,6 +36,8 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     
     var minimalScaledWidth = CGFloat(0)
     var width = CGFloat(1)
+    
+    private var effectiveTransform = CGAffineTransform.identity
     
     init(figure: ChartFigure) {
         super.init(frame: .zero)
@@ -109,10 +113,12 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
             
             let transformedBezierPath = UIBezierPath(cgPath: rootBezierPath.cgPath)
             transformedBezierPath.apply(targetTransform)
+            effectiveTransform = targetTransform
             
             path = transformedBezierPath.cgPath
         }
         else {
+            effectiveTransform = .identity
             path = rootBezierPath.cgPath
         }
 
@@ -134,6 +140,14 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         }
     }
     
+    func convertEffectiveToOriginal(point: CGPoint) -> CGPoint {
+        return point.applying(effectiveTransform.inverted())
+    }
+    
+    func convertOriginalToEffective(point: CGPoint) -> CGPoint {
+        return point.applying(effectiveTransform)
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -142,7 +156,8 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     
     private func updateFigure() {
         rootBezierPath.removeAllPoints()
-        
+        effectiveTransform = .identity
+
         switch figure {
         case .joinedLines: renderJoinedLines()
         case .separatePoints: renderSeparatePoints()

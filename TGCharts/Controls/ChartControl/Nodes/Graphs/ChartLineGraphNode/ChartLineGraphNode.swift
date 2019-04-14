@@ -13,13 +13,8 @@ protocol IChartLineGraphNode: IChartGraphNode {
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
-    private let pointerLineNode = ChartNode()
-    
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat) {
         super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        pointerLineNode.isHidden = true
-        addSubview(pointerLineNode)
         
         configure(figure: .joinedLines) { _, node, line in
             node.strokeColor = line.color
@@ -65,6 +60,8 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     }
     
     override func updateChart(points: [String: [CGPoint]]) {
+        super.updateChart(points: points)
+        
         for (node, line) in zip(orderedNodes, chart.lines) {
             node.points = points[line.key] ?? []
         }
@@ -89,13 +86,41 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
+    override func updatePointer(meta: ChartSliceMeta,
+                                eyes: [ChartGraphEye],
+                                totalEdges: [ChartRange],
+                                duration: TimeInterval) {
         container?.adjustPointer(
             chart: chart,
             config: config,
-            meta: meta,
-            edges: chart.lines.map { _ in totalEdges.first ?? .empty },
-            options: [.line, .dots]
+            eyes: eyes,
+            options: [.line, .dots],
+            duration: duration
+        )
+    }
+    
+    override func calculatePointing(pointer: CGFloat) -> ChartGraphPointing {
+        guard let firstFigureNode = orderedNodes.first else {
+            return ChartGraphPointing()
+        }
+        
+        let originalPoint = firstFigureNode.convertEffectiveToOriginal(
+            point: CGPoint(x: bounds.width * pointer, y: 0)
+        )
+        
+        let stepX = bounds.width / CGFloat(chart.axis.indices.count - 1)
+        let originalIndex = Int(round(originalPoint.x / stepX))
+        let normalizedIndex = between(value: originalIndex, minimum: 0, maximum: chart.axis.count - 1)
+        
+        let points: [CGPoint] = zip(chart.lines, orderedNodes).map { line, node in
+            let originalPoint = cachedPoints[line.key]?[normalizedIndex] ?? .zero
+            return node.convertOriginalToEffective(point: originalPoint)
+        }
+        
+        return ChartGraphPointing(
+            pointer: pointer,
+            index: normalizedIndex,
+            points: points
         )
     }
 }

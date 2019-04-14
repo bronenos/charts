@@ -13,8 +13,6 @@ protocol IChartDuoGraphNode: IChartLineGraphNode {
 }
 
 class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
-    private let pointerLineNode = ChartNode()
-    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         return super.shouldReset(newConfig: newConfig, oldConfig: oldConfig)
     }
@@ -63,13 +61,16 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
     }
 
-    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
+    override func updatePointer(meta: ChartSliceMeta,
+                                eyes: [ChartGraphEye],
+                                totalEdges: [ChartRange],
+                                duration: TimeInterval) {
         container?.adjustPointer(
             chart: chart,
             config: config,
-            meta: meta,
-            edges: totalEdges,
-            options: [.line, .dots]
+            eyes: eyes,
+            options: [.line, .dots],
+            duration: duration
         )
     }
 }

@@ -13,18 +13,18 @@ protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
     func update(config: ChartConfig, duration: TimeInterval)
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
-    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions)
+    func adjustPointer(chart: Chart, config: ChartConfig, eyes: [ChartGraphEye], options: ChartPointerOptions, duration: TimeInterval)
 }
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     let guidesContainer: ChartGuideContainer
-    let pointerContainer: ChartPointerControl
+    let pointerContainer: ChartPointerContainer
 
     private var innerGraph: ChartGraphNode?
     
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
-        pointerContainer = ChartPointerControl(chart: chart, formattingProvider: formattingProvider)
+        pointerContainer = ChartPointerContainer(chart: chart, formattingProvider: formattingProvider)
 
         super.init(frame: .zero)
         
@@ -60,8 +60,16 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         guidesContainer.update(leftEdge: left, rightEdge: right, duration: duration)
     }
     
-    func adjustPointer(chart: Chart, config: ChartConfig, meta: ChartSliceMeta, edges: [ChartRange], options: ChartPointerOptions) {
-        pointerContainer.update(chart: chart, config: config, meta: meta, edges: edges, options: options)
+    func adjustPointer(chart: Chart, config: ChartConfig, eyes: [ChartGraphEye], options: ChartPointerOptions, duration: TimeInterval) {
+        pointerContainer.update(
+            chart: chart,
+            config: config,
+            pointing: config.pointer.flatMap { pointer in
+                innerGraph?.calculatePointing(pointer: pointer)
+            },
+            options: options,
+            duration: duration * 2
+        )
     }
     
     override func discardCache() {
@@ -74,6 +82,7 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         backgroundColor = DesignBook.shared.color(.primaryBackground)
         innerGraph?.updateDesign()
         guidesContainer.updateDesign()
+        pointerContainer.updateDesign()
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

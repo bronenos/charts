@@ -13,13 +13,8 @@ protocol IChartBarGraphNode: IChartGraphNode {
 }
 
 class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
-    private let pointerLineNode = ChartNode()
-    
     override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         super.init(chart: chart, config: config, formattingProvider: formattingProvider)
-        
-        pointerLineNode.isHidden = true
-        addSubview(pointerLineNode)
         
         configure(figure: .filledPaths) { index, node, line in
             node.fillColor = line.color
@@ -66,6 +61,8 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     }
     
     override func updateChart(points: [String: [CGPoint]]) {
+        super.updateChart(points: points)
+        
         zip(chart.lines, config.lines).forEach { line, lineConfig in
             guard let node = figureNodes[line.key] else { return }
             
@@ -98,13 +95,16 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
+    override func updatePointer(meta: ChartSliceMeta,
+                                eyes: [ChartGraphEye],
+                                totalEdges: [ChartRange],
+                                duration: TimeInterval) {
         container?.adjustPointer(
             chart: chart,
             config: config,
-            meta: meta,
-            edges: [],
-            options: [.line]
+            eyes: eyes,
+            options: [.line],
+            duration: duration
         )
     }
 }

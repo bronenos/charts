@@ -58,6 +58,7 @@ final class ChartPointerCloudNode: ChartNode, IChartPointerCloudNode {
         yearNode.textColor = DesignBook.shared.color(.chartPointerCloudForeground)
         
         setNeedsLayout()
+        layoutIfNeeded()
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

@@ -9,12 +9,31 @@
 import Foundation
 import UIKit
 
+struct ChartGraphPointing {
+    let pointer: CGFloat
+    let index: Int
+    let points: [CGPoint]
+    
+    init() {
+        pointer = 0
+        index = 0
+        points = []
+    }
+    
+    init(pointer: CGFloat, index: Int, points: [CGPoint]) {
+        self.pointer = pointer
+        self.index = index
+        self.points = points
+    }
+}
+
 protocol IChartGraphNode {
     var container: IChartGraphContainer? { get set }
     func update(config: ChartConfig, duration: TimeInterval)
+    func calculatePointing(pointer: CGFloat) -> ChartGraphPointing
 }
 
-struct ChartGraphEye {
+struct ChartGraphEye: Equatable {
     let edges: UIEdgeInsets
     let scaleFactor: CGFloat
 }
@@ -37,18 +56,21 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     let chart: Chart
     private(set) var config: ChartConfig
+    private var eyes: [ChartGraphEye]
 
     let figuresContainer = ChartNode()
     var figureNodes = [String: ChartFigureNode]()
     var orderedNodes = [ChartFigureNode]()
 
+    private(set) var lastMeta: ChartSliceMeta?
     let calculationQueue = OperationQueue()
+    var cachedPoints = [String: [CGPoint]]()
     var cachedEyesContext: ChartEyeOperationContext?
-    private var lastMeta: ChartSliceMeta?
 
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.chart = chart
         self.config = config
+        self.eyes = chart.axis.indices.map { _ in ChartGraphEye(edges: .zero, scaleFactor: 1.0) }
         
         super.init(frame: .zero)
         
@@ -73,9 +95,16 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     final func configure(figure: ChartFigure, block: @escaping (Int, ChartFigureNode, ChartLine) -> Void) {
+        orderedNodes.forEach { node in
+            node.removeFromSuperview()
+        }
+        
         orderedNodes.removeAll()
+        figureNodes.removeAll()
+
         chart.lines.enumerated().forEach { index, line in
             let node = ChartFigureNode(figure: figure)
+            node.isUserInteractionEnabled = false
             block(index, node, line)
             
             orderedNodes.append(node)
@@ -90,7 +119,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
         
         self.config = config
-        
         enqueueRecalculation(duration: duration)
     }
     
@@ -119,10 +147,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
 
     func updateChart(points: [String: [CGPoint]]) {
-        abort()
+        self.cachedPoints = points
     }
     
     func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
+        self.eyes = eyes
+        
         for (node, eye) in zip(orderedNodes, eyes) {
             node.setEye(insets: eye.edges, scale: eye.scaleFactor, duration: duration)
         }
@@ -132,8 +162,15 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
         
-    func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
+    func updatePointer(meta: ChartSliceMeta,
+                       eyes: [ChartGraphEye],
+                       totalEdges: [ChartRange],
+                       duration: TimeInterval) {
         abort()
+    }
+    
+    func calculatePointing(pointer: CGFloat) -> ChartGraphPointing {
+        return ChartGraphPointing()
     }
     
     override func updateDesign() {
@@ -167,9 +204,23 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     guard let `self` = self else { return }
                     self.cachedEyesContext = result.context
                     
-                    self.updateEyes(result.eyes, edges: result.edges, duration: duration)
-                    self.updateGuides(edges: result.edges, duration: duration)
-                    self.updatePointer(meta: meta, totalEdges: result.context.totalEdges)
+                    self.updateEyes(
+                        result.eyes,
+                        edges: result.edges,
+                        duration: duration
+                    )
+                    
+                    self.updateGuides(
+                        edges: result.edges,
+                        duration: duration
+                    )
+                    
+                    self.updatePointer(
+                        meta: meta,
+                        eyes: result.eyes,
+                        totalEdges: result.context.totalEdges,
+                        duration: duration
+                    )
                 }
             )
             
@@ -188,9 +239,20 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     guard let `self` = self else { return }
                     self.cachedEyesContext = result.context
                     
-                    self.updateChart(points: result.points)
-                    self.updateEyes(result.eyes, edges: result.context.totalEdges, duration: duration)
-                    self.updateGuides(edges: result.context.totalEdges, duration: duration)
+                    self.updateChart(
+                        points: result.points
+                    )
+                    
+                    self.updateEyes(
+                        result.eyes,
+                        edges: result.context.totalEdges,
+                        duration: duration
+                    )
+                    
+                    self.updateGuides(
+                        edges: result.context.totalEdges,
+                        duration: duration
+                    )
                 }
             )
             
@@ -204,7 +266,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             }
         }
         else {
-            updatePointer(meta: meta, totalEdges: [])
+            updatePointer(
+                meta: meta,
+                eyes: [],
+                totalEdges: [],
+                duration: duration
+            )
         }
     }
 }

@@ -60,12 +60,12 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
             case .left:
                 let minimum = -originFrame.minX
                 let maximum = originFrame.width - standardWidth
-                return -movement.between(minimum: minimum, maximum: maximum)
+                return -between(value: movement, minimum: minimum, maximum: maximum)
                 
             case .right:
                 let minimum = -(originFrame.maxX - (originFrame.minX + standardWidth))
                 let maximum = navigatorNode.bounds.width - originFrame.maxX
-                return movement.between(minimum: minimum, maximum: maximum)
+                return between(value: movement, minimum: minimum, maximum: maximum)
             }
         }
         
