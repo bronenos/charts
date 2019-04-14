@@ -9,75 +9,83 @@
 import Foundation
 import UIKit
 
-class ChartAreaPointsOperation: ChartBarPointsOperation {
+class ChartAreaPointsOperation: ChartPointsOperation {
     override func calculateResult() -> CalculatePointsResult {
-        let totalEdge = calculateSliceEdge(
+        let totalSumms = calculateSumms(
+            chart: chart,
+            config: config,
             indices: chart.axis.indices
         )
         
-        let sliceEdge = calculateSliceEdge(
-            indices: meta.visibleIndices
+        let totalEdge = ChartRange(
+            start: 0,
+            end: 100
         )
         
         let points = calculatePoints(
             bounds: bounds,
             chart: chart,
             config: config,
+            totalSumms: totalSumms,
             totalEdge: totalEdge,
             meta: meta
         )
         
         let context = ChartEyeOperationContext(
             totalEdges: [totalEdge],
-            lineEdges: [sliceEdge]
+            lineEdges: []
         )
         
-        let eyes = calculateEyes(
-            context: context,
-            sliceEdge: sliceEdge
+        let eye = calculateEye(
+            config: config
         )
         
         return CalculatePointsResult(
             range: config.range,
             context: context,
             points: points,
-            eyes: eyes
+            eyes: clone(eye, number: chart.lines.count)
         )
     }
 }
 
-class ChartAreaEyesOperation: ChartBarEyesOperation {
+class ChartAreaEyesOperation: ChartEyesOperation {
     override func calculateResult() -> CalculateEyesResult {
-        let sliceEdge = calculateSliceEdge(
-            indices: meta.visibleIndices
-        )
-        
-        let eyes = calculateEyes(
-            context: ChartEyeOperationContext(
-                totalEdges: context.totalEdges,
-                lineEdges: [sliceEdge]
-            ),
-            sliceEdge: sliceEdge
+        let eye = calculateEye(
+            config: config
         )
         
         return CalculateEyesResult(
             context: context,
             edges: context.totalEdges,
-            eyes: eyes
+            eyes: clone(eye, number: chart.lines.count)
         )
     }
 }
 
 fileprivate extension Operation {
+    func calculateSumms(chart: Chart, config: ChartConfig, indices: Range<Int>) -> [Int] {
+        return zip(indices, chart.axis[indices]).map { index, item in
+            var summ = 0
+            
+            for (line, config) in zip(chart.lines, config.lines) {
+                guard config.visible else { continue }
+                summ += line.values[index]
+            }
+            
+            return summ
+        }
+    }
+    
     func calculatePoints(bounds: CGRect,
                          chart: Chart,
                          config: ChartConfig,
+                         totalSumms: [Int],
                          totalEdge: ChartRange,
                          meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
-        let stepX = bounds.width / CGFloat(chart.axis.count)
-        let extraHeight = bounds.height * 0.15
+        let stepX = bounds.width / CGFloat(chart.axis.count - 1)
         
         var map = [String: [CGPoint]]()
         var values = clone(0, number: chart.axis.count)
@@ -92,31 +100,53 @@ fileprivate extension Operation {
             var currentX = CGFloat(0)
             var points = [CGPoint]()
             
-            for value in values {
-                let currentY = bounds.calculateY(value: value, edge: totalEdge)
+            for index in chart.axis.indices {
+                let value = CGFloat(values[index])
+                let summ = CGFloat(totalSumms[index])
                 
-                points.append(CGPoint(x: currentX, y: currentY))
+                if summ > 0 {
+                    let percent = Int(round((value / summ) * totalEdge.distance))
+                    let currentY = bounds.calculateY(value: percent, edge: totalEdge)
+                    points.append(CGPoint(x: currentX, y: currentY))
+                }
+                else {
+                    points.append(CGPoint(x: currentX, y: bounds.height))
+                }
                 
                 currentX += stepX
             }
             
-            for (oldValue, value) in zip(oldValues, values).reversed() {
+            for index in chart.axis.indices.reversed() {
+                let summ = CGFloat(totalSumms[index])
+                
                 currentX -= stepX
                 
-                let currentY: CGFloat
                 if lineConfig.visible {
-                    currentY = bounds.calculateY(value: oldValue, edge: totalEdge) + extraHeight
+                    let oldValue = CGFloat(oldValues[index])
+                    let percent = Int(round(oldValue / summ))
+                    let currentY = bounds.calculateY(value: percent, edge: totalEdge)
+                    points.append(CGPoint(x: currentX, y: currentY))
+                }
+                else if summ > 0 {
+                    let value = CGFloat(values[index])
+                    let percent = Int(round(value / summ))
+                    let currentY = bounds.calculateY(value: percent, edge: totalEdge)
+                    points.append(CGPoint(x: currentX, y: currentY))
                 }
                 else {
-                    currentY = bounds.calculateY(value: value, edge: totalEdge)
+                    points.append(CGPoint(x: currentX, y: bounds.height))
                 }
-                
-                points.append(CGPoint(x: currentX, y: currentY))
             }
             
             map[line.key] = points
         }
         
         return map
+    }
+    
+    func calculateEye(config: ChartConfig) -> UIEdgeInsets {
+        let left = config.range.start
+        let right = config.range.end
+        return UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
     }
 }

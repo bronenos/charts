@@ -12,16 +12,23 @@ import UIKit
 class ChartBarPointsOperation: ChartPointsOperation {
     override func calculateResult() -> CalculatePointsResult {
         let totalEdge = calculateSliceEdge(
+            chart: chart,
+            config: config,
             indices: chart.axis.indices
         )
         
         let sliceEdge = calculateSliceEdge(
+            chart: chart,
+            config: config,
             indices: meta.visibleIndices
         )
 
-        let points = calculateNormalizedPoints(
-            edge: totalEdge,
-            with: meta
+        let points = calculatePoints(
+            bounds: bounds,
+            chart: chart,
+            config: config,
+            totalEdge: totalEdge,
+            meta: meta
         )
         
         let context = ChartEyeOperationContext(
@@ -30,6 +37,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
         )
         
         let eyes = calculateEyes(
+            config: config,
             context: context,
             sliceEdge: sliceEdge
         )
@@ -41,8 +49,39 @@ class ChartBarPointsOperation: ChartPointsOperation {
             eyes: eyes
         )
     }
-    
-    private func calculateNormalizedPoints(edge: ChartRange, with meta: ChartSliceMeta) -> [String: [CGPoint]] {
+}
+
+class ChartBarEyesOperation: ChartEyesOperation {
+    override func calculateResult() -> CalculateEyesResult {
+        let sliceEdge = calculateSliceEdge(
+            chart: chart,
+            config: config,
+            indices: meta.visibleIndices
+        )
+        
+        let eyes = calculateEyes(
+            config: config,
+            context: ChartEyeOperationContext(
+                totalEdges: context.totalEdges,
+                lineEdges: clone(sliceEdge, number: chart.lines.count)
+            ),
+            sliceEdge: sliceEdge
+        )
+        
+        return CalculateEyesResult(
+            context: context,
+            edges: context.totalEdges,
+            eyes: eyes
+        )
+    }
+}
+
+fileprivate extension Operation {
+    func calculatePoints(bounds: CGRect,
+                         chart: Chart,
+                         config: ChartConfig,
+                         totalEdge: ChartRange,
+                         meta: ChartSliceMeta) -> [String: [CGPoint]] {
         guard bounds.size != .zero else { return [:] }
         
         let stepX = bounds.width / CGFloat(chart.axis.count)
@@ -62,7 +101,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
             var points = [CGPoint]()
             
             for value in values {
-                let currentY = bounds.calculateY(value: value, edge: edge)
+                let currentY = bounds.calculateY(value: value, edge: totalEdge)
                 
                 points.append(CGPoint(x: currentX, y: currentY))
                 
@@ -74,10 +113,10 @@ class ChartBarPointsOperation: ChartPointsOperation {
             for (oldValue, value) in zip(oldValues, values).reversed() {
                 let currentY: CGFloat
                 if lineConfig.visible {
-                    currentY = bounds.calculateY(value: oldValue, edge: edge) + extraHeight
+                    currentY = bounds.calculateY(value: oldValue, edge: totalEdge) + extraHeight
                 }
                 else {
-                    currentY = bounds.calculateY(value: value, edge: edge)
+                    currentY = bounds.calculateY(value: value, edge: totalEdge)
                 }
                 
                 points.append(CGPoint(x: currentX, y: currentY))
@@ -93,47 +132,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
         return map
     }
     
-    func calculateSliceEdge(indices: Range<Int>) -> ChartRange {
-        return _calculateSliceEdge(chart: chart, config: config, indices: indices)
-    }
-    
-    func calculateEyes(context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
-        return _calculateEyes(config: config, context: context, sliceEdge: sliceEdge)
-    }
-}
-
-class ChartBarEyesOperation: ChartEyesOperation {
-    override func calculateResult() -> CalculateEyesResult {
-        let sliceEdge = calculateSliceEdge(
-            indices: meta.visibleIndices
-        )
-        
-        let eyes = calculateEyes(
-            context: ChartEyeOperationContext(
-                totalEdges: context.totalEdges,
-                lineEdges: clone(sliceEdge, number: chart.lines.count)
-            ),
-            sliceEdge: sliceEdge
-        )
-        
-        return CalculateEyesResult(
-            context: context,
-            edges: context.totalEdges,
-            eyes: eyes
-        )
-    }
-    
-    func calculateSliceEdge(indices: Range<Int>) -> ChartRange {
-        return _calculateSliceEdge(chart: chart, config: config, indices: indices)
-    }
-    
-    func calculateEyes(context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
-        return _calculateEyes(config: config, context: context, sliceEdge: sliceEdge)
-    }
-}
-
-fileprivate extension Operation {
-    func _calculateSliceEdge(chart: Chart, config: ChartConfig, indices: Range<Int>) -> ChartRange {
+    func calculateSliceEdge(chart: Chart, config: ChartConfig, indices: Range<Int>) -> ChartRange {
         var currentGrowingValues = clone(0, number: indices.count)
         var lineMaximalValues = clone(0, number: chart.lines.count)
         
@@ -151,7 +150,7 @@ fileprivate extension Operation {
         return ChartRange(start: 0, end: CGFloat(maximalValue))
     }
     
-    func _calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
+    func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdge: ChartRange) -> [UIEdgeInsets] {
         guard let totalEdge = context.totalEdges.first else {
             return []
         }
