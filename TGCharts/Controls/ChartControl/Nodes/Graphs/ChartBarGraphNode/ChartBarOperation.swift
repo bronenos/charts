@@ -167,7 +167,7 @@ extension Operation {
                 return UIEdgeInsets(top: top, left: left, bottom: 0, right: right)
             }
             else {
-                return UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
+                return UIEdgeInsets(top: 10.0, left: left, bottom: 0, right: right)
             }
         }
     }

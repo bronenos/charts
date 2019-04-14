@@ -42,6 +42,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     let calculationQueue = OperationQueue()
     var cachedPointsResult: CalculatePointsResult?
+    var cachedFocusContext: ChartFocusOperationContext?
     var cachedFocusResult: CalculateFocusResult?
 
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
@@ -96,6 +97,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         super.discardCache()
         cachedPointsResult = nil
         cachedFocusResult = nil
+        cachedFocusContext = nil
         hasCalculatedPoints = false
         lastMeta = nil
     }
@@ -161,11 +163,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         if let pointsResult = cachedPointsResult, hasCalculatedPoints {
             let operation = obtainFocusCalculationOperation(
                 meta: meta,
-                context: pointsResult.context,
+                context: cachedFocusContext ?? pointsResult.context,
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
                     self.cachedFocusResult = result
+                    self.cachedFocusContext = result.context
                     
                     self.updateFocus(result.focuses, edges: result.edges, duration: duration)
                     self.updateGuides(edges: result.edges, duration: duration)
@@ -185,8 +188,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.cachedPointsResult = result
                     self.hasCalculatedPoints = true
+                    self.cachedPointsResult = result
+                    self.cachedFocusContext = result.context
                     
                     self.updateChart(self.chart, meta: meta, edges: result.context.totalEdges, duration: duration)
                     self.updateFocus(result.focuses, edges: result.context.totalEdges, duration: duration)

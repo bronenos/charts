@@ -142,33 +142,43 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         let currentGuide = activeGuide
         activeGuide = nil
         
-        UIView.animate(
-            withDuration: (duration > 0 ? duration : 0.15),
-            animations: { [unowned self] in
-                self.layoutGuides(
-                    guides: guidesPair.primary,
-                    usingEdge: lastEdge,
-                    startY: adjustFromPosition,
-                    height: destinationToHeight * scalingCoef,
-                    alpha: 0
-                )
-                
-                self.layoutGuides(
-                    guides: guidesPair.secondary,
-                    usingEdge: edge,
-                    startY: 0,
-                    height: destinationToHeight,
-                    alpha: 1.0
-                )
-            },
-            completion: { [unowned self] _ in
-                switch currentGuide {
-                case .primary?: self.activeGuide = .secondary
-                case .secondary?: self.activeGuide = .primary
-                default: abort()
-                }
+        func _animations() {
+            layoutGuides(
+                guides: guidesPair.primary,
+                usingEdge: lastEdge,
+                startY: adjustFromPosition,
+                height: destinationToHeight * scalingCoef,
+                alpha: 0
+            )
+            
+            layoutGuides(
+                guides: guidesPair.secondary,
+                usingEdge: edge,
+                startY: 0,
+                height: destinationToHeight,
+                alpha: 1.0
+            )
+        }
+        
+        func _completion() {
+            switch currentGuide {
+            case .primary?: activeGuide = .secondary
+            case .secondary?: activeGuide = .primary
+            default: abort()
             }
-        )
+        }
+        
+        if duration > 0 {
+            UIView.animate(
+                withDuration: duration,
+                animations: _animations,
+                completion: { _ in _completion() }
+            )
+        }
+        else {
+            _animations()
+            _completion()
+        }
     }
     
     private func adjustGuides(edge: ChartRange,

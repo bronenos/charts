@@ -33,7 +33,8 @@ class ChartLinePointsOperation: ChartPointsOperation {
         
         let focuses = calculateLineFocuses(
             config: config,
-            context: context
+            context: context,
+            sliceEdges: context.sliceEdges
         )
         
         return CalculatePointsResult(
@@ -73,12 +74,24 @@ class ChartLineFocusOperation: ChartFocusOperation {
             indices: meta.visibleIndices
         )
         
+        let edgess = [ChartRange](repeating: sliceEdge, count: chart.lines.count)
+        
+        let context = ChartFocusOperationContext(
+            totalEdges: self.context.totalEdges,
+            sliceEdges: zip(self.context.sliceEdges, edgess).map { contextualEdge, edge in
+                if edge.distance > 0 {
+                    return edge
+                }
+                else {
+                    return contextualEdge
+                }
+            }
+        )
+        
         let focuses = calculateLineFocuses(
             config: config,
-            context: ChartFocusOperationContext(
-                totalEdges: context.totalEdges,
-                sliceEdges: [ChartRange](repeating: sliceEdge, count: chart.lines.count)
-            )
+            context: self.context,
+            sliceEdges: edgess
         )
         
         return CalculateFocusResult(
@@ -119,22 +132,25 @@ extension Operation {
         )
     }
     
-    func calculateLineFocuses(config: ChartConfig, context: ChartFocusOperationContext) -> [UIEdgeInsets] {
+    func calculateLineFocuses(config: ChartConfig,
+                              context: ChartFocusOperationContext,
+                              sliceEdges: [ChartRange]) -> [UIEdgeInsets] {
         guard let totalEdge = context.totalEdges.first else {
             return []
         }
         
         let left = config.range.start
         let right = config.range.end
-
-        return context.sliceEdges.map { sliceEdge in
+        
+        return zip(context.sliceEdges, sliceEdges).map { contextualSliceEdge, sliceEdge in
             if sliceEdge.distance > 0 {
                 let top = sliceEdge.end.percent(from: totalEdge.start, to: totalEdge.end)
                 let bottom = sliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
                 return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
             }
             else {
-                return UIEdgeInsets(top: 1.0, left: left, bottom: 0, right: right)
+                let bottom = contextualSliceEdge.start.percent(from: totalEdge.start, to: totalEdge.end)
+                return UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
             }
         }
     }
