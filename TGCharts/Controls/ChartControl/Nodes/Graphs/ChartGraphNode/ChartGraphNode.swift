@@ -38,7 +38,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     var orderedNodes = [ChartFigureNode]()
 
     private var lastMeta: ChartSliceMeta?
-    private var hasCalculatedPoints = false
     
     let calculationQueue = OperationQueue()
     var cachedPointsResult: CalculatePointsResult?
@@ -67,7 +66,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     override var frame: CGRect {
         didSet {
             guard frame.size != oldValue.size else { return }
-            hasCalculatedPoints = false
+            discardCache()
         }
     }
     
@@ -98,7 +97,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         cachedPointsResult = nil
         cachedFocusResult = nil
         cachedFocusContext = nil
-        hasCalculatedPoints = false
         lastMeta = nil
     }
     
@@ -160,7 +158,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let meta = chart.obtainMeta(config: config, bounds: bounds)
         guard meta.range.distance > 0 else { return }
         
-        if let pointsResult = cachedPointsResult, hasCalculatedPoints {
+        if let pointsResult = cachedPointsResult {
             let operation = obtainFocusCalculationOperation(
                 meta: meta,
                 context: cachedFocusContext ?? pointsResult.context,
@@ -188,7 +186,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.hasCalculatedPoints = true
                     self.cachedPointsResult = result
                     self.cachedFocusContext = result.context
                     

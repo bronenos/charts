@@ -126,7 +126,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         layoutGuides(
             guides: guidesPair.primary,
             usingEdge: lastEdge,
-            startY: adjustFromPosition,
+            startY: 0,
             height: bounds.height,
             alpha: 1.0
         )
