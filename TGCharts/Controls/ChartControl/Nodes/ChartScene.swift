@@ -88,7 +88,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         let miniGraph = obtainGraph(chart: chart, config: config, formattingProvider: formattingProvider, width: 1)
         navigatorNode.inject(graph: miniGraph)
         
-        populateOptions(chart: chart, config: config)
+        populateOptions(chart: chart, config: config, animated: false)
         updateDesign()
         
         optionsNode.tokenTapHandler = { [weak self] index in
@@ -109,7 +109,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         graphContainer.update(config: config, duration: duration)
         timelineNode.update(config: config, duration: duration)
         navigatorNode.update(config: config, duration: duration)
-        populateOptions(chart: chart, config: config)
+        populateOptions(chart: chart, config: config, animated: (duration > 0))
     }
     
     override func updateDesign() {
@@ -162,7 +162,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         }
     }
     
-    private func populateOptions(chart: Chart, config: ChartConfig) {
+    private func populateOptions(chart: Chart, config: ChartConfig, animated: Bool) {
         optionsNode.populate(
             zip(chart.lines, config.lines).map { line, lineConfig in
                 ChartOptionsItem(
@@ -171,7 +171,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                     title: line.name,
                     enabled: lineConfig.visible
                 )
-            }
+            },
+            animated: animated
         )
     }
 }

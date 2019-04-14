@@ -11,7 +11,7 @@ import UIKit
 
 protocol IChartOptionsControl: class {
     var tokenTapHandler: ((Int) -> Void)? { get set }
-    func populate(_ options: [ChartOptionsItem])
+    func populate(_ options: [ChartOptionsItem], animated: Bool)
 }
 
 final class ChartOptionsControl: ChartNode, IChartOptionsControl {
@@ -20,12 +20,17 @@ final class ChartOptionsControl: ChartNode, IChartOptionsControl {
     private var tokenOptions = [ChartOptionsItem]()
     private var tokenControls = [ChartOptionsToken]()
     
-    func populate(_ options: [ChartOptionsItem]) {
+    func populate(_ options: [ChartOptionsItem], animated: Bool) {
         self.tokenOptions = options
         
         if options.count == tokenControls.count {
             zip(options, tokenControls).forEach { option, control in
-                control.configure(color: option.color, title: option.title, enabled: option.enabled)
+                control.configure(
+                    color: option.color,
+                    title: option.title,
+                    enabled: option.enabled,
+                    animated: animated
+                )
             }
         }
         else {
@@ -33,8 +38,18 @@ final class ChartOptionsControl: ChartNode, IChartOptionsControl {
             
             tokenControls = options.map { option in
                 let control = ChartOptionsToken()
-                control.configure(color: option.color, title: option.title, enabled: option.enabled)
-                control.addTarget(self, action: #selector(handleTokenTap), for: .touchUpInside)
+                
+                control.configure(
+                    color: option.color,
+                    title: option.title,
+                    enabled: option.enabled,
+                    animated: animated
+                )
+                
+                control.tapHandler = { [weak self] in
+                    self?.handleTokenTap(control)
+                }
+                
                 return control
             }
             
