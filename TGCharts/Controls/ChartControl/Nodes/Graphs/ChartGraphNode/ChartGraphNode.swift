@@ -37,12 +37,9 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     var figureNodes = [String: ChartFigureNode]()
     var orderedNodes = [ChartFigureNode]()
 
-    private var lastMeta: ChartSliceMeta?
-    
     let calculationQueue = OperationQueue()
-    var cachedPointsResult: CalculatePointsResult?
     var cachedFocusContext: ChartFocusOperationContext?
-    var cachedFocusResult: CalculateFocusResult?
+    private var lastMeta: ChartSliceMeta?
 
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider) {
         self.chart = chart
@@ -94,8 +91,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     override func discardCache() {
         super.discardCache()
-        cachedPointsResult = nil
-        cachedFocusResult = nil
         cachedFocusContext = nil
         lastMeta = nil
     }
@@ -111,14 +106,14 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
 
-    func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
-        abort()
-    }
-    
     func obtainFocusCalculationOperation(meta: ChartSliceMeta,
                                          context: ChartFocusOperationContext,
                                          duration: TimeInterval,
                                          completion: @escaping (CalculateFocusResult) -> Void) -> ChartFocusOperation {
+        abort()
+    }
+    
+    func updateChart(points: [String: [CGPoint]]) {
         abort()
     }
     
@@ -132,7 +127,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
         
-    func updatePointer(meta: ChartSliceMeta) {
+    func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
         abort()
     }
     
@@ -158,18 +153,18 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         let meta = chart.obtainMeta(config: config, bounds: bounds)
         guard meta.range.distance > 0 else { return }
         
-        if let pointsResult = cachedPointsResult {
+        if let focusContext = cachedFocusContext {
             let operation = obtainFocusCalculationOperation(
                 meta: meta,
-                context: cachedFocusContext ?? pointsResult.context,
+                context: focusContext,
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.cachedFocusResult = result
                     self.cachedFocusContext = result.context
                     
                     self.updateFocus(result.focuses, edges: result.edges, duration: duration)
                     self.updateGuides(edges: result.edges, duration: duration)
+                    self.updatePointer(meta: meta, totalEdges: result.context.totalEdges)
                 }
             )
             
@@ -186,16 +181,15 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                 duration: duration,
                 completion: { [weak self] result in
                     guard let `self` = self else { return }
-                    self.cachedPointsResult = result
                     self.cachedFocusContext = result.context
                     
-                    self.updateChart(self.chart, meta: meta, edges: result.context.totalEdges, duration: duration)
+                    self.updateChart(points: result.points)
                     self.updateFocus(result.focuses, edges: result.context.totalEdges, duration: duration)
                     self.updateGuides(edges: result.context.totalEdges, duration: duration)
                 }
             )
             
-            if let _ = cachedPointsResult {
+            if let _ = cachedFocusContext {
                 if calculationQueue.operations.isEmpty {
                     calculationQueue.addOperation(operation)
                 }
@@ -205,7 +199,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             }
         }
         else {
-            updatePointer(meta: meta)
+            updatePointer(meta: meta, totalEdges: [])
         }
     }
 }

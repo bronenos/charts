@@ -47,8 +47,8 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
     }
     
-    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
-        super.updateChart(chart, meta: meta, edges: edges, duration: duration)
+    override func updateChart(points: [String: [CGPoint]]) {
+        super.updateChart(points: points)
     }
     
     override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
@@ -63,12 +63,12 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         )
     }
 
-    override func updatePointer(meta: ChartSliceMeta) {
+    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
         container?.adjustPointer(
             chart: chart,
             config: config,
             meta: meta,
-            edges: cachedPointsResult?.context.totalEdges ?? [],
+            edges: totalEdges,
             options: [.line, .dots]
         )
     }

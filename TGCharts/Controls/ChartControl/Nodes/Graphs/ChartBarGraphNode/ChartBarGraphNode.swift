@@ -31,27 +31,6 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         abort()
     }
     
-    func placeBars(meta: ChartSliceMeta, offset: CGFloat, points: [String: [CGPoint]], duration: TimeInterval) {
-        zip(chart.lines, config.lines).forEach { line, lineConfig in
-            guard let node = figureNodes[line.key] else { return }
-            
-            if let point = points[line.key] {
-                guard let firstPoint = point.first else { return }
-                let restPoints = point.dropFirst()
-                
-                let path = UIBezierPath()
-                path.move(to: firstPoint)
-                restPoints.forEach(path.addLine)
-                path.close()
-                
-                node.bezierPaths = [path]
-            }
-            else {
-                node.bezierPaths = []
-            }
-        }
-    }
-    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         let newVisible = newConfig.lines.map { $0.visible }
         let oldVisible = oldConfig.lines.map { $0.visible }
@@ -86,13 +65,25 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
-        placeBars(
-            meta: meta,
-            offset: meta.totalWidth * config.range.start,
-            points: cachedPointsResult?.points ?? [:],
-            duration: duration
-        )
+    override func updateChart(points: [String: [CGPoint]]) {
+        zip(chart.lines, config.lines).forEach { line, lineConfig in
+            guard let node = figureNodes[line.key] else { return }
+            
+            if let point = points[line.key] {
+                guard let firstPoint = point.first else { return }
+                let restPoints = point.dropFirst()
+                
+                let path = UIBezierPath()
+                path.move(to: firstPoint)
+                restPoints.forEach(path.addLine)
+                path.close()
+                
+                node.bezierPaths = [path]
+            }
+            else {
+                node.bezierPaths = []
+            }
+        }
     }
     
     override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
@@ -107,7 +98,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta) {
+    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
         container?.adjustPointer(
             chart: chart,
             config: config,

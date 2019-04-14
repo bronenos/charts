@@ -31,15 +31,6 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         abort()
     }
     
-    internal func placeLines(meta: ChartSliceMeta,
-                             offset: CGFloat,
-                             points: [String: [CGPoint]],
-                             duration: TimeInterval) {
-        zip(chart.lines, config.lines).forEach { line, lineConfig in
-            figureNodes[line.key]?.points = points[line.key] ?? []
-        }
-    }
-    
     override func shouldReset(newConfig: ChartConfig, oldConfig: ChartConfig) -> Bool {
         return false
     }
@@ -72,13 +63,10 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    override func updateChart(_ chart: Chart, meta: ChartSliceMeta, edges: [ChartRange], duration: TimeInterval) {
-        placeLines(
-            meta: meta,
-            offset: meta.totalWidth * config.range.start,
-            points: cachedPointsResult?.points ?? [:],
-            duration: duration
-        )
+    override func updateChart(points: [String: [CGPoint]]) {
+        for (node, line) in zip(orderedNodes, chart.lines) {
+            node.points = points[line.key] ?? []
+        }
     }
     
     override func updateFocus(_ focuses: [UIEdgeInsets], edges: [ChartRange], duration: TimeInterval) {
@@ -100,14 +88,12 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
     }
     
-    override func updatePointer(meta: ChartSliceMeta) {
-        guard let edge = cachedPointsResult?.context.totalEdges.first else { return }
-        
+    override func updatePointer(meta: ChartSliceMeta, totalEdges: [ChartRange]) {
         container?.adjustPointer(
             chart: chart,
             config: config,
             meta: meta,
-            edges: chart.lines.map { _ in edge },
+            edges: chart.lines.map { _ in totalEdges.first ?? ChartRange(start: 0, end: 0) },
             options: [.line, .dots]
         )
     }

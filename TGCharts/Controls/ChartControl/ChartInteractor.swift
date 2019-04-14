@@ -57,7 +57,9 @@ final class ChartInteractor: IChartInteractor {
                 navigatorNode: navigatorNode,
                 startPoint: point,
                 startRange: range,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .leftArrow:
@@ -70,7 +72,9 @@ final class ChartInteractor: IChartInteractor {
                 startRange: range,
                 direction: .left,
                 navigatorOptions: navigatorOptions,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .rightArrow:
@@ -83,14 +87,18 @@ final class ChartInteractor: IChartInteractor {
                 startRange: range,
                 direction: .right,
                 navigatorOptions: navigatorOptions,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .graph:
             scenario = ChartInteractionPointScenario(
                 sceneNode: scene,
                 graphNode: graphNode,
-                pointUpdateBlock: { [weak self] pointer in self?.updatePointer(pointer) }
+                pointUpdateBlock: { [weak self] pointer in
+                    self?.updatePointer(pointer)
+                }
             )
 
         default:
