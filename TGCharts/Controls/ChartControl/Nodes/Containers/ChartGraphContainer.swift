@@ -17,8 +17,8 @@ protocol IChartGraphContainer: IChartNode {
                      lastDate: Date,
                      duration: TimeInterval)
     
-    func adjustGuides(left: ChartRange?,
-                      right: ChartRange?,
+    func adjustGuides(leftOptions: ChartGuideOptions?,
+                      rightOptions: ChartGuideOptions?,
                       duration: TimeInterval)
     
     func adjustPointer(pointing: ChartGraphPointing?,
@@ -80,8 +80,8 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         headerNode?.setDateInterval(sinceDate: sinceDate, untilDate: lastDate)
     }
     
-    func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {
-        guidesContainer.update(leftEdge: left, rightEdge: right, duration: duration)
+    func adjustGuides(leftOptions: ChartGuideOptions?, rightOptions: ChartGuideOptions?, duration: TimeInterval) {
+        guidesContainer.update(leftOptions: leftOptions, rightOptions: rightOptions, duration: duration)
     }
     
     func adjustPointer(pointing: ChartGraphPointing?,

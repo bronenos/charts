@@ -62,7 +62,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
     }
     
     private func colorizeDateNodes(_ nodes: [ChartLabelNode]) {
-        let color = DesignBook.shared.color(.chartIndexForeground)
+        let color = DesignBook.shared.color(chart: chart, key: .x)
         
         dateNodes.values.forEach { node in
             node.textColor = color
@@ -191,7 +191,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         let node = ChartLabelNode()
         node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
         node.text = formattingProvider.format(date: date, style: .shortDate)
-        node.textColor = DesignBook.shared.color(.chartIndexForeground)
+        node.textColor = DesignBook.shared.color(chart: chart, key: .x)
         node.font = DesignBook.shared.font(size: 8, weight: .regular)
         node.textAlignment = .right
         node.alpha = 0

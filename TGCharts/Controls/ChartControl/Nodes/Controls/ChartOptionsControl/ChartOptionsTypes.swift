@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct ChartOptionsItem {
+struct ChartOptionsItem: Equatable {
     let key: String
     let color: UIColor
     let title: String

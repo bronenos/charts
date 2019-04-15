@@ -119,7 +119,8 @@ fileprivate extension Operation {
             for (oldValue, value) in zip(oldValues, values).reversed() {
                 let currentY: CGFloat
                 if lineConfig.visible {
-                    currentY = bounds.calculateY(value: oldValue, edge: totalEdge) + extraHeight
+                    let y = bounds.calculateY(value: oldValue, edge: totalEdge)
+                    currentY = min(bounds.height, y + extraHeight)
                 }
                 else {
                     currentY = bounds.calculateY(value: value, edge: totalEdge)

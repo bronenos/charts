@@ -55,7 +55,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         let standardDistance = navigatorOptions.caretStandardDistance
         let movement = (sceneNode.convert(point, to: navigatorNode) - originPoint).dx
         
-        let normalMovement: CGFloat = convert(direction) { value in
+        let normalMovement: CGFloat = convertMap(direction) { value in
             switch value {
             case .left:
                 let minimum = -originFrame.minX
@@ -73,7 +73,7 @@ final class ChartInteractionScaleScenario: IChartInteractorScenario {
         let growingDistanceCoef = currentWidth.percent(from: standardWidth, to: navigatorNode.bounds.width)
         let targetDistance = standardDistance + (1.0 - standardDistance) * growingDistanceCoef
         
-        let range: ChartRange = convert(direction) { value in
+        let range: ChartRange = convertMap(direction) { value in
             switch value {
             case .left:
                 let start = max(0, startRange.end - targetDistance)

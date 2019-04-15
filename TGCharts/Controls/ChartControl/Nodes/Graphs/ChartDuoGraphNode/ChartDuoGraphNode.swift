@@ -61,9 +61,41 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     }
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
+        func _constructOptions(line: ChartLine?,
+                               lineConfig: ChartLineConfig?,
+                               range: ChartRange?) -> ChartGuideOptions? {
+            let lineColor = line.flatMap { DesignBook.shared.color(chart: chart, key: .tooltip($0.colorKey)) }
+            let resultingColor = lineColor ?? DesignBook.shared.color(chart: chart, key: .y)
+            
+            let emptyOptions = ChartGuideOptions(
+                range: .empty,
+                numberOfSteps: 6,
+                closeToBounds: false,
+                textColor: resultingColor
+            )
+            
+            guard let config = lineConfig, config.visible else { return emptyOptions }
+            guard let range = range else { return nil }
+            
+            return ChartGuideOptions(
+                range: range,
+                numberOfSteps: 6,
+                closeToBounds: false,
+                textColor: resultingColor
+            )
+        }
+        
         container?.adjustGuides(
-            left: (config.lines.first?.visible == true ? edges.first : .empty),
-            right: (config.lines.last?.visible == true ? edges.last : .empty),
+            leftOptions: _constructOptions(
+                line: chart.lines.first,
+                lineConfig: config.lines.first,
+                range: edges.first
+            ),
+            rightOptions: _constructOptions(
+                line: chart.lines.last,
+                lineConfig: config.lines.last,
+                range: edges.last
+            ),
             duration: duration
         )
     }

@@ -11,7 +11,8 @@ import UIKit
 
 protocol IChartGuideStepNode: IChartNode {
     var value: String? { get set }
-    var color: UIColor? { get set }
+    var valueColor: UIColor? { get set }
+    var underlineColor: UIColor? { get set }
 }
 
 final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
@@ -23,7 +24,7 @@ final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
         
         isUserInteractionEnabled = false
         
-        valueNode.font = DesignBook.shared.font(size: 12, weight: .regular)
+        valueNode.font = DesignBook.shared.font(size: 10, weight: .regular)
         valueNode.textAlignment = alignment
         addSubview(valueNode)
         
@@ -35,22 +36,18 @@ final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
     }
     
     var value: String? {
-        get {
-            return valueNode.text
-        }
-        set {
-            valueNode.text = newValue
-            valueNode.textColor = DesignBook.shared.color(.chartIndexForeground)
-        }
+        get { return valueNode.text }
+        set { valueNode.text = newValue }
     }
     
-    var color: UIColor? {
-        get {
-            return underlineNode.backgroundColor
-        }
-        set {
-            underlineNode.backgroundColor = newValue
-        }
+    var valueColor: UIColor? {
+        get { return valueNode.textColor }
+        set { valueNode.textColor = newValue }
+    }
+    
+    var underlineColor: UIColor? {
+        get { return underlineNode.backgroundColor }
+        set { underlineNode.backgroundColor = newValue }
     }
     
     override func layoutSubviews() {

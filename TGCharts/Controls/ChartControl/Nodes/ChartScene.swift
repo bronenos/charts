@@ -115,7 +115,6 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             )
         )
         
-        populateOptions(chart: chart, config: config, animated: false)
         updateDesign()
         
         optionsNode.tokenTapHandler = { [weak self] index, exclusive in
@@ -168,6 +167,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         graphContainer.updateDesign()
         timelineNode.updateDesign()
         navigatorNode.updateDesign()
+        populateOptions(chart: chart, config: config, animated: false)
     }
     
     override func discardCache() {
@@ -253,7 +253,10 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             zip(chart.lines, config.lines).map { line, lineConfig in
                 ChartOptionsItem(
                     key: line.key,
-                    color: line.color,
+                    color: DesignBook.shared.color(
+                        chart: chart,
+                        key: .button(line.colorKey)
+                    ),
                     title: line.name,
                     enabled: lineConfig.visible
                 )

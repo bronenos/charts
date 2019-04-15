@@ -23,6 +23,9 @@ final class FormattingProvider: IFormattingProvider {
     
     init(localeProvider: ILocaleProvider) {
         dateFormatter.locale = localeProvider.activeLocale
+        
+        quantityFormatter.minimumFractionDigits = 0
+        quantityFormatter.maximumFractionDigits = 0
     }
     
     func format(date: Date, style: FormattingDateStyle) -> String {
@@ -59,8 +62,8 @@ final class FormattingProvider: IFormattingProvider {
     
     func format(guide value: Int) -> String {
         if value > 1_000_000 {
-            quantityFormatter.minimumFractionDigits = 2
-            quantityFormatter.maximumFractionDigits = 2
+            quantityFormatter.minimumFractionDigits = 1
+            quantityFormatter.maximumFractionDigits = 1
             
             let rest = Double(value) / 1_000_000
             if let value = quantityFormatter.string(from: NSNumber(value: rest)) {
@@ -69,8 +72,8 @@ final class FormattingProvider: IFormattingProvider {
         }
         
         if value > 1_000 {
-            quantityFormatter.minimumFractionDigits = 2
-            quantityFormatter.maximumFractionDigits = 2
+            quantityFormatter.minimumFractionDigits = 1
+            quantityFormatter.maximumFractionDigits = 1
             
             let rest = Double(value) / 1_000
             if let value = quantityFormatter.string(from: NSNumber(value: rest)) {

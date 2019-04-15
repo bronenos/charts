@@ -143,6 +143,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         return Layout(
             bounds: bounds,
             verticalGap: sliderNode.verticalGap,
+            sliderArrowWidth: sliderNode.horizontalGap,
             navigatingCalculator: calculator
         )
     }
@@ -151,14 +152,13 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
 fileprivate struct Layout {
     let bounds: CGRect
     let verticalGap: CGFloat
+    let sliderArrowWidth: CGFloat
     let navigatingCalculator: NavigatingCalculator
 
     var graphContainerFrame: CGRect {
-        let topY = verticalGap * 2
         let leftX = navigatingCalculator.graphCurrentX
         let width = navigatingCalculator.graphCurrentWidth
-        let height = bounds.height - topY * 2
-        return CGRect(x: leftX, y: topY, width: width, height: height)
+        return CGRect(x: leftX, y: 0, width: width, height: bounds.height).insetBy(dx: 0, dy: verticalGap)
     }
     
     var spaceNodeFrame: CGRect {
@@ -166,19 +166,22 @@ fileprivate struct Layout {
     }
     
     var leftDimFrame: CGRect {
-        let leftX = sliderNodeFrame.minX
-        return bounds.divided(atDistance: leftX, from: .minXEdge).slice
+        let leftX = sliderNodeFrame.minX + sliderArrowWidth
+        return bounds
+            .divided(atDistance: leftX, from: .minXEdge).slice
+            .insetBy(dx: 0, dy: verticalGap)
     }
     
     var rightDimFrame: CGRect {
-        let rightX = sliderNodeFrame.maxX
-        return bounds.divided(atDistance: rightX, from: .minXEdge).remainder
+        let rightX = sliderNodeFrame.maxX - sliderArrowWidth
+        return bounds
+            .divided(atDistance: rightX, from: .minXEdge).remainder
+            .insetBy(dx: 0, dy: verticalGap)
     }
     
     var sliderNodeFrame: CGRect {
         let leftX = navigatingCalculator.caretCurrentX
         let width = navigatingCalculator.caretCurrentWidth
-        let value = CGRect(x: leftX, y: 0, width: width, height: bounds.height)
-        return value
+        return CGRect(x: leftX, y: 0, width: width, height: bounds.height)
     }
 }

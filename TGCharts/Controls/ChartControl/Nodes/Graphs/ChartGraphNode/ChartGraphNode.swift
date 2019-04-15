@@ -84,8 +84,6 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         
         super.init(frame: .zero)
         
-        clipsToBounds = true
-        
         calculationQueue.maxConcurrentOperationCount = 1
         calculationQueue.qualityOfService = .userInteractive
         
@@ -125,6 +123,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             figureNodes[line.key] = node
             figuresContainer.addSubview(node)
         }
+        
+        updateDesign()
     }
     
     func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval) {
@@ -162,20 +162,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         
         let stepX = bounds.width / CGFloat(numberOfSteps)
         let originalIndex = Int(rounder(originalX / stepX))
-        let normalizedIndex = between(value: originalIndex, minimum: 0, maximum: chart.axis.count - 1)
-        
-        let normalizedPoint = CGPoint(x: CGFloat(normalizedIndex) * stepX, y: 0)
-        let effectivePoint = firstFigureNode.convertOriginalToEffective(point: normalizedPoint)
-        
-        if effectivePoint.x > bounds.maxX {
-            return normalizedIndex - 1
-        }
-        else if effectivePoint.x < bounds.minX {
-            return normalizedIndex + 1
-        }
-        else {
-            return normalizedIndex
-        }
+        return between(value: originalIndex, minimum: 0, maximum: chart.axis.count - 1)
     }
     
     final func calculatePointing(pointer: CGFloat, rounder: (CGFloat) -> CGFloat) -> ChartGraphPointing {

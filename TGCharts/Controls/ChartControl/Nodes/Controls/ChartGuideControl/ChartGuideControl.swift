@@ -9,8 +9,15 @@
 import Foundation
 import UIKit
 
+struct ChartGuideOptions: Equatable {
+    let range: ChartRange
+    let numberOfSteps: Int
+    let closeToBounds: Bool
+    let textColor: UIColor?
+}
+
 protocol IChartGuideControl: IChartNode {
-    func update(edge: ChartRange?, duration: TimeInterval)
+    func update(options: ChartGuideOptions?, duration: TimeInterval)
 }
 
 final class ChartGuideControl: ChartNode, IChartGuideControl {
@@ -24,45 +31,43 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         case secondary
     }
     
+    private let chart: Chart
+    private let alignment: NSTextAlignment
     private let formattingProvider: IFormattingProvider
+
+    private var primaryGuides = [ChartGuideStepNode]()
+    private var secondaryGuides = [ChartGuideStepNode]()
     
-    private let primaryGuides: [ChartGuideStepNode]
-    private let secondaryGuides: [ChartGuideStepNode]
-    
-    private let numberOfVerticalGuides = 6
+    private var options: ChartGuideOptions?
     private var activeGuide: VerticalActiveGuide? = .primary
     private var lastEdge: ChartRange?
     
     init(chart: Chart, config: ChartConfig, alignment: NSTextAlignment, formattingProvider: IFormattingProvider) {
+        self.chart = chart
+        self.alignment = alignment
         self.formattingProvider = formattingProvider
         
-        primaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartGuideStepNode(alignment: alignment) }
-        secondaryGuides = (0 ..< numberOfVerticalGuides).map { _ in ChartGuideStepNode(alignment: alignment) }
-
         super.init(frame: .zero)
         
-        primaryGuides.forEach { node in
-            node.autoresizingMask = [.flexibleWidth]
-            node.alpha = 1.0
-            addSubview(node)
-        }
-        
-        secondaryGuides.forEach { node in
-            node.autoresizingMask = [.flexibleWidth]
-            node.alpha = 0
-            addSubview(node)
-        }
+        recreateGuides()
     }
     
     required init?(coder aDecoder: NSCoder) {
         abort()
     }
     
-    func update(edge: ChartRange?, duration: TimeInterval) {
-        update(edge: edge, duration: duration, force: false)
+    func update(options: ChartGuideOptions?, duration: TimeInterval) {
+        let oldOptions = self.options
+        self.options = options
+        
+        if options != oldOptions {
+            recreateGuides()
+        }
+        
+        update(edge: options?.range, duration: duration, force: false)
     }
     
-    func update(edge: ChartRange?, duration: TimeInterval, force: Bool) {
+    private func update(edge: ChartRange?, duration: TimeInterval, force: Bool) {
         guard let activeGuide = activeGuide else { return }
         let guidesPair = obtainGuides()
         
@@ -94,13 +99,37 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
     
     override func updateDesign() {
         super.updateDesign()
-        primaryGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
-        primaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
-        secondaryGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
-        secondaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
+        primaryGuides.forEach { $0.underlineColor = DesignBook.shared.color(.chartGridStroke) }
+        secondaryGuides.forEach { $0.underlineColor = DesignBook.shared.color(.chartGridStroke) }
         
         if let edge = lastEdge {
             update(edge: edge, duration: 0, force: true)
+        }
+    }
+    
+    private func recreateGuides() {
+        primaryGuides.forEach { $0.removeFromSuperview() }
+        secondaryGuides.forEach { $0.removeFromSuperview() }
+
+        if let options = options {
+            clipsToBounds = !options.closeToBounds
+            
+            primaryGuides = (0 ..< options.numberOfSteps).map { _ in ChartGuideStepNode(alignment: alignment) }
+            primaryGuides.forEach { node in
+                node.autoresizingMask = [.flexibleWidth]
+                node.alpha = 1.0
+                addSubview(node)
+            }
+            
+            secondaryGuides = (0 ..< options.numberOfSteps).map { _ in ChartGuideStepNode(alignment: alignment) }
+            secondaryGuides.forEach { node in
+                node.autoresizingMask = [.flexibleWidth]
+                node.alpha = 0
+                addSubview(node)
+            }
+        }
+        else {
+            clipsToBounds = true
         }
     }
     
@@ -240,18 +269,28 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
                               startY: CGFloat,
                               height: CGFloat,
                               alpha: CGFloat) {
-        let stepY = height / CGFloat(numberOfVerticalGuides)
-        let stepValue = usingEdge.distance / CGFloat(numberOfVerticalGuides)
+        guard let options = options else { return }
         
-        (0 ..< numberOfVerticalGuides).forEach { step in
+        let stepY: CGFloat = convertMap(options.closeToBounds) { closeToBounds in
+            let numberOfSteps = options.numberOfSteps - (closeToBounds ? 1 : 0)
+            return (height - 1) / CGFloat(numberOfSteps)
+        }
+        
+        let stepValue: CGFloat = convertMap(options.closeToBounds) { closeToBounds in
+            let numberOfSteps = options.numberOfSteps - (closeToBounds ? 1 : 0)
+            return usingEdge.distance / CGFloat(numberOfSteps)
+        }
+        
+        (0 ..< options.numberOfSteps).forEach { step in
             let height = CGFloat(20)
             let value = Int(usingEdge.start + CGFloat(step) * stepValue)
             let currentY = bounds.height - (startY + CGFloat(step) * stepY) - height
-            let color = DesignBook.shared.color(step == 0 ? .chartPointerFocusedLineStroke : .chartGuidesLineStroke)
             
             let guide = guides[step]
             guide.frame = CGRect(x: 0, y: currentY, width: bounds.width, height: 20)
-            guide.color = color
+            
+            guide.valueColor = options.textColor
+            guide.underlineColor = DesignBook.shared.color(.chartGridStroke)
             
             if step == 0, usingEdge.distance == 0 {
                 guide.value = formattingProvider.format(guide: 0)

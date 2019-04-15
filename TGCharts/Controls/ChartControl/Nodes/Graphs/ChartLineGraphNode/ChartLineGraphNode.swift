@@ -28,7 +28,6 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         )
         
         configure(figure: .joinedLines) { _, node, line in
-            node.strokeColor = line.color
             node.strokeWidth = width
             node.minimalScaledWidth = 0.75
         }
@@ -105,8 +104,13 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
         container?.adjustGuides(
-            left: edges.first ?? .empty,
-            right: nil,
+            leftOptions: ChartGuideOptions(
+                range: edges.first ?? .empty,
+                numberOfSteps: 6,
+                closeToBounds: false,
+                textColor: DesignBook.shared.color(chart: chart, key: .y)
+            ),
+            rightOptions: nil,
             duration: duration
         )
     }
@@ -134,7 +138,10 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                             value: formattingProvider.format(
                                 guide: line.values[pointing.index]
                             ),
-                            color: line.color
+                            color: DesignBook.shared.color(
+                                chart: chart,
+                                key: .tooltip(line.colorKey)
+                            )
                         )
                     }
                 ),
@@ -148,6 +155,17 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 content: nil,
                 options: [.line, .dots],
                 duration: duration *  2
+            )
+        }
+    }
+    
+    override func updateDesign() {
+        super.updateDesign()
+        
+        zip(chart.lines, orderedNodes).forEach { line, node in
+            node.strokeColor = DesignBook.shared.color(
+                chart: chart,
+                key: .line(line.colorKey)
             )
         }
     }

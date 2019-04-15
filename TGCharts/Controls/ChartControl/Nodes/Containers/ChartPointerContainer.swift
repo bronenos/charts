@@ -31,7 +31,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
     private let formattingProvider: IFormattingProvider
     
     private let lineNode: ChartNode
-    private let orderedDotNodes: [ChartFigureNode]
+    private var orderedDotNodes = [ChartFigureNode]()
     private var dotNodes = [String: ChartFigureNode]()
     private let cloudNode: ChartPointerCloudControl
     
@@ -43,7 +43,6 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         self.formattingProvider = formattingProvider
         
         lineNode = ChartNode()
-        orderedDotNodes = chart.lines.map(generateDotNode)
         cloudNode = ChartPointerCloudControl()
 
         super.init(frame: .zero)
@@ -51,14 +50,10 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         lineNode.alpha = 0
         addSubview(lineNode)
         
-        zip(chart.lines, orderedDotNodes).forEach { line, node in
-            node.isHidden = true
-            addSubview(node)
-            dotNodes[line.key] = node
-        }
-        
         cloudNode.alpha = 0
         addSubview(cloudNode)
+        
+        updateDesign()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -70,7 +65,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
                 options: ChartPointerOptions,
                 duration: TimeInterval) {
         if let points = pointing?.points {
-            lineNode.backgroundColor = DesignBook.shared.color(.chartPointerFocusedLineStroke)
+            lineNode.backgroundColor = DesignBook.shared.color(.chartGridStroke)
             
             for (line, node) in zip(chart.lines, orderedDotNodes) {
                 if !options.contains(.dots) {
@@ -144,7 +139,17 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
     
     override func updateDesign() {
         super.updateDesign()
+        
+        orderedDotNodes.forEach { $0.removeFromSuperview() }
+        orderedDotNodes = chart.lines.map { generateDotNode(chart: chart, line: $0) }
+        zip(chart.lines, orderedDotNodes).forEach { line, node in
+            node.isHidden = true
+            addSubview(node)
+            dotNodes[line.key] = node
+        }
+        
         cloudNode.updateDesign()
+        
     }
     
     override func layoutSubviews() {
@@ -248,7 +253,7 @@ fileprivate struct Layout {
     }
 }
 
-fileprivate func generateDotNode(line: ChartLine) -> ChartFigureNode {
+fileprivate func generateDotNode(chart: Chart, line: ChartLine) -> ChartFigureNode {
     let path = UIBezierPath(
         arcCenter: .zero,
         radius: 3,
@@ -258,7 +263,7 @@ fileprivate func generateDotNode(line: ChartLine) -> ChartFigureNode {
     )
     
     let node = ChartFigureNode(figure: .nestedBezierPaths)
-    node.strokeColor = line.color
+    node.strokeColor = DesignBook.shared.color(chart: chart, key: .line(line.colorKey))
     node.fillColor = DesignBook.shared.color(.primaryBackground)
     node.strokeWidth = 2
     node.bezierPaths = [path]

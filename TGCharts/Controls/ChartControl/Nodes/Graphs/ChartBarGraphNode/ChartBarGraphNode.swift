@@ -29,11 +29,9 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         )
         
         configure(figure: .filledPaths) { index, node, line in
-            node.fillColor = line.color
             node.layer.zPosition = -CGFloat(index)
         }
         
-        dimmingNode.fillColor = DesignBook.shared.color(.chartPointerDimming)
         dimmingNode.alpha = 0
         dimmingNode.isHidden = !enableControls
         dimmingNode.isUserInteractionEnabled = false
@@ -114,8 +112,13 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
         container?.adjustGuides(
-            left: edges.first ?? .empty,
-            right: nil,
+            leftOptions: ChartGuideOptions(
+                range: edges.first ?? .empty,
+                numberOfSteps: 6,
+                closeToBounds: false,
+                textColor: DesignBook.shared.color(chart: chart, key: .y)
+            ),
+            rightOptions: nil,
             duration: duration
         )
     }
@@ -137,7 +140,10 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                     percent: nil,
                     title: line.name,
                     value: formattingProvider.format(guide: value),
-                    color: line.color
+                    color: DesignBook.shared.color(
+                        chart: chart,
+                        key: .tooltip(line.colorKey)
+                    )
                 )
             }
             
@@ -182,7 +188,9 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         if enableControls {
             layout(duration: 0)
             
+            dimmingNode.fillColor = DesignBook.shared.color(chart: chart, key: .dimming)
             let dimmingAlpha = CGFloat(config.pointer == nil ? 0 : 1.0)
+            
             if dimmingNode.alpha != dimmingAlpha {
                 UIView.animate(
                     withDuration: DesignBook.shared.duration(.pointerDimming),
@@ -225,14 +233,22 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         let baseX = CGFloat(index) * stepX
         
         let leftX = firstNode.convertOriginalToEffective(x: baseX)
-        let leftFrame = CGRect(x: 0,y: 0, width: leftX, height: bounds.height)
+        let leftFrame = CGRect(x: -bounds.width * 0.5,y: 0, width: leftX + bounds.width * 0.5, height: bounds.height)
         
         let rightX = firstNode.convertOriginalToEffective(x: baseX + stepX)
-        let rightFrame = CGRect(x: rightX, y: 0, width: bounds.width - rightX, height: bounds.height)
+        let rightFrame = CGRect(x: rightX, y: 0, width: bounds.width * 1.5 - rightX, height: bounds.height)
         
         dimmingNode.bezierPaths = [
             UIBezierPath(rect: leftFrame),
             UIBezierPath(rect: rightFrame)
         ]
+    }
+    
+    override func updateDesign() {
+        super.updateDesign()
+        
+        zip(chart.lines, orderedNodes).forEach { line, node in
+            node.fillColor = DesignBook.shared.color(chart: chart, key: .line(line.colorKey))
+        }
     }
 }

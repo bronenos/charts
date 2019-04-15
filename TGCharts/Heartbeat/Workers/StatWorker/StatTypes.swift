@@ -25,18 +25,18 @@ struct Chart: Equatable {
     let length: Int
     let lines: [ChartLine]
     let axis: [ChartAxisItem]
-    let children: [String: URL]
+    let stylePair: ChartStylePair
     
     init(type: ChartType,
          length: Int,
          lines: [ChartLine],
          axis: [ChartAxisItem],
-         children: [String: URL]) {
+         stylePair: ChartStylePair) {
         self.type = type
         self.length = length
         self.lines = lines
         self.axis = axis
-        self.children = children
+        self.stylePair = stylePair
     }
     
     func obtainMeta(config: ChartConfig, bounds: CGRect) -> ChartSliceMeta {
@@ -80,6 +80,7 @@ struct Chart: Equatable {
         guard lhs.length == rhs.length else { return false }
         guard lhs.lines == rhs.lines else { return false }
         guard lhs.axis == rhs.axis else { return false }
+        guard lhs.stylePair == rhs.stylePair else { return false }
         return true
     }
 }
@@ -111,17 +112,39 @@ struct ChartLine: Equatable {
     let key: String
     let name: String
     let type: String
-    let color: UIColor
+    let colorKey: String
     let values: [Int]
     
     static func ==(lhs: ChartLine, rhs: ChartLine) -> Bool {
         guard lhs.key == rhs.key else { return false }
         guard lhs.name == rhs.name else { return false }
         guard lhs.type == rhs.type else { return false }
-        guard lhs.color == rhs.color else { return false }
+        guard lhs.colorKey == rhs.colorKey else { return false }
         guard lhs.values == rhs.values else { return false }
         return true
     }
+}
+
+struct ChartStylePair: Equatable {
+    let light: ChartStyle
+    let dark: ChartStyle
+}
+
+struct ChartStyle: Equatable {
+    let axis: ChartAxisStyle
+    let lines: [String: ChartLineStyle]
+    let mask: UIColor?
+}
+
+struct ChartAxisStyle: Equatable {
+    let vertical: UIColor
+    let horizontal: UIColor
+}
+
+struct ChartLineStyle: Equatable {
+    let line: UIColor
+    let button: UIColor
+    let tooltip: UIColor
 }
 
 struct ChartSlice {

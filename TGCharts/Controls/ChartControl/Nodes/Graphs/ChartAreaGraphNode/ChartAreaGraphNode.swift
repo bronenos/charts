@@ -27,7 +27,6 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         )
         
         configure(figure: .filledPaths) { index, node, line in
-            node.fillColor = line.color
             node.layer.zPosition = -CGFloat(index)
         }
     }
@@ -106,8 +105,13 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     
     override func updateGuides(edges: [ChartRange], duration: TimeInterval) {
         container?.adjustGuides(
-            left: edges.first ?? .empty,
-            right: nil,
+            leftOptions: ChartGuideOptions(
+                range: edges.first ?? .empty,
+                numberOfSteps: 5,
+                closeToBounds: true,
+                textColor: DesignBook.shared.color(chart: chart, key: .y)
+            ),
+            rightOptions: nil,
             duration: duration
         )
     }
@@ -140,7 +144,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                             value: formattingProvider.format(
                                 guide: line.values[pointing.index]
                             ),
-                            color: line.color
+                            color: DesignBook.shared.color(chart: chart, key: .tooltip(line.colorKey))
                         )
                     }
                 ),
@@ -155,6 +159,14 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                 options: [.line, .anchor],
                 duration: duration *  2
             )
+        }
+    }
+    
+    override func updateDesign() {
+        super.updateDesign()
+        
+        zip(chart.lines, orderedNodes).forEach { line, node in
+            node.fillColor = DesignBook.shared.color(chart: chart, key: .line(line.colorKey))
         }
     }
 }

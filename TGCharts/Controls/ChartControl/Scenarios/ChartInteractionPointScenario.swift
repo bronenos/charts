@@ -40,6 +40,6 @@ final class ChartInteractionPointScenario: IChartInteractorScenario {
     
     private func calculatePointer(_ point: CGPoint) -> CGFloat {
         let pointer = (point.x - graphNode.bounds.minX) / graphNode.bounds.width
-        return max(0, min(pointer, 1.0))
+        return pointer
     }
 }

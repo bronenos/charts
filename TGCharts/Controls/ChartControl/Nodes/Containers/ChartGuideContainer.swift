@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol IChartGuideContainer: IChartNode {
-    func update(leftEdge: ChartRange?, rightEdge: ChartRange?, duration: TimeInterval)
+    func update(leftOptions: ChartGuideOptions?, rightOptions: ChartGuideOptions?, duration: TimeInterval)
 }
 
 final class ChartGuideContainer: ChartNode, IChartGuideContainer {
@@ -34,10 +34,7 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
         
         super.init(frame: .zero)
         
-        leftGuidesNode.clipsToBounds = true
         addSubview(leftGuidesNode)
-        
-        rightGuidesNode.clipsToBounds = true
         addSubview(rightGuidesNode)
     }
     
@@ -45,9 +42,9 @@ final class ChartGuideContainer: ChartNode, IChartGuideContainer {
         abort()
     }
     
-    func update(leftEdge: ChartRange?, rightEdge: ChartRange?, duration: TimeInterval) {
-        leftGuidesNode.update(edge: leftEdge, duration: duration)
-        rightGuidesNode.update(edge: rightEdge, duration: duration)
+    func update(leftOptions: ChartGuideOptions?, rightOptions: ChartGuideOptions?, duration: TimeInterval) {
+        leftGuidesNode.update(options: leftOptions, duration: duration)
+        rightGuidesNode.update(options: rightOptions, duration: duration)
     }
     
     override func updateDesign() {
