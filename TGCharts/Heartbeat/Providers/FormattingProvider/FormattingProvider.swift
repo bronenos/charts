@@ -42,6 +42,10 @@ final class FormattingProvider: IFormattingProvider {
             dateFormatter.dateFormat = "d MMM yyyy"
             dateFormatter.doesRelativeDateFormatting = false
             
+        case .dayAndDate:
+            dateFormatter.dateFormat = "EEE, d MMM yyyy"
+            dateFormatter.doesRelativeDateFormatting = false
+
         case .fullDate:
             dateFormatter.dateFormat = "EEEE, d MMM yyyy"
             dateFormatter.doesRelativeDateFormatting = false

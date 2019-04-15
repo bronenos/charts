@@ -78,14 +78,14 @@
 		D4984A9D225A80320008C552 /* ChartOptionsToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A9C225A80320008C552 /* ChartOptionsToken.swift */; };
 		D4984A9F225B42950008C552 /* ChartLineGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */; };
 		D4984AA1225B47340008C552 /* ChartGuideControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984AA0225B47340008C552 /* ChartGuideControl.swift */; };
-		D4984AA3225B4AE00008C552 /* ChartPointerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4984AA2225B4AE00008C552 /* ChartPointerControl.swift */; };
-		D4AECB0E224156D300AE5D89 /* ChartPointerCloudNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */; };
+		D4AECB0E224156D300AE5D89 /* ChartPointerCloudControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0D224156D300AE5D89 /* ChartPointerCloudControl.swift */; };
 		D4AECB102241734000AE5D89 /* ChartInteractionPointScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */; };
 		D4BE0CAD223D8FAC001DEE03 /* ChartTimelineControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CAC223D8FAC001DEE03 /* ChartTimelineControl.swift */; };
 		D4BE0CB1223D929E001DEE03 /* ChartLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */; };
 		D4D0F25B223AB37300F69F8C /* ChartInteractionScaleScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */; };
 		D4DA1682225DB975009FC1ED /* ChartAreaGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
+		D4F6E064226451820058FF47 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6E063226451820058FF47 /* StringExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -164,14 +164,14 @@
 		D4984A9C225A80320008C552 /* ChartOptionsToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartOptionsToken.swift; sourceTree = "<group>"; };
 		D4984A9E225B42950008C552 /* ChartLineGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLineGraphNode.swift; sourceTree = "<group>"; };
 		D4984AA0225B47340008C552 /* ChartGuideControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGuideControl.swift; sourceTree = "<group>"; };
-		D4984AA2225B4AE00008C552 /* ChartPointerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerControl.swift; sourceTree = "<group>"; };
-		D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerCloudNode.swift; sourceTree = "<group>"; };
+		D4AECB0D224156D300AE5D89 /* ChartPointerCloudControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointerCloudControl.swift; sourceTree = "<group>"; };
 		D4AECB0F2241734000AE5D89 /* ChartInteractionPointScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionPointScenario.swift; sourceTree = "<group>"; };
 		D4BE0CAC223D8FAC001DEE03 /* ChartTimelineControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTimelineControl.swift; sourceTree = "<group>"; };
 		D4BE0CB0223D929E001DEE03 /* ChartLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartLabelNode.swift; sourceTree = "<group>"; };
 		D4D0F25A223AB37300F69F8C /* ChartInteractionScaleScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionScaleScenario.swift; sourceTree = "<group>"; };
 		D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAreaGraphNode.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
+		D4F6E063226451820058FF47 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,7 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				D402B39E225CE18400A59A18 /* ChartGuideControl */,
-				D402B39D225CE16900A59A18 /* ChartPointerControl */,
+				D4F6E0602263DA180058FF47 /* ChartPointerCloudControl */,
 				D402B39F225CE24B00A59A18 /* ChartTimelineControl */,
 				D402B39C225CDE0100A59A18 /* ChartNavigatorControl */,
 				D4984A99225A80020008C552 /* ChartOptionsControl */,
@@ -229,15 +229,6 @@
 				D45B789E223A521A002134ED /* ChartSliderArrowNode.swift */,
 			);
 			path = ChartNavigatorControl;
-			sourceTree = "<group>";
-		};
-		D402B39D225CE16900A59A18 /* ChartPointerControl */ = {
-			isa = PBXGroup;
-			children = (
-				D4984AA2225B4AE00008C552 /* ChartPointerControl.swift */,
-				D4AECB0D224156D300AE5D89 /* ChartPointerCloudNode.swift */,
-			);
-			path = ChartPointerControl;
 			sourceTree = "<group>";
 		};
 		D402B39E225CE18400A59A18 /* ChartGuideControl */ = {
@@ -433,6 +424,7 @@
 				D45B78AA223A67D3002134ED /* CGVectorExtensions.swift */,
 				D479B958225FA56900C99897 /* CGFloatExtensions.swift */,
 				D481905822639D29004CBEF6 /* UIViewExtensions.swift */,
+				D4F6E063226451820058FF47 /* StringExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -542,10 +534,10 @@
 		D48EEF5A2237C6D300C232E6 /* Nodes */ = {
 			isa = PBXGroup;
 			children = (
-				D42B7A512239779B00733F2F /* ChartScene.swift */,
-				D4984A95225A6B150008C552 /* ChartHeader.swift */,
 				D45D92702244393C004E136C /* Basic */,
 				D402B399225CDC4300A59A18 /* Containers */,
+				D42B7A512239779B00733F2F /* ChartScene.swift */,
+				D4984A95225A6B150008C552 /* ChartHeader.swift */,
 				D402B39B225CDC7F00A59A18 /* Graphs */,
 				D402B39A225CDC4A00A59A18 /* Controls */,
 			);
@@ -560,6 +552,14 @@
 				D4984A9C225A80320008C552 /* ChartOptionsToken.swift */,
 			);
 			path = ChartOptionsControl;
+			sourceTree = "<group>";
+		};
+		D4F6E0602263DA180058FF47 /* ChartPointerCloudControl */ = {
+			isa = PBXGroup;
+			children = (
+				D4AECB0D224156D300AE5D89 /* ChartPointerCloudControl.swift */,
+			);
+			path = ChartPointerCloudControl;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -661,7 +661,6 @@
 				D46182862235AF64006B72A7 /* BroadcastObservable.swift in Sources */,
 				D48190452260CCA7004CBEF6 /* GlobalExtensions.swift in Sources */,
 				D48EEF5C2237C6EE00C232E6 /* ChartGraphNode.swift in Sources */,
-				D4984AA3225B4AE00008C552 /* ChartPointerControl.swift in Sources */,
 				D461824C2234D7E4006B72A7 /* RootViewController.swift in Sources */,
 				D481904922622F6D004CBEF6 /* ChartOperation.swift in Sources */,
 				D42B7A502239750400733F2F /* ChartNavigatorControl.swift in Sources */,
@@ -681,6 +680,7 @@
 				D4984AA1225B47340008C552 /* ChartGuideControl.swift in Sources */,
 				D4984A9D225A80320008C552 /* ChartOptionsToken.swift in Sources */,
 				D42B7A4C223952E800733F2F /* ChartNode.swift in Sources */,
+				D4F6E064226451820058FF47 /* StringExtensions.swift in Sources */,
 				D461827622359895006B72A7 /* StatWorker.swift in Sources */,
 				D4BE0CAD223D8FAC001DEE03 /* ChartTimelineControl.swift in Sources */,
 				D42658D02236341000FB79AB /* ChartTypes.swift in Sources */,
@@ -715,7 +715,7 @@
 				D42B7A5822398B8A00733F2F /* CGRectExtensions.swift in Sources */,
 				D461827822359927006B72A7 /* StatTypes.swift in Sources */,
 				D46182572234DA0D006B72A7 /* StatInteractor.swift in Sources */,
-				D4AECB0E224156D300AE5D89 /* ChartPointerCloudNode.swift in Sources */,
+				D4AECB0E224156D300AE5D89 /* ChartPointerCloudControl.swift in Sources */,
 				D461823322346536006B72A7 /* Heartbeat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -65,14 +65,11 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
     }
 
     override func updatePointer(eyes: [ChartGraphEye],
-                                totalEdges: [ChartRange],
+                                valueEdges: [ChartRange],
                                 duration: TimeInterval) {
-        container?.adjustPointer(
-            chart: chart,
-            config: config,
+        super.updatePointer(
             eyes: eyes,
-            options: [.line, .dots],
-            rounder: round,
+            valueEdges: valueEdges,
             duration: duration
         )
     }

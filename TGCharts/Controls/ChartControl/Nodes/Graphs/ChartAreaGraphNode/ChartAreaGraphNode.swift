@@ -104,15 +104,48 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     }
     
     override func updatePointer(eyes: [ChartGraphEye],
-                                totalEdges: [ChartRange],
+                                valueEdges: [ChartRange],
                                 duration: TimeInterval) {
-        container?.adjustPointer(
-            chart: chart,
-            config: config,
-            eyes: eyes,
-            options: [.line],
-            rounder: round,
-            duration: duration
-        )
+        if let pointer = config.pointer, let topValue = valueEdges.first?.end {
+            let pointing = calculatePointing(pointer: pointer, rounder: round)
+            let date = chart.axis[pointing.index].date
+            let lines = chart.visibleLines(config: config)
+            
+            container?.adjustPointer(
+                pointing: pointing,
+                content: ChartPointerCloudContent(
+                    header: formattingProvider.format(
+                        date: date,
+                        style: .dayAndDate
+                    ),
+                    disclosable: true,
+                    values: lines.map { line in
+                        let percent = CGFloat(line.values[pointing.index]) / CGFloat(topValue)
+                        let percentToDisplay = Int(percent * 100)
+                        
+                        return ChartPointerCloudValue(
+                            percent: formattingProvider.format(
+                                guide: percentToDisplay
+                            ),
+                            title: line.name,
+                            value: formattingProvider.format(
+                                guide: line.values[pointing.index]
+                            ),
+                            color: line.color
+                        )
+                    }
+                ),
+                options: [.line],
+                duration: duration *  2
+            )
+        }
+        else {
+            container?.adjustPointer(
+                pointing: nil,
+                content: nil,
+                options: [.line, .dots],
+                duration: duration *  2
+            )
+        }
     }
 }

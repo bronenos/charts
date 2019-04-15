@@ -17,6 +17,11 @@ class ChartAreaPointsOperation: ChartPointsOperation {
             indices: chart.axis.indices
         )
         
+        let totalSummRange = ChartRange(
+            start: 0,
+            end: CGFloat(totalSumms.max() ?? 0)
+        )
+        
         let totalEdge = ChartRange(
             start: 0,
             end: 100
@@ -33,6 +38,7 @@ class ChartAreaPointsOperation: ChartPointsOperation {
         )
         
         let context = ChartEyeOperationContext(
+            valueEdges: [totalSummRange],
             totalEdges: [totalEdge],
             lineEdges: []
         )

@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 
 struct ChartEyeOperationContext {
+    let valueEdges: [ChartRange]
     let totalEdges: [ChartRange]
     let lineEdges: [ChartRange]
 }

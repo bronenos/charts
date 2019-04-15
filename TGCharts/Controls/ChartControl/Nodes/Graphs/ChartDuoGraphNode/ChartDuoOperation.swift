@@ -31,6 +31,7 @@ final class ChartDuoPointsOperation: ChartLinePointsOperation {
         )
         
         let context = ChartEyeOperationContext(
+            valueEdges: totalEdges,
             totalEdges: totalEdges,
             lineEdges: sliceEdges
         )
@@ -66,6 +67,7 @@ final class ChartDuoEyesOperation: ChartLineEyesOperation {
 
         return CalculateEyesResult(
             context: ChartEyeOperationContext(
+                valueEdges: context.valueEdges,
                 totalEdges: context.totalEdges,
                 lineEdges: zip(context.lineEdges, sliceEdges).map { contextualEdge, edge in
                     return (edge.distance > 0 ? edge : contextualEdge)

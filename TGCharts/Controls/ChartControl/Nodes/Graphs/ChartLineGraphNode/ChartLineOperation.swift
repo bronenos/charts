@@ -29,6 +29,7 @@ class ChartLinePointsOperation: ChartPointsOperation {
         )
         
         let context = ChartEyeOperationContext(
+            valueEdges: [totalEdge],
             totalEdges: [totalEdge],
             lineEdges: clone(sliceEdge, number: chart.lines.count)
         )
@@ -66,6 +67,7 @@ class ChartLineEyesOperation: ChartEyesOperation {
         
         return CalculateEyesResult(
             context: ChartEyeOperationContext(
+                valueEdges: context.valueEdges,
                 totalEdges: context.totalEdges,
                 lineEdges: zip(context.lineEdges, sliceEdges).map { contextualEdge, edge in
                     return (edge.distance > 0 ? edge : contextualEdge)

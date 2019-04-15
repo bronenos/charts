@@ -13,11 +13,9 @@ protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
     func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
-    func adjustPointer(chart: Chart,
-                       config: ChartConfig,
-                       eyes: [ChartGraphEye],
+    func adjustPointer(pointing: ChartGraphPointing?,
+                       content: ChartPointerCloudContent?,
                        options: ChartPointerOptions,
-                       rounder: (CGFloat) -> CGFloat,
                        duration: TimeInterval)
 }
 
@@ -65,20 +63,15 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         guidesContainer.update(leftEdge: left, rightEdge: right, duration: duration)
     }
     
-    func adjustPointer(chart: Chart,
-                       config: ChartConfig,
-                       eyes: [ChartGraphEye],
+    func adjustPointer(pointing: ChartGraphPointing?,
+                       content: ChartPointerCloudContent?,
                        options: ChartPointerOptions,
-                       rounder: (CGFloat) -> CGFloat,
                        duration: TimeInterval) {
         pointerContainer.update(
-            chart: chart,
-            config: config,
-            pointing: config.pointer.flatMap { pointer in
-                innerGraph?.calculatePointing(pointer: pointer, rounder: rounder)
-            },
+            pointing: pointing,
+            content: content,
             options: options,
-            duration: duration * 2
+            duration: duration
         )
     }
     

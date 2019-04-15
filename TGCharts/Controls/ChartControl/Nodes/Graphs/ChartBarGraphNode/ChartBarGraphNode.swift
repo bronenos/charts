@@ -112,16 +112,44 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     }
     
     override func updatePointer(eyes: [ChartGraphEye],
-                                totalEdges: [ChartRange],
+                                valueEdges: [ChartRange],
                                 duration: TimeInterval) {
-        container?.adjustPointer(
-            chart: chart,
-            config: config,
-            eyes: eyes,
-            options: [],
-            rounder: floor,
-            duration: duration
-        )
+        if let pointer = config.pointer {
+            let pointing = calculatePointing(pointer: pointer, rounder: round)
+            let date = chart.axis[pointing.index].date
+            let lines = chart.visibleLines(config: config)
+            
+            container?.adjustPointer(
+                pointing: pointing,
+                content: ChartPointerCloudContent(
+                    header: formattingProvider.format(
+                        date: date,
+                        style: .dayAndDate
+                    ),
+                    disclosable: true,
+                    values: lines.map { line in
+                        ChartPointerCloudValue(
+                            percent: nil,
+                            title: line.name,
+                            value: formattingProvider.format(
+                                guide: line.values[pointing.index]
+                            ),
+                            color: line.color
+                        )
+                    }
+                ),
+                options: [],
+                duration: duration *  2
+            )
+        }
+        else {
+            container?.adjustPointer(
+                pointing: nil,
+                content: nil,
+                options: [],
+                duration: duration *  2
+            )
+        }
         
         if enableControls {
             layout(duration: 0)

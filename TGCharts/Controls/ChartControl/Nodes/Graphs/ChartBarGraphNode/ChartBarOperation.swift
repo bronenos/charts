@@ -33,6 +33,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
         )
         
         let context = ChartEyeOperationContext(
+            valueEdges: [totalEdge],
             totalEdges: [totalEdge],
             lineEdges: [sliceEdge]
         )
@@ -63,6 +64,7 @@ class ChartBarEyesOperation: ChartEyesOperation {
         let eyes = calculateEyes(
             config: config,
             context: ChartEyeOperationContext(
+                valueEdges: context.valueEdges,
                 totalEdges: context.totalEdges,
                 lineEdges: clone(sliceEdge, number: chart.lines.count)
             ),

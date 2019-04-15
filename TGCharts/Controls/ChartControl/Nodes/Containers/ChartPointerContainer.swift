@@ -9,29 +9,42 @@
 import Foundation
 import UIKit
 
+struct ChartPointerOptions: OptionSet {
+    let rawValue: Int
+    init(rawValue: Int) { self.rawValue = rawValue }
+    static let line = ChartPointerOptions(rawValue: 1 << 0)
+    static let dots = ChartPointerOptions(rawValue: 1 << 1)
+    static let closely = ChartPointerOptions(rawValue: 1 << 2)
+    static let disclosable = ChartPointerOptions(rawValue: 1 << 3)
+}
+
 protocol IChartPointerContainer: IChartNode {
-    func update(chart: Chart,
-                config: ChartConfig,
-                pointing: ChartGraphPointing?,
+    func update(pointing: ChartGraphPointing?,
+                content: ChartPointerCloudContent?,
                 options: ChartPointerOptions,
                 duration: TimeInterval)
 }
 
 final class ChartPointerContainer: ChartNode, IChartPointerContainer {
+    private let formattingProvider: IFormattingProvider
+    
     private let lineNode: ChartNode
     private let dotNodes: [ChartFigureNode]
-    private let cloudNode: ChartPointerCloudNode
+    private let cloudNode: ChartPointerCloudControl
     
     private var pointing: ChartGraphPointing?
+    private var options: ChartPointerOptions = []
 
     init(chart: Chart, formattingProvider: IFormattingProvider) {
+        self.formattingProvider = formattingProvider
+        
         lineNode = ChartNode()
         dotNodes = chart.lines.map(generateDotNode)
-        cloudNode = ChartPointerCloudNode(formattingProvider: formattingProvider)
+        cloudNode = ChartPointerCloudControl()
 
         super.init(frame: .zero)
         
-        lineNode.isHidden = true
+        lineNode.alpha = 0
         addSubview(lineNode)
         
         dotNodes.forEach { node in
@@ -47,9 +60,8 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         abort()
     }
     
-    func update(chart: Chart,
-                config: ChartConfig,
-                pointing: ChartGraphPointing?,
+    func update(pointing: ChartGraphPointing?,
+                content: ChartPointerCloudContent?,
                 options: ChartPointerOptions,
                 duration: TimeInterval) {
         if let _ = pointing {
@@ -63,38 +75,46 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
             lineNode.isHidden = true
         }
         
-        if let pointing = pointing {
-            let date = chart.axis[pointing.index].date
-            let lines = chart.visibleLines(config: config)
-            cloudNode.setDate(date, lines: lines, index: pointing.index)
+        if let content = content {
+            cloudNode.populate(content: content)
         }
         
         if let _ = pointing, let _ = self.pointing {
             self.pointing = pointing
+            self.options = options
+            
             layout(duration: duration)
         }
         else if let _ = pointing {
             self.pointing = pointing
+            self.options = options
+            
             layout(duration: 0)
             
             cloudNode.transform = CGAffineTransform(scaleX: 1.35, y: 1.35)
             cloudNode.alpha = 0
+            lineNode.alpha = 0
             
-            UIView.animate(withDuration: duration) { [unowned self] in
-                self.cloudNode.transform = .identity
-                self.cloudNode.alpha = 1.0
+            UIView.animate(withDuration: duration) { [weak self] in
+                self?.cloudNode.transform = .identity
+                self?.cloudNode.alpha = 1.0
+                self?.lineNode.alpha = 1.0
             }
         }
         else if let _ = self.pointing {
             self.pointing = pointing
+            self.options = options
+            
             layout(duration: 0)
             
             cloudNode.transform = .identity
             cloudNode.alpha = 1.0
+            lineNode.alpha = 1.0
             
-            UIView.animate(withDuration: duration) { [unowned self] in
-                self.cloudNode.transform = CGAffineTransform(scaleX: 1.25, y: 1.25)
-                self.cloudNode.alpha = 0
+            UIView.animate(withDuration: duration) { [weak self] in
+                self?.cloudNode.transform = CGAffineTransform(scaleX: 1.25, y: 1.25)
+                self?.cloudNode.alpha = 0
+                self?.lineNode.alpha = 0
             }
         }
     }
@@ -121,7 +141,8 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
             bounds: CGRect(origin: .zero, size: size),
             dotNodes: dotNodes,
             cloudNode: cloudNode,
-            pointing: pointing
+            pointing: pointing,
+            closely: options.contains(.closely)
         )
     }
 }
@@ -129,8 +150,9 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
 fileprivate struct Layout {
     let bounds: CGRect
     let dotNodes: [ChartFigureNode]
-    let cloudNode: ChartPointerCloudNode
+    let cloudNode: ChartPointerCloudControl
     let pointing: ChartGraphPointing
+    let closely: Bool
     
     private let cloudOffscreen = CGFloat(10)
     private let cloudExtraMove = CGFloat(10)
@@ -161,10 +183,14 @@ fileprivate struct Layout {
         return CGPoint(x: midX, y: midY)
     }
     
+    private var cloudTopMargin: CGFloat {
+        return closely ? 0 : 5
+    }
+
     private var cloudNodeFrame: CGRect {
         let size = cloudNode.sizeThatFits(.zero)
         let leftX = (bounds.width + cloudOffscreen * 2 - size.width) * pointing.pointer - cloudOffscreen
-        let baseFrame = CGRect(x: leftX, y: 0, width: size.width, height: size.height)
+        let baseFrame = CGRect(x: leftX, y: cloudTopMargin, width: size.width, height: size.height)
         
         guard let topDotFrame = dotNodeFrames.sorted(by: { $0.minY < $1.minY }).first else {
             return baseFrame
@@ -176,11 +202,11 @@ fileprivate struct Layout {
         
         if topDotFrame.midX > bounds.midX {
             let leftX = topDotFrame.minX - cloudExtraMove - size.width
-            return CGRect(x: leftX, y: 0, width: size.width, height: size.height)
+            return CGRect(x: leftX, y: cloudTopMargin, width: size.width, height: size.height)
         }
         else {
             let leftX = topDotFrame.maxX + cloudExtraMove
-            return CGRect(x: leftX, y: 0, width: size.width, height: size.height)
+            return CGRect(x: leftX, y: cloudTopMargin, width: size.width, height: size.height)
         }
     }
 }

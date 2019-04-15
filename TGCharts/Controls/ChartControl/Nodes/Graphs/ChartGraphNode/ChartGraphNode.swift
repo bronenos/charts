@@ -59,6 +59,8 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     
     let chart: Chart
     let enableControls: Bool
+    let formattingProvider: IFormattingProvider
+    
     private(set) var config: ChartConfig
     private(set) var eyes: [ChartGraphEye]
 
@@ -74,6 +76,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
         self.chart = chart
         self.enableControls = enableControls
+        self.formattingProvider = formattingProvider
         self.config = config
         self.eyes = chart.axis.indices.map { _ in ChartGraphEye(edges: .zero, scaleFactor: 1.0) }
         
@@ -136,7 +139,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
             if let context = cachedEyesContext {
                 updatePointer(
                     eyes: eyes,
-                    totalEdges: context.totalEdges,
+                    valueEdges: context.valueEdges,
                     duration: duration
                 )
             }
@@ -229,7 +232,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
         
     func updatePointer(eyes: [ChartGraphEye],
-                       totalEdges: [ChartRange],
+                       valueEdges: [ChartRange],
                        duration: TimeInterval) {
         abort()
     }
@@ -281,7 +284,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     
                     self.updatePointer(
                         eyes: result.eyes,
-                        totalEdges: result.context.totalEdges,
+                        valueEdges: result.context.valueEdges,
                         duration: duration
                     )
                 }
@@ -330,7 +333,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         else {
             updatePointer(
                 eyes: [],
-                totalEdges: [],
+                valueEdges: [],
                 duration: duration
             )
         }
