@@ -41,7 +41,9 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     }
     
     func setChartMetas(_ metas: [ChartMeta]) {
+        let localeProvider = interactor.localeProvider
         let formattingProvider = interactor.formattingProvider
+        let feedbackDriver = interactor.feedbackDriver
         
         chartControls.forEach { control in control.setDelegate(nil) }
         chartControls = metas.map { meta in
@@ -51,8 +53,9 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
                     bounds: view.bounds,
                     traitCollection: traitCollection
                 ),
-                localeProvider: interactor.localeProvider,
-                formattingProvider: formattingProvider
+                localeProvider: localeProvider,
+                formattingProvider: formattingProvider,
+                feedbackDriver: feedbackDriver
             )
         }
         chartControls.forEach { control in control.setDelegate(self) }

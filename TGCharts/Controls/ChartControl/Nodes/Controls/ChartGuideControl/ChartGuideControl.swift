@@ -39,8 +39,8 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
     private var secondaryGuides = [ChartGuideStepNode]()
     
     private var options: ChartGuideOptions?
+    private var lastOptions: ChartGuideOptions?
     private var activeGuide: VerticalActiveGuide? = .primary
-    private var lastEdge: ChartRange?
     
     init(chart: Chart, config: ChartConfig, alignment: NSTextAlignment, formattingProvider: IFormattingProvider) {
         self.chart = chart
@@ -60,38 +60,46 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         let oldOptions = self.options
         self.options = options
         
-        if options != oldOptions {
+        if options?.textColor != oldOptions?.textColor {
             recreateGuides()
         }
-        
-        update(edge: options?.range, duration: duration, force: false)
+        else if options?.numberOfSteps != oldOptions?.numberOfSteps {
+            recreateGuides()
+        }
+
+        update(options: options, duration: duration, force: false)
     }
     
-    private func update(edge: ChartRange?, duration: TimeInterval, force: Bool) {
+    private func update(options: ChartGuideOptions?, duration: TimeInterval, force: Bool) {
         guard let activeGuide = activeGuide else { return }
         let guidesPair = obtainGuides()
         
-        guard (edge != lastEdge) || force else { return }
-        defer { lastEdge = edge }
+        guard (options != lastOptions) || force else { return }
+        defer { lastOptions = options }
         
-        if let edge = edge {
-            if let lastEdge = lastEdge, !isMinorEdgeChange(fromEdge: lastEdge, toEdge: edge) {
+        if let options = options {
+            if let lastOptions = lastOptions, !isMinorChange(from: lastOptions, to: options) {
                 exchangeGuides(
-                    edge: edge,
-                    lastEdge: lastEdge,
+                    options: options,
+                    lastOptions: lastOptions,
                     duration: duration
                 )
             }
             else {
                 adjustGuides(
-                    edge: edge,
+                    options: options,
                     duration: duration
                 )
             }
         }
         else {
             adjustGuides(
-                edge: .empty,
+                options: ChartGuideOptions(
+                    range: .empty,
+                    numberOfSteps: 1,
+                    closeToBounds: false,
+                    textColor: nil
+                ),
                 duration: duration
             )
         }
@@ -102,8 +110,8 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         primaryGuides.forEach { $0.underlineColor = DesignBook.shared.color(.chartGridStroke) }
         secondaryGuides.forEach { $0.underlineColor = DesignBook.shared.color(.chartGridStroke) }
         
-        if let edge = lastEdge {
-            update(edge: edge, duration: 0, force: true)
+        if let options = lastOptions {
+            update(options: options, duration: 0, force: true)
         }
     }
     
@@ -133,13 +141,13 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         }
     }
     
-    private func isMinorEdgeChange(fromEdge: ChartRange, toEdge: ChartRange) -> Bool {
-        if !(fromEdge.distance > 0 && toEdge.distance > 0) {
+    private func isMinorChange(from: ChartGuideOptions, to: ChartGuideOptions) -> Bool {
+        if !(from.range.distance > 0 && to.range.distance > 0) {
             return true
         }
         
-        let growth = abs(fromEdge.distance - toEdge.distance)
-        if (growth / max(fromEdge.distance, toEdge.distance)) > 0.1 {
+        let growth = abs(from.range.distance - to.range.distance)
+        if (growth / max(from.range.distance, to.range.distance)) > 0.1 {
             return false
         }
         else {
@@ -147,24 +155,24 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         }
     }
     
-    private func exchangeGuides(edge: ChartRange,
-                                lastEdge: ChartRange,
+    private func exchangeGuides(options: ChartGuideOptions,
+                                lastOptions: ChartGuideOptions,
                                 duration: TimeInterval) {
         let guidesPair = obtainGuides()
         
-        let scalingCoef = lastEdge.distance / edge.distance
-        let startDiff = edge.start - lastEdge.start
+        let scalingCoef = lastOptions.range.distance / options.range.distance
+        let startDiff = options.range.start - lastOptions.range.start
         
-        let relativeFromPosition = (startDiff / lastEdge.distance) * bounds.height
+        let relativeFromPosition = (startDiff / lastOptions.range.distance) * bounds.height
         let adjustFromPosition = -relativeFromPosition * (1 + scalingCoef)
         
-        let relativeHeight = (lastEdge.distance / edge.distance) // size.height * (1.0 / scalingCoef)
+        let relativeHeight = (lastOptions.range.distance / options.range.distance)
         let sourceToHeight = bounds.height / relativeHeight
         let destinationToHeight = bounds.height
         
         layoutGuides(
             guides: guidesPair.primary,
-            usingEdge: lastEdge,
+            usingOptions: lastOptions,
             startY: 0,
             height: bounds.height,
             alpha: 1.0
@@ -172,7 +180,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         
         layoutGuides(
             guides: guidesPair.secondary,
-            usingEdge: edge,
+            usingOptions: options,
             startY: relativeFromPosition,
             height: sourceToHeight,
             alpha: 0
@@ -184,7 +192,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         func _animations() {
             layoutGuides(
                 guides: guidesPair.primary,
-                usingEdge: lastEdge,
+                usingOptions: lastOptions,
                 startY: adjustFromPosition,
                 height: destinationToHeight * scalingCoef,
                 alpha: 0
@@ -192,7 +200,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             
             layoutGuides(
                 guides: guidesPair.secondary,
-                usingEdge: edge,
+                usingOptions: options,
                 startY: 0,
                 height: destinationToHeight,
                 alpha: 1.0
@@ -210,6 +218,8 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         if duration > 0 {
             UIView.animate(
                 withDuration: duration,
+                delay: 0,
+                options: [.curveEaseInOut],
                 animations: _animations,
                 completion: { _ in _completion() }
             )
@@ -220,18 +230,18 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         }
     }
     
-    private func adjustGuides(edge: ChartRange,
+    private func adjustGuides(options: ChartGuideOptions,
                               duration: TimeInterval) {
         let guidesPair = obtainGuides()
-        let primaryAlpha = CGFloat(edge.distance > 0 ? 1.0 : 0)
+        let primaryAlpha = CGFloat(options.range.distance > 0 ? 1.0 : 0)
         
-        func _block() {
+        func _block(alpha: CGFloat?) {
             layoutGuides(
                 guides: guidesPair.primary,
-                usingEdge: edge,
+                usingOptions: options,
                 startY: 0,
                 height: bounds.height,
-                alpha: primaryAlpha
+                alpha: alpha ?? primaryAlpha
             )
             
             for node in guidesPair.secondary {
@@ -239,18 +249,36 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             }
         }
         
-        if (edge.distance == 0) == (lastEdge?.distance == 0) {
-            _block()
+        if (options.range.distance == 0) == (lastOptions?.range.distance == 0) {
+            _block(alpha: nil)
         }
+//        else if let last = lastOptions?.range, (last.distance > 0) != (options.range.distance > 0) {
+//            _block(alpha: 0)
+//
+//            let currentGuide = activeGuide
+//            activeGuide = nil
+//
+//            UIView.animate(
+//                withDuration: duration,
+//                delay: 0,
+//                options: [],
+//                animations: { _block(alpha: nil) },
+//                completion: { [weak self] _ in
+//                    self?.activeGuide = currentGuide
+//                }
+//            )
+//        }
         else {
             let currentGuide = activeGuide
             activeGuide = nil
             
             UIView.animate(
                 withDuration: duration,
-                animations: _block,
-                completion: { [unowned self] _ in
-                    self.activeGuide = currentGuide
+                delay: 0,
+                options: [],
+                animations: { _block(alpha: nil) },
+                completion: { [weak self] _ in
+                    self?.activeGuide = currentGuide
                 }
             )
         }
@@ -265,7 +293,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
     }
     
     private func layoutGuides(guides: [ChartGuideStepNode],
-                              usingEdge: ChartRange,
+                              usingOptions: ChartGuideOptions,
                               startY: CGFloat,
                               height: CGFloat,
                               alpha: CGFloat) {
@@ -278,12 +306,12 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         
         let stepValue: CGFloat = convertMap(options.closeToBounds) { closeToBounds in
             let numberOfSteps = options.numberOfSteps - (closeToBounds ? 1 : 0)
-            return usingEdge.distance / CGFloat(numberOfSteps)
+            return usingOptions.range.distance / CGFloat(numberOfSteps)
         }
         
         (0 ..< options.numberOfSteps).forEach { step in
             let height = CGFloat(20)
-            let value = Int(usingEdge.start + CGFloat(step) * stepValue)
+            let value = Int(usingOptions.range.start + CGFloat(step) * stepValue)
             let currentY = bounds.height - (startY + CGFloat(step) * stepY) - height
             
             let guide = guides[step]
@@ -292,12 +320,12 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
             guide.valueColor = options.textColor
             guide.underlineColor = DesignBook.shared.color(.chartGridStroke)
             
-            if step == 0, usingEdge.distance == 0 {
+            if step == 0, usingOptions.range.distance == 0 {
                 guide.value = formattingProvider.format(guide: 0)
                 guide.alpha = 1.0
             }
             else {
-                if usingEdge.distance > 0 {
+                if usingOptions.range.distance > 0 {
                     guide.value = formattingProvider.format(guide: value)
                 }
                 

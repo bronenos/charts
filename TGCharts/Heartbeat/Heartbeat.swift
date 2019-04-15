@@ -10,11 +10,13 @@ import Foundation
 
 protocol IHeartbeat: class {
     var providers: HeartbeatProviders { get }
+    var drivers: HeartbeatDrivers { get }
     var workers: HeartbeatWorkers { get }
 }
 
 final class Heartbeat: IHeartbeat {
     let providers: HeartbeatProviders
+    let drivers: HeartbeatDrivers
     let workers: HeartbeatWorkers
     
     init() {
@@ -27,6 +29,12 @@ final class Heartbeat: IHeartbeat {
         providers = HeartbeatProviders(
             localeProvider: localeProvider,
             formattingProvider: formattingProvider
+        )
+        
+        let feedbackDriver = FeedbackDriver()
+        
+        drivers = HeartbeatDrivers(
+            feedbackDriver: feedbackDriver
         )
         
         let statWorker = StatWorker(

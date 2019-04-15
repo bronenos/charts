@@ -186,6 +186,7 @@ fileprivate struct Layout {
     
     private let cloudOffscreen = CGFloat(10)
     private let cloudExtraMove = CGFloat(20)
+    private let cloudMargin = CGFloat(10)
 
     var lineNodeFrame: CGRect {
         if let pointedX = pointing.coordX {
@@ -238,7 +239,7 @@ fileprivate struct Layout {
             return baseFrame
         }
         
-        guard topDotFrame.minY < baseFrame.maxY else {
+        guard baseFrame.insetBy(dx: -cloudMargin, dy: -cloudMargin).intersects(topDotFrame) else {
             return baseFrame
         }
         

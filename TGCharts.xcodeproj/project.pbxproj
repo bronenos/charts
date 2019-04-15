@@ -86,6 +86,9 @@
 		D4DA1682225DB975009FC1ED /* ChartAreaGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */; };
 		D4F4610B2238C60B00EDDF90 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F4610A2238C60B00EDDF90 /* global.swift */; };
 		D4F6E064226451820058FF47 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6E063226451820058FF47 /* StringExtensions.swift */; };
+		D4F6E067226502840058FF47 /* FeedbackDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6E066226502840058FF47 /* FeedbackDriver.swift */; };
+		D4F6E06B226505600058FF47 /* HeartbeatDrivers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6E06A226505600058FF47 /* HeartbeatDrivers.swift */; };
+		D4F6E06D226507120058FF47 /* FeedbackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6E06C226507120058FF47 /* FeedbackTypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -172,6 +175,9 @@
 		D4DA1681225DB975009FC1ED /* ChartAreaGraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAreaGraphNode.swift; sourceTree = "<group>"; };
 		D4F4610A2238C60B00EDDF90 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 		D4F6E063226451820058FF47 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
+		D4F6E066226502840058FF47 /* FeedbackDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackDriver.swift; sourceTree = "<group>"; };
+		D4F6E06A226505600058FF47 /* HeartbeatDrivers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartbeatDrivers.swift; sourceTree = "<group>"; };
+		D4F6E06C226507120058FF47 /* FeedbackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackTypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -372,8 +378,10 @@
 			isa = PBXGroup;
 			children = (
 				D461823822346690006B72A7 /* HeartbeatProviders.swift */,
+				D4F6E06A226505600058FF47 /* HeartbeatDrivers.swift */,
 				D461823C22346771006B72A7 /* LocaleProvider */,
 				D461823F22346BE0006B72A7 /* FormattingProvider */,
+				D4F6E0652265024D0058FF47 /* FeedbackDriver */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -562,6 +570,15 @@
 			path = ChartPointerCloudControl;
 			sourceTree = "<group>";
 		};
+		D4F6E0652265024D0058FF47 /* FeedbackDriver */ = {
+			isa = PBXGroup;
+			children = (
+				D4F6E06C226507120058FF47 /* FeedbackTypes.swift */,
+				D4F6E066226502840058FF47 /* FeedbackDriver.swift */,
+			);
+			path = FeedbackDriver;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -648,6 +665,7 @@
 				D461828A2235C902006B72A7 /* UIColorExtensions.swift in Sources */,
 				D461827422359873006B72A7 /* HeartbeatWorkers.swift in Sources */,
 				D4984A9B225A80180008C552 /* ChartOptionsTypes.swift in Sources */,
+				D4F6E06D226507120058FF47 /* FeedbackTypes.swift in Sources */,
 				D45B78A5223A60EE002134ED /* ChartInteractorScenario.swift in Sources */,
 				D481904F226230DB004CBEF6 /* ChartDuoOperation.swift in Sources */,
 				D461824322346C30006B72A7 /* FormattingTypes.swift in Sources */,
@@ -687,6 +705,7 @@
 				D461824F2234D97B006B72A7 /* BaseViewController.swift in Sources */,
 				D461824D2234D7E4006B72A7 /* RootInteractor.swift in Sources */,
 				D46B96E1225B69C9001EFED6 /* ChartGraphContainer.swift in Sources */,
+				D4F6E06B226505600058FF47 /* HeartbeatDrivers.swift in Sources */,
 				D46182562234DA0D006B72A7 /* StatViewController.swift in Sources */,
 				D42658D2223678CC00FB79AB /* StatSectionHeader.swift in Sources */,
 				D46182552234DA0D006B72A7 /* StatRouter.swift in Sources */,
@@ -695,6 +714,7 @@
 				D461821D2234614F006B72A7 /* AppDelegate.swift in Sources */,
 				D45D926F224411EB004E136C /* ChartGuideStepNode.swift in Sources */,
 				D45B78A7223A610C002134ED /* ChartInteractorMoveScenario.swift in Sources */,
+				D4F6E067226502840058FF47 /* FeedbackDriver.swift in Sources */,
 				D45B78A9223A673D002134ED /* CGPointExtensions.swift in Sources */,
 				D46182812235A571006B72A7 /* JsonReader.swift in Sources */,
 				D48190572263782D004CBEF6 /* ChartPointerContainer.swift in Sources */,

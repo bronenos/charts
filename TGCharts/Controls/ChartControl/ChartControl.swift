@@ -32,6 +32,7 @@ protocol IChartControl: class {
 
 final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
     let chart: Chart
+    private let feedbackDriver: IFeedbackDriver
 
     private weak var delegate: IChartControlDelegate?
 
@@ -44,8 +45,13 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     private let navigatorOptions: ChartNavigatorOptions
     private(set) var config: ChartConfig
 
-    init(chart: Chart, mainGraphHeight: CGFloat, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+    init(chart: Chart,
+         mainGraphHeight: CGFloat,
+         localeProvider: ILocaleProvider,
+         formattingProvider: IFormattingProvider,
+         feedbackDriver: IFeedbackDriver) {
         self.chart = chart
+        self.feedbackDriver = feedbackDriver
         
         standardDistance = CGFloat(1.0 / 12.0)
         standardRange = ChartRange(start: 1.0 - standardDistance, end: 1.0)
@@ -132,6 +138,13 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
             duration: DesignBook.shared.duration(.toggleLine),
             wantsActualEye: true
         )
+        
+        if exclusive {
+            feedbackDriver.vibrateOnAction(strength: .strong)
+        }
+        else {
+            feedbackDriver.vibrateOnAction(strength: .medium)
+        }
     }
     
     func interactorDidBegin() {
@@ -150,6 +163,8 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
             duration: DesignBook.shared.duration(.updateEye),
             wantsActualEye: wantsActualEye
         )
+        
+//        feedbackDriver.vibrateOnSlide()
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

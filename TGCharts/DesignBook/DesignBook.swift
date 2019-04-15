@@ -142,7 +142,7 @@ final class LightDesignBook: DesignBook {
         case .chartPointerCloudControls: return UIColor(hex: "59606D").withAlphaComponent(0.3)
         case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.71, green: 0.78, blue: 0.88, alpha: 1.0)
+        case .sliderBackground: return UIColor(hex: "B4C7D9")
         case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         case .optionForeground: return UIColor.white
         case .actionForeground: return UIColor(hex: "108BE3")
@@ -176,7 +176,7 @@ final class DarkDesignBook: DesignBook {
         case .chartPointerCloudControls: return UIColor(hex: "D2D5D7")
         case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
         case .navigatorCoverBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.27, green: 0.31, blue: 0.35, alpha: 1.0)
+        case .sliderBackground: return UIColor(hex: "444F5A")
         case .sliderForeground: return UIColor.white
         case .optionForeground: return UIColor.white
         case .actionForeground: return UIColor(hex: "2EA6FE")

@@ -13,6 +13,7 @@ protocol IStatInteractor: IBaseInteractor {
     var view: IStatView! { get set }
     var localeProvider: ILocaleProvider { get }
     var formattingProvider: IFormattingProvider { get }
+    var feedbackDriver: IFeedbackDriver { get }
     func toggleDesign()
 }
 
@@ -39,6 +40,10 @@ final class StatInteractor: IStatInteractor {
     
     var formattingProvider: IFormattingProvider {
         return heartbeat.providers.formattingProvider
+    }
+    
+    var feedbackDriver: IFeedbackDriver {
+        return heartbeat.drivers.feedbackDriver
     }
     
     func interfaceStartup() {
