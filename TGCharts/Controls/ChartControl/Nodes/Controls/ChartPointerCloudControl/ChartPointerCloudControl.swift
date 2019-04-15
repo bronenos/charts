@@ -86,7 +86,7 @@ final class ChartPointerCloudControl: ChartNode, IChartPointerCloudControl {
             arrowNode.attributedText = NSAttributedString(
                 string: "›",
                 attributes: [
-                    .foregroundColor: DesignBook.shared.color(.chartPointerCloudForeground),
+                    .foregroundColor: DesignBook.shared.color(.chartPointerCloudControls),
                     .paragraphStyle: _style(alignment: .right)
                 ]
             )

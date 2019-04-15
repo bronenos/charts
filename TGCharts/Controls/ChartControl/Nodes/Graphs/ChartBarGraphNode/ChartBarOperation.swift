@@ -33,7 +33,7 @@ class ChartBarPointsOperation: ChartPointsOperation {
         )
         
         let context = ChartEyeOperationContext(
-            valueEdges: [totalEdge],
+            valueEdges: [sliceEdge],
             totalEdges: [totalEdge],
             lineEdges: [sliceEdge]
         )
@@ -61,19 +61,21 @@ class ChartBarEyesOperation: ChartEyesOperation {
             indices: meta.visibleIndices
         )
         
+        let context = ChartEyeOperationContext(
+            valueEdges: [sliceEdge],
+            totalEdges: self.context.totalEdges,
+            lineEdges: clone(sliceEdge, number: chart.lines.count)
+        )
+        
         let eyes = calculateEyes(
             config: config,
-            context: ChartEyeOperationContext(
-                valueEdges: context.valueEdges,
-                totalEdges: context.totalEdges,
-                lineEdges: clone(sliceEdge, number: chart.lines.count)
-            ),
+            context: context,
             sliceEdge: sliceEdge
         )
         
         return CalculateEyesResult(
             context: context,
-            edges: context.totalEdges,
+            edges: [sliceEdge],
             eyes: eyes
         )
     }

@@ -25,6 +25,7 @@ enum DesignBookColor {
     case chartPointerFocusedLineStroke
     case chartPointerCloudBackground
     case chartPointerCloudForeground
+    case chartPointerCloudControls
     case chartPointerDimming
     case navigatorBackground
     case navigatorCoverBackground
