@@ -34,7 +34,7 @@ final class FormattingProvider: IFormattingProvider {
         
         switch style {
         case .shortDate:
-            dateFormatter.dateFormat = "MMM d"
+            dateFormatter.dateFormat = "d MMM"
             dateFormatter.doesRelativeDateFormatting = false
 
         case .justYear:

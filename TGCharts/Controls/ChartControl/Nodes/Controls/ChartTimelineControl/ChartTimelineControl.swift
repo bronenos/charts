@@ -194,7 +194,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
             string: formattingProvider.format(date: date, style: .shortDate),
             attributes: [
                 .font: DesignBook.shared.font(size: 10, weight: .regular),
-                .kern: NSNumber(value: -0.5)
+                .kern: NSNumber(value: -0.3)
             ]
         )
         
