@@ -255,7 +255,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
 
     override func updateDesign() {
         super.updateDesign()
-        backgroundColor = DesignBook.shared.color(.primaryBackground)
+        
+        if enableControls {
+            backgroundColor = DesignBook.shared.color(.primaryBackground)
+        }
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {

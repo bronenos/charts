@@ -59,7 +59,8 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         super.init(frame: .zero)
         
         tag = ChartControlTag.navigator.rawValue
-        clipsToBounds = true
+        layer.cornerRadius = 8
+        layer.masksToBounds = true
         
         addSubview(spaceNode)
         addSubview(graphContainer)
@@ -110,6 +111,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
     
     override func updateDesign() {
         super.updateDesign()
+        graphContainer.backgroundColor = DesignBook.shared.color(.navigatorBackground)
         spaceNode.backgroundColor = DesignBook.shared.color(.primaryBackground)
         leftDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
         rightDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)

@@ -116,7 +116,8 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                 range: edges.first ?? .empty,
                 numberOfSteps: 6,
                 closeToBounds: false,
-                textColor: DesignBook.shared.color(chart: chart, key: .y)
+                textColor: DesignBook.shared.color(chart: chart, key: .y),
+                reversedAnimations: true
             ),
             rightOptions: nil,
             duration: duration

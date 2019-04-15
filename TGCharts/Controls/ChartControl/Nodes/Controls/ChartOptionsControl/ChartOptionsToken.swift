@@ -33,7 +33,7 @@ final class ChartOptionsToken: UIView {
         button.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
         addSubview(button)
         
-        layer.cornerRadius = 4
+        layer.cornerRadius = DesignBook.shared.standardRadius
         layer.masksToBounds = true
         
         button.addGestureRecognizer(

@@ -29,6 +29,7 @@ protocol IChartGraphContainer: IChartNode {
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     private let headerNode: ChartHeader?
+    private let enableControls: Bool
     private var mainGraphHeight: CGFloat
     
     private let guidesContainer: ChartGuideContainer
@@ -37,6 +38,7 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     
     init(chart: Chart, config: ChartConfig, headerNode: ChartHeader?, formattingProvider: IFormattingProvider, mainGraphHeight: CGFloat, enableControls: Bool) {
         self.headerNode = headerNode
+        self.enableControls = enableControls
         self.mainGraphHeight = mainGraphHeight
         
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
@@ -103,7 +105,11 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
 
     override func updateDesign() {
         super.updateDesign()
-        backgroundColor = DesignBook.shared.color(.primaryBackground)
+        
+        if enableControls {
+            backgroundColor = DesignBook.shared.color(.primaryBackground)
+        }
+        
         innerGraph?.updateDesign()
         guidesContainer.updateDesign()
         pointerContainer.updateDesign()

@@ -14,6 +14,7 @@ struct ChartGuideOptions: Equatable {
     let numberOfSteps: Int
     let closeToBounds: Bool
     let textColor: UIColor?
+    let reversedAnimations: Bool
 }
 
 protocol IChartGuideControl: IChartNode {
@@ -98,7 +99,8 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
                     range: .empty,
                     numberOfSteps: 1,
                     closeToBounds: false,
-                    textColor: nil
+                    textColor: nil,
+                    reversedAnimations: false
                 ),
                 duration: duration
             )

@@ -71,7 +71,8 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
                 range: .empty,
                 numberOfSteps: 6,
                 closeToBounds: false,
-                textColor: resultingColor
+                textColor: resultingColor,
+                reversedAnimations: false
             )
             
             guard let config = lineConfig, config.visible else { return emptyOptions }
@@ -81,7 +82,8 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
                 range: range,
                 numberOfSteps: 6,
                 closeToBounds: false,
-                textColor: resultingColor
+                textColor: resultingColor,
+                reversedAnimations: false
             )
         }
         

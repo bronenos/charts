@@ -28,6 +28,7 @@ enum ChartColorKey {
 protocol IDesignBook: class {
     var style: DesignBookStyle { get }
     var styleObservable: BroadcastObservable<DesignBookStyle> { get }
+    var standardRadius: CGFloat { get }
     func color(_ color: DesignBookColor) -> UIColor
     func color(chart: Chart, key: ChartColorKey) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
@@ -55,6 +56,10 @@ class DesignBook: IDesignBook {
     
     var styleObservable: BroadcastObservable<DesignBookStyle> {
         return sharedStyleObservable
+    }
+    
+    var standardRadius: CGFloat {
+        return 6
     }
     
     func color(_ color: DesignBookColor) -> UIColor {
@@ -140,8 +145,8 @@ final class LightDesignBook: DesignBook {
         case .chartPointerCloudBackground: return UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
         case .chartPointerCloudControls: return UIColor(hex: "59606D").withAlphaComponent(0.3)
-        case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
-        case .navigatorCoverBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 0.7)
+        case .navigatorBackground: return UIColor(hex: "E9F3FA")
+        case .navigatorCoverBackground: return self.color(.navigatorBackground).withAlphaComponent(0.2)
         case .sliderBackground: return UIColor(hex: "B4C7D9")
         case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         case .optionForeground: return UIColor.white
@@ -174,8 +179,8 @@ final class DarkDesignBook: DesignBook {
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
         case .chartPointerCloudControls: return UIColor(hex: "D2D5D7")
-        case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
-        case .navigatorCoverBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 0.7)
+        case .navigatorBackground: return UIColor(hex: "151C27")
+        case .navigatorCoverBackground: return self.color(.navigatorBackground).withAlphaComponent(0.2)
         case .sliderBackground: return UIColor(hex: "444F5A")
         case .sliderForeground: return UIColor.white
         case .optionForeground: return UIColor.white

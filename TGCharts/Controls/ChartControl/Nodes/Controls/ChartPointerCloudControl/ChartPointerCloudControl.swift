@@ -36,7 +36,7 @@ final class ChartPointerCloudControl: ChartNode, IChartPointerCloudControl {
     init() {
         super.init(frame: .zero)
         
-        layer.cornerRadius = 4
+        layer.cornerRadius = DesignBook.shared.standardRadius
         layer.masksToBounds = true
         
         dateNode.font = DesignBook.shared.font(size: 11, weight: .medium)

@@ -108,7 +108,8 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 range: edges.first ?? .empty,
                 numberOfSteps: 6,
                 closeToBounds: false,
-                textColor: DesignBook.shared.color(chart: chart, key: .y)
+                textColor: DesignBook.shared.color(chart: chart, key: .y),
+                reversedAnimations: false
             ),
             rightOptions: nil,
             duration: duration

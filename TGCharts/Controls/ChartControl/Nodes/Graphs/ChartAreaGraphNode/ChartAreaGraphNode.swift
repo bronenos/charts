@@ -109,7 +109,8 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                 range: edges.first ?? .empty,
                 numberOfSteps: 5,
                 closeToBounds: true,
-                textColor: DesignBook.shared.color(chart: chart, key: .y)
+                textColor: DesignBook.shared.color(chart: chart, key: .y),
+                reversedAnimations: true
             ),
             rightOptions: nil,
             duration: duration
