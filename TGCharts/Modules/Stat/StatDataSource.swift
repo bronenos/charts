@@ -38,7 +38,9 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         tableView.dataSource = self
         tableView.delegate = self
         
+        tableView.separatorColor = DesignBook.shared.color(.primaryBackground)
         tableView.reloadData()
+        
         self.tableView = tableView
     }
     
@@ -81,7 +83,6 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         let control = metas[indexPath.section].control
         control.link(to: cell.contentView)
         
-        cell.separatorInset.left = cell.bounds.width
         cell.selectionStyle = .none
     }
     
@@ -91,6 +92,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func updateDesign() {
+        tableView?.separatorColor = DesignBook.shared.color(.primaryBackground)
         metas.forEach { meta in meta.control.update() }
     }
 }
