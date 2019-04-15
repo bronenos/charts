@@ -32,7 +32,7 @@ protocol IChartSceneNode: IChartNode {
 }
 
 protocol IChartSceneDelegate: class {
-    func sceneDidToggleLine(index: Int)
+    func sceneDidToggleLine(index: Int, exclusive: Bool)
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
@@ -118,8 +118,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         populateOptions(chart: chart, config: config, animated: false)
         updateDesign()
         
-        optionsNode.tokenTapHandler = { [weak self] index in
-            self?.delegate?.sceneDidToggleLine(index: index)
+        optionsNode.tokenTapHandler = { [weak self] index, exclusive in
+            self?.delegate?.sceneDidToggleLine(index: index, exclusive: exclusive)
         }
     }
     

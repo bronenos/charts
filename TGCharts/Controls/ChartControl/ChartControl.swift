@@ -119,8 +119,14 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         render(duration: 0, wantsActualEye: false)
     }
     
-    func sceneDidToggleLine(index: Int) {
-        config.lines[index].visible.toggle()
+    func sceneDidToggleLine(index: Int, exclusive: Bool) {
+        if exclusive {
+            config.lines.indices.forEach {  config.lines[$0].visible = false }
+            config.lines[index].visible = true
+        }
+        else {
+            config.lines[index].visible.toggle()
+        }
         
         render(
             duration: DesignBook.shared.duration(.toggleLine),

@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 
 protocol IChartOptionsControl: class {
-    var tokenTapHandler: ((Int) -> Void)? { get set }
+    var tokenTapHandler: ((Int, Bool) -> Void)? { get set }
     func populate(_ options: [ChartOptionsItem], animated: Bool)
 }
 
 final class ChartOptionsControl: ChartNode, IChartOptionsControl {
-    var tokenTapHandler: ((Int) -> Void)?
+    var tokenTapHandler: ((Int, Bool) -> Void)?
     
     private var tokenOptions = [ChartOptionsItem]()
     private var tokenControls = [ChartOptionsToken]()
@@ -46,8 +46,8 @@ final class ChartOptionsControl: ChartNode, IChartOptionsControl {
                     animated: animated
                 )
                 
-                control.tapHandler = { [weak self] in
-                    self?.handleTokenTap(control)
+                control.tapHandler = { [weak self] exclusive in
+                    self?.handleTokenTap(control, exclusive: exclusive)
                 }
                 
                 return control
@@ -74,9 +74,9 @@ final class ChartOptionsControl: ChartNode, IChartOptionsControl {
         )
     }
     
-    @objc private func handleTokenTap(_ control: ChartOptionsToken) {
+    @objc private func handleTokenTap(_ control: ChartOptionsToken, exclusive: Bool) {
         guard let index = tokenControls.firstIndex(of: control) else { return }
-        tokenTapHandler?(index)
+        tokenTapHandler?(index, exclusive)
     }
 }
 

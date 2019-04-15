@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 final class ChartOptionsToken: UIView {
-    var tapHandler: (() -> Void)?
+    var tapHandler: ((Bool) -> Void)?
     
     private let titleLabel = UILabel()
     private let enabledLabel = UILabel()
@@ -35,6 +35,10 @@ final class ChartOptionsToken: UIView {
         
         layer.cornerRadius = 4
         layer.masksToBounds = true
+        
+        button.addGestureRecognizer(
+            UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        )
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -100,7 +104,12 @@ final class ChartOptionsToken: UIView {
     }
     
     @objc private func handleTap() {
-        tapHandler?()
+        tapHandler?(false)
+    }
+    
+    @objc private func handleLongPress(_ gesture: UIGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        tapHandler?(true)
     }
 }
 
