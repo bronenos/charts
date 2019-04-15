@@ -26,6 +26,7 @@ protocol IChartControl: class {
     func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
     func unlink()
+    func updateHeight(mainGraphHeight: CGFloat)
     func update()
 }
 
@@ -43,7 +44,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     private let navigatorOptions: ChartNavigatorOptions
     private(set) var config: ChartConfig
 
-    init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+    init(chart: Chart, mainGraphHeight: CGFloat, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
         self.chart = chart
         
         standardDistance = CGFloat(1.0 / 12.0)
@@ -61,6 +62,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         
         scene = ChartSceneNode(
             chart: chart,
+            mainGraphHeight: mainGraphHeight,
             navigatorOptions: navigatorOptions,
             config: config,
             localeProvider: localeProvider,
@@ -86,9 +88,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     }
     
     override var frame: CGRect {
-        didSet {
-            update()
-        }
+        didSet { update() }
     }
     
     func setDelegate(_ delegate: IChartControlDelegate?) {
@@ -106,6 +106,12 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     
     func unlink() {
         removeFromSuperview()
+    }
+    
+    func updateHeight(mainGraphHeight: CGFloat) {
+        scene.updateHeight(mainGraphHeight: mainGraphHeight)
+        render(duration: 0, wantsActualEye: false)
+        setNeedsLayout()
     }
     
     func update() {

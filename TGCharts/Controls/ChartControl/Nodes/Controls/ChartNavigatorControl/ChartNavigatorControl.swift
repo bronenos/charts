@@ -51,6 +51,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
             chart: chart,
             config: config,
             formattingProvider: formattingProvider,
+            mainGraphHeight: 25,
             enableControls: false
         )
         

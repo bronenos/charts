@@ -22,6 +22,7 @@ protocol IDesignBook: class {
     func color(_ color: DesignBookColor) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
     func duration(_ animation: DesignBookAnimation) -> TimeInterval
+    func mainGraphHeight(bounds: CGRect, traitCollection: UITraitCollection) -> CGFloat
     func caretStandardWidth(navigationWidth: CGFloat) -> CGFloat
     func resolveStatusBarStyle() -> UIStatusBarStyle
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key: Any]
@@ -65,6 +66,19 @@ class DesignBook: IDesignBook {
         case .toggleOption: return 0.25
         case .updateEye: return isPhone ? 0.075 : 0
         case .pointerDimming: return 0.25
+        }
+    }
+    
+    func mainGraphHeight(bounds: CGRect, traitCollection: UITraitCollection) -> CGFloat {
+        if isPhone {
+            switch traitCollection.verticalSizeClass {
+            case .regular: return min(bounds.height * 0.5, 300)
+            case .compact: return 150
+            default: return 50
+            }
+        }
+        else {
+            return 300
         }
     }
     

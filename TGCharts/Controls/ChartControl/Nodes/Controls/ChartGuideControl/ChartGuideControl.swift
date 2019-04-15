@@ -59,10 +59,14 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
     }
     
     func update(edge: ChartRange?, duration: TimeInterval) {
+        update(edge: edge, duration: duration, force: false)
+    }
+    
+    func update(edge: ChartRange?, duration: TimeInterval, force: Bool) {
         guard let activeGuide = activeGuide else { return }
         let guidesPair = obtainGuides()
         
-        guard edge != lastEdge else { return }
+        guard (edge != lastEdge) || force else { return }
         defer { lastEdge = edge }
         
         if let edge = edge {
@@ -94,6 +98,10 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         primaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
         secondaryGuides.first?.color = DesignBook.shared.color(.chartPointerFocusedLineStroke)
         secondaryGuides.dropFirst().forEach { $0.color = DesignBook.shared.color(.chartGuidesLineStroke) }
+        
+        if let edge = lastEdge {
+            update(edge: edge, duration: 0, force: true)
+        }
     }
     
     private func isMinorEdgeChange(fromEdge: ChartRange, toEdge: ChartRange) -> Bool {

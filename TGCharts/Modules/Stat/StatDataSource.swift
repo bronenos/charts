@@ -42,7 +42,8 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
         self.tableView = tableView
     }
     
-    func reload() {
+    func reload(mainGraphHeight: CGFloat) {
+        metas.forEach { meta in meta.control.updateHeight(mainGraphHeight: mainGraphHeight) }
         tableView?.reloadData()
     }
     

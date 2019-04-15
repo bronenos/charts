@@ -139,18 +139,20 @@ fileprivate extension Operation {
         let left = config.range.start
         let right = config.range.end
         
+        let distanceBase = config.standardDistance
+        let distanceFactor = config.range.distance.percent(from: distanceBase, to: distanceBase * 3)
+        let scaleFactor = 1.0 - (0.75 * distanceFactor)
+        
         return zip(context.lineEdges, sliceEdges).map { contextualSliceEdge, sliceEdge in
             if sliceEdge.distance > 0 {
                 let top = sliceEdge.end.percent(inside: totalEdge)
                 let bottom = sliceEdge.start.percent(inside: totalEdge)
                 let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-                let scaleFactor = (config.standardDistance / config.range.distance)
                 return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
             else {
                 let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
                 let edges = UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
-                let scaleFactor = (config.standardDistance / config.range.distance)
                 return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
         }

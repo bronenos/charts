@@ -27,6 +27,7 @@ enum ChartControlTag: Int {
 
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
+    func updateHeight(mainGraphHeight: CGFloat)
     func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool)
 }
 
@@ -48,6 +49,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     private var config: ChartConfig
     
     init(chart: Chart,
+         mainGraphHeight: CGFloat,
          navigatorOptions: ChartNavigatorOptions,
          config: ChartConfig,
          localeProvider: ILocaleProvider,
@@ -65,6 +67,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             chart: chart,
             config: config,
             formattingProvider: formattingProvider,
+            mainGraphHeight: mainGraphHeight,
             enableControls: true
         )
         
@@ -121,6 +124,10 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     
     required init?(coder aDecoder: NSCoder) {
         abort()
+    }
+    
+    func updateHeight(mainGraphHeight: CGFloat) {
+        graphContainer.updateHeight(mainGraphHeight: mainGraphHeight)
     }
     
     func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool) {
@@ -270,7 +277,6 @@ fileprivate struct Layout {
     let optionsNode: ChartOptionsControl
     
     private let gaps = Layout.totalGaps
-    private let graphHeight = CGFloat(300)
     private let timelineHeight = CGFloat(25)
     private let navigatorHeight = CGFloat(40)
     

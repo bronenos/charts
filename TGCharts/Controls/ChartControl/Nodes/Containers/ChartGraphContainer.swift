@@ -21,12 +21,15 @@ protocol IChartGraphContainer: IChartNode {
 }
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
-    let guidesContainer: ChartGuideContainer
-    let pointerContainer: ChartPointerContainer
-
+    private var mainGraphHeight: CGFloat
+    
+    private let guidesContainer: ChartGuideContainer
+    private let pointerContainer: ChartPointerContainer
     private var innerGraph: ChartGraphNode?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, mainGraphHeight: CGFloat, enableControls: Bool) {
+        self.mainGraphHeight = mainGraphHeight
+        
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
         pointerContainer = ChartPointerContainer(chart: chart, formattingProvider: formattingProvider)
 
@@ -54,6 +57,10 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         innerGraph = graph
         innerGraph?.container = self
         insertSubview(graph, belowSubview: guidesContainer)
+    }
+    
+    func updateHeight(mainGraphHeight: CGFloat) {
+        self.mainGraphHeight = mainGraphHeight
     }
     
     func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval) {
@@ -90,7 +97,7 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        return innerGraph?.sizeThatFits(.zero) ?? .zero
+        return CGSize(width: size.width, height: mainGraphHeight)
     }
     
     override func layoutSubviews() {

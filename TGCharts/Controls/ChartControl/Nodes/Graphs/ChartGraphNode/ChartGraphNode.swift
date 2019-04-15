@@ -257,7 +257,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        return CGSize(width: size.width, height: 300)
+        return size
     }
     
     override func layoutSubviews() {

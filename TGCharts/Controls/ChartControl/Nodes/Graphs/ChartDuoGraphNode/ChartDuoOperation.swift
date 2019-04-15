@@ -138,6 +138,10 @@ fileprivate extension Operation {
     func calculateEyes(config: ChartConfig, context: ChartEyeOperationContext, sliceEdges: [ChartRange]) -> [ChartGraphEye] {
         let allHidden = sliceEdges.allSatisfy { $0.distance == 0 }
         
+        let distanceBase = config.standardDistance
+        let distanceFactor = config.range.distance.percent(from: distanceBase, to: distanceBase * 3)
+        let scaleFactor = 1.0 - (0.75 * distanceFactor)
+        
         return config.lines.indices.map { index in
             let totalEdge = context.totalEdges[index]
             let contextualSliceEdge = context.lineEdges[index]
@@ -150,13 +154,11 @@ fileprivate extension Operation {
                 let top = sliceEdge.end.percent(inside: totalEdge)
                 let bottom = sliceEdge.start.percent(inside: totalEdge)
                 let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-                let scaleFactor = (config.standardDistance / config.range.distance)
                 return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
             else if allHidden {
                 let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
                 let edges = UIEdgeInsets(top: bottom + 10.0, left: left, bottom: bottom, right: right)
-                let scaleFactor = (config.standardDistance / config.range.distance)
                 return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
             }
             else {
@@ -165,12 +167,10 @@ fileprivate extension Operation {
                 
                 if top > bottom {
                     let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-                    let scaleFactor = (config.standardDistance / config.range.distance)
                     return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
                 }
                 else {
                     let edges = UIEdgeInsets(top: bottom + 1.0, left: left, bottom: bottom, right: right)
-                    let scaleFactor = (config.standardDistance / config.range.distance)
                     return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
                 }
             }

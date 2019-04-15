@@ -34,13 +34,6 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleOrientationChange),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -54,6 +47,10 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         chartControls = metas.map { meta in
             ChartControl(
                 chart: meta.chart,
+                mainGraphHeight: DesignBook.shared.mainGraphHeight(
+                    bounds: view.bounds,
+                    traitCollection: traitCollection
+                ),
                 localeProvider: interactor.localeProvider,
                 formattingProvider: formattingProvider
             )
@@ -114,8 +111,15 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         interactor.toggleDesign()
     }
     
-    @objc private func handleOrientationChange() {
-        dataSource.reload()
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        dataSource.reload(
+            mainGraphHeight: DesignBook.shared.mainGraphHeight(
+                bounds: view.bounds,
+                traitCollection: traitCollection
+            )
+        )
     }
 }
 
