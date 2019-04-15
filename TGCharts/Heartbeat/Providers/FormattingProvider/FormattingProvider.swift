@@ -42,7 +42,7 @@ final class FormattingProvider: IFormattingProvider {
             dateFormatter.doesRelativeDateFormatting = false
             
         case .mediumDate:
-            dateFormatter.dateFormat = "d MMM yyyy"
+            dateFormatter.dateFormat = "d MMMM yyyy"
             dateFormatter.doesRelativeDateFormatting = false
             
         case .dayAndDate:
