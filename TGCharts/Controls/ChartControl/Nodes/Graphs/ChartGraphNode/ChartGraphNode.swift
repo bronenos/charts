@@ -231,6 +231,12 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         for (node, eye) in zip(orderedNodes, eyes) {
             node.setEye(insets: eye.edges, scale: eye.scaleFactor, duration: duration)
         }
+        
+        container?.adjustDates(
+            sinceDate: chart.axis[calculatePointing(pointer: 0, rounder: floor).index].date,
+            lastDate: chart.axis[calculatePointing(pointer: 1.0, rounder: ceil).index].date,
+            duration: duration
+        )
     }
     
     func updateGuides(edges: [ChartRange], duration: TimeInterval) {

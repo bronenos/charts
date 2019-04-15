@@ -66,6 +66,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         graphContainer = ChartGraphContainer(
             chart: chart,
             config: config,
+            headerNode: headerNode,
             formattingProvider: formattingProvider,
             mainGraphHeight: mainGraphHeight,
             enableControls: true

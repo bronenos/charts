@@ -12,7 +12,14 @@ import UIKit
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
     func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval)
-    func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
+    
+    func adjustDates(sinceDate: Date,
+                     lastDate: Date,
+                     duration: TimeInterval)
+    
+    func adjustGuides(left: ChartRange?,
+                      right: ChartRange?,
+                      duration: TimeInterval)
     
     func adjustPointer(pointing: ChartGraphPointing?,
                        content: ChartPointerCloudContent?,
@@ -21,13 +28,15 @@ protocol IChartGraphContainer: IChartNode {
 }
 
 final class ChartGraphContainer: ChartNode, IChartGraphContainer {
+    private let headerNode: ChartHeader?
     private var mainGraphHeight: CGFloat
     
     private let guidesContainer: ChartGuideContainer
     private let pointerContainer: ChartPointerContainer
     private var innerGraph: ChartGraphNode?
     
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, mainGraphHeight: CGFloat, enableControls: Bool) {
+    init(chart: Chart, config: ChartConfig, headerNode: ChartHeader?, formattingProvider: IFormattingProvider, mainGraphHeight: CGFloat, enableControls: Bool) {
+        self.headerNode = headerNode
         self.mainGraphHeight = mainGraphHeight
         
         guidesContainer = ChartGuideContainer(chart: chart, config: config, formattingProvider: formattingProvider)
@@ -65,6 +74,10 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     
     func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval) {
         innerGraph?.update(config: config, shouldUpdateEye: shouldUpdateEye, duration: duration)
+    }
+    
+    func adjustDates(sinceDate: Date, lastDate: Date, duration: TimeInterval) {
+        headerNode?.setDateInterval(sinceDate: sinceDate, untilDate: lastDate)
     }
     
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {

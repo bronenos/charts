@@ -50,6 +50,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         graphContainer = ChartGraphContainer(
             chart: chart,
             config: config,
+            headerNode: nil,
             formattingProvider: formattingProvider,
             mainGraphHeight: 25,
             enableControls: false
