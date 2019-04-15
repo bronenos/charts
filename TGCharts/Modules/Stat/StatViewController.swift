@@ -11,7 +11,7 @@ import UIKit
 
 protocol IStatView: class {
     func setTitle(_ title: String)
-    func setCharts(titlePrefix: String, charts: [Chart])
+    func setChartMetas(_ metas: [ChartMeta])
     func setDesignSwitcher(title: String)
 }
 
@@ -47,20 +47,24 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         abort()
     }
     
-    func setCharts(titlePrefix: String, charts: [Chart]) {
+    func setChartMetas(_ metas: [ChartMeta]) {
         let formattingProvider = interactor.formattingProvider
         
         chartControls.forEach { control in control.setDelegate(nil) }
-        chartControls = charts.map {
+        chartControls = metas.map { meta in
             ChartControl(
-                chart: $0,
+                chart: meta.chart,
                 localeProvider: interactor.localeProvider,
                 formattingProvider: formattingProvider
             )
         }
         chartControls.forEach { control in control.setDelegate(self) }
         
-        dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
+        dataSource.setMetas(
+            metas: zip(metas, chartControls).map { meta, control in
+                return ChartControlMeta(chartMeta: meta, control: control)
+            }
+        )
     }
     
     func setDesignSwitcher(title: String) {

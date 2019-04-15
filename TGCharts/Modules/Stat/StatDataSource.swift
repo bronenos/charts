@@ -9,18 +9,21 @@
 import Foundation
 import UIKit
 
+struct ChartControlMeta {
+    let chartMeta: ChartMeta
+    let control: ChartControl
+}
+
 fileprivate let standardHeaderHeight = CGFloat(25)
 
 final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate, DesignBookUpdatable {
     private weak var tableView: UITableView?
     
-    private var sectionTitle: String?
-    private var chartControls = [ChartControl]()
+    private var metas = [ChartControlMeta]()
     private var designSwitcherTitle: String?
     
-    func setChartControls(titlePrefix: String, controls: [ChartControl]) {
-        sectionTitle = titlePrefix
-        chartControls = controls
+    func setMetas(metas: [ChartControlMeta]) {
+        self.metas = metas
         tableView?.reloadData()
     }
     
@@ -44,7 +47,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return chartControls.count
+        return metas.count
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -52,10 +55,8 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard let title = sectionTitle else { return nil }
-        
         let label = StatSectionHeader()
-        label.text = "\(title) #\(section + 1)".uppercased()
+        label.text = metas[section].chartMeta.title.uppercased()
         label.textColor = DesignBook.shared.color(.secondaryForeground)
         label.font = DesignBook.shared.font(size: 13, weight: .light)
         return label
@@ -66,7 +67,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let control = chartControls[indexPath.section]
+        let control = metas[indexPath.section].control
         let height = control.sizeThatFits(tableView.bounds.size).height
         return height
     }
@@ -76,7 +77,7 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let control = chartControls[indexPath.section]
+        let control = metas[indexPath.section].control
         control.link(to: cell.contentView)
         
         cell.separatorInset.left = cell.bounds.width
@@ -84,12 +85,12 @@ final class StatDataSource: NSObject, UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let control = chartControls[indexPath.section]
+        let control = metas[indexPath.section].control
         control.unlink()
     }
     
     func updateDesign() {
-        chartControls.forEach { control in control.update() }
+        metas.forEach { meta in meta.control.update() }
     }
 }
 

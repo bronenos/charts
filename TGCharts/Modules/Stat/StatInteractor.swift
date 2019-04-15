@@ -28,9 +28,8 @@ final class StatInteractor: IStatInteractor {
         self.heartbeat = heartbeat
         
         statObserver = heartbeat.workers.statWorker.stateObservable.addObserver { [weak self] value in
-            guard case .ready(let charts) = value else { return }
-            let prefix = heartbeat.localized(key: "Stat.Section.TitlePrefix")
-            self?.view.setCharts(titlePrefix: prefix, charts: charts)
+            guard case .ready(let metas) = value else { return }
+            self?.view.setChartMetas(metas)
         }
     }
     

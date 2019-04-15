@@ -12,7 +12,12 @@ import UIKit
 enum StatLoadingState {
     case unknown
     case waiting
-    case ready([Chart])
+    case ready([ChartMeta])
+}
+
+struct ChartMeta {
+    let title: String
+    let chart: Chart
 }
 
 struct Chart: Equatable {

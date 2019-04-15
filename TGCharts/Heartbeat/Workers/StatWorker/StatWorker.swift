@@ -15,13 +15,15 @@ protocol IStatWorker: class {
 }
 
 final class StatWorker: IStatWorker {
+    private let localeProvider: ILocaleProvider
     private let folderName: String
     private let entryFileName: String
     
     private(set) var state = StatLoadingState.unknown
     let stateObservable = BroadcastObservable<StatLoadingState>()
     
-    init(folderName: String, entryFileName: String) {
+    init(localeProvider: ILocaleProvider, folderName: String, entryFileName: String) {
+        self.localeProvider = localeProvider
         self.folderName = folderName
         self.entryFileName = entryFileName
     }
@@ -89,8 +91,27 @@ final class StatWorker: IStatWorker {
     }
     
     private func storeAndBroadcast(charts: [Chart]) {
-        state = .ready(charts)
-        stateObservable.broadcast(state)
+        if charts.count >= 5 {
+            let chartMetas = [
+                ChartMeta(title: "Followers", chart: charts[0]),
+                ChartMeta(title: "Interactions", chart: charts[3]),
+                ChartMeta(title: "Messages", chart: charts[2]),
+                ChartMeta(title: "Views", chart: charts[1]),
+                ChartMeta(title: "Apps", chart: charts[4])
+            ]
+            
+            state = .ready(chartMetas)
+            stateObservable.broadcast(state)
+        }
+        else {
+            let prefix = localeProvider.localize(key: "Stat.Section.TitlePrefix")
+            let chartMetas = charts.enumerated().map { index, chart in
+                ChartMeta(title: "\(prefix) #\(index + 1)", chart: chart)
+            }
+
+            state = .ready(chartMetas)
+            stateObservable.broadcast(state)
+        }
     }
 }
 

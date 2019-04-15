@@ -30,6 +30,7 @@ final class Heartbeat: IHeartbeat {
         )
         
         let statWorker = StatWorker(
+            localeProvider: localeProvider,
             folderName: "graph_data",
             entryFileName: "overview.json"
         )
