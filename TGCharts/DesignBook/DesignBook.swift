@@ -178,7 +178,7 @@ final class DarkDesignBook: DesignBook {
         case .chartGridStroke: return UIColor(hex: "8596AB").withAlphaComponent(0.2)
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
-        case .chartPointerCloudControls: return UIColor(hex: "D2D5D7")
+        case .chartPointerCloudControls: return UIColor(hex: "D2D5D7").withAlphaComponent(0.3)
         case .navigatorBackground: return UIColor(hex: "151C27")
         case .navigatorCoverBackground: return self.color(.navigatorBackground).withAlphaComponent(0.2)
         case .sliderBackground: return UIColor(hex: "444F5A")

@@ -43,7 +43,7 @@ final class ChartPointerCloudControl: ChartNode, IChartPointerCloudControl {
         dateNode.textAlignment = .left
         addSubview(dateNode)
         
-        arrowNode.font = DesignBook.shared.font(size: 17, weight: .medium)
+        arrowNode.font = DesignBook.shared.font(size: 20, weight: .medium)
         arrowNode.textAlignment = .right
         addSubview(arrowNode)
         
@@ -245,7 +245,7 @@ fileprivate struct Layout {
     
     var arrowNodeFrame: CGRect {
         let size = arrowNode.sizeThatFits(.zero)
-        let topY = dateNodeFrame.midY - size.height * 0.5 - 1
+        let topY = dateNodeFrame.midY - size.height * 0.5 - 1.35
         let leftX = bounds.width - horGap - size.width
         return CGRect(x: leftX, y: topY, width: size.width, height: size.height)
     }
