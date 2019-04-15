@@ -165,12 +165,27 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         let scalingCoef = lastOptions.range.distance / options.range.distance
         let startDiff = options.range.start - lastOptions.range.start
         
+        let relativeHeight = (lastOptions.range.distance / options.range.distance)
+        let destinationToHeight = bounds.height
+        let sourceToHeight: CGFloat = convertMap(options.reversedAnimations) { value in
+            if value {
+                return bounds.height * relativeHeight
+            }
+            else {
+                return bounds.height / relativeHeight
+            }
+        }
+        
         let relativeFromPosition = (startDiff / lastOptions.range.distance) * bounds.height
         let adjustFromPosition = -relativeFromPosition * (1 + scalingCoef)
-        
-        let relativeHeight = (lastOptions.range.distance / options.range.distance)
-        let sourceToHeight = bounds.height / relativeHeight
-        let destinationToHeight = bounds.height
+        let targetFromHeight: CGFloat = convertMap(options.reversedAnimations) { value in
+            if value {
+                return destinationToHeight / scalingCoef
+            }
+            else {
+                return destinationToHeight * scalingCoef
+            }
+        }
         
         layoutGuides(
             guides: guidesPair.primary,
@@ -196,7 +211,7 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
                 guides: guidesPair.primary,
                 usingOptions: lastOptions,
                 startY: adjustFromPosition,
-                height: destinationToHeight * scalingCoef,
+                height: targetFromHeight,
                 alpha: 0
             )
             

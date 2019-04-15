@@ -120,7 +120,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
     override func updatePointer(eyes: [ChartGraphEye],
                                 valueEdges: [ChartRange],
                                 duration: TimeInterval) {
-        if let pointer = config.pointer, let topValue = valueEdges.first?.end {
+        if let pointer = config.pointer {
             let pointing = calculatePointing(pointer: pointer, rounder: round)
             let date = chart.axis[pointing.index].date
             let lines = chart.visibleLines(config: config)
@@ -134,7 +134,9 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                     ),
                     disclosable: true,
                     values: lines.map { line in
-                        let percent = CGFloat(line.values[pointing.index]) / CGFloat(topValue)
+                        let value = line.values[pointing.index]
+                        let totalValue = valueEdges[pointing.index]
+                        let percent = CGFloat(value) / totalValue.end
                         let percentToDisplay = Int(percent * 100)
                         
                         return ChartPointerCloudValue(
