@@ -90,8 +90,8 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         let skippingStep = calculateStep(dateWidth: dateWidth, rightEdge: rightEdge, meta: meta)
         let skippingSemiStep = max(1, skippingStep / 2)
         
-        let fadingStartDistance = dateWidth * 0.05
-        let fadingEndDistance = dateWidth * 0.2
+        let fadingStartDistance = dateWidth * 0
+        let fadingEndDistance = dateWidth * 0.15
         
         var animatedBlocks = [() -> Void]()
         func _possibleAnimate(node: ChartLabelNode, index: Int, targetAlpha: CGFloat?) {
@@ -134,22 +134,18 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                 let primaryLeftAnchor = rightEdge - CGFloat(primaryIndex) * meta.stepX - dateWidth
                 let rightAnchor = rightEdge - CGFloat(index) * meta.stepX
                 
-                if primaryLeftAnchor < rightAnchor {
-                    let distance = rightAnchor - primaryLeftAnchor
-                    if distance < fadingStartDistance {
-                        let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
-                        _possibleAnimate(node: node, index: index, targetAlpha: 1.0)
+                let fadingEndAnchor = primaryLeftAnchor + fadingEndDistance
+                let fadingStartAnchor = primaryLeftAnchor + fadingStartDistance
+
+                if rightAnchor > fadingEndAnchor {
+                    if let node = possibleNode(index: index) {
+                        _possibleAnimate(node: node, index: index, targetAlpha: 0)
                     }
-                    else if distance > fadingEndDistance {
-                        if let node = possibleNode(index: index) {
-                            _possibleAnimate(node: node, index: index, targetAlpha: 0)
-                        }
-                    }
-                    else {
-                        let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
-                        let coef = distance.percent(from: fadingStartDistance, to: fadingEndDistance)
-                        _possibleAnimate(node: node, index: index, targetAlpha: 1.0 - coef)
-                    }
+                }
+                else if rightAnchor > fadingStartAnchor {
+                    let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
+                    let coef = rightAnchor.percent(from: fadingStartAnchor, to: fadingEndAnchor)
+                    _possibleAnimate(node: node, index: index, targetAlpha: 1.0 - coef)
                 }
                 else {
                     let node = ensureNode(index: index, date: chart.axis[dateIndex].date, dateWidth: dateWidth)
@@ -190,11 +186,17 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
         
         let node = ChartLabelNode()
         node.frame = CGRect(x: 0, y: 0, width: dateWidth, height: bounds.height)
-        node.text = formattingProvider.format(date: date, style: .shortDate)
         node.textColor = DesignBook.shared.color(chart: chart, key: .x)
-        node.font = DesignBook.shared.font(size: 8, weight: .regular)
         node.textAlignment = .right
         node.alpha = 0
+        
+        node.attributedText = NSAttributedString(
+            string: formattingProvider.format(date: date, style: .shortDate),
+            attributes: [
+                .font: DesignBook.shared.font(size: 10, weight: .regular),
+                .kern: NSNumber(value: -0.5)
+            ]
+        )
         
         addSubview(node)
         dateNodes[index] = node
