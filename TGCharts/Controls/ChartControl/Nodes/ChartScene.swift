@@ -89,6 +89,8 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
 
         super.init(frame: .zero)
         
+        clipsToBounds = true
+        
         addSubview(headerNode)
         addSubview(graphContainer)
         addSubview(timelineNode)
