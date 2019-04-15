@@ -109,7 +109,7 @@ final class ChartTimelineControl: ChartNode, IChartTimelineControl {
                 node.transform = transformToApply
             }
             
-            if let alpha = targetAlpha {
+            if let alpha = targetAlpha, node.alpha != alpha {
                 node.alpha = alpha
             }
         }

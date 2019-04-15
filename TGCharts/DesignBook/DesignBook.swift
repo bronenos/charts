@@ -21,6 +21,8 @@ protocol IDesignBook: class {
     var styleObservable: BroadcastObservable<DesignBookStyle> { get }
     func color(_ color: DesignBookColor) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
+    func duration(_ animation: DesignBookAnimation) -> TimeInterval
+    func caretStandardWidth(navigationWidth: CGFloat) -> CGFloat
     func resolveStatusBarStyle() -> UIStatusBarStyle
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key: Any]
 }
@@ -56,12 +58,30 @@ class DesignBook: IDesignBook {
         }
     }
     
+    func duration(_ animation: DesignBookAnimation) -> TimeInterval {
+        switch animation {
+        case .designChange: return 0.15
+        case .toggleLine: return 0.25
+        case .toggleOption: return 0.25
+        case .updateEye: return isPhone ? 0.075 : 0
+        case .pointerDimming: return 0.25
+        }
+    }
+    
+    func caretStandardWidth(navigationWidth: CGFloat) -> CGFloat {
+        return isPhone ? 95 : (navigationWidth / 12)
+    }
+    
     func resolveStatusBarStyle() -> UIStatusBarStyle {
         preconditionFailure("Must use the specific subclass")
     }
     
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key : Any] {
         return [.foregroundColor: color(.primaryForeground)]
+    }
+    
+    private var isPhone: Bool {
+        return (UI_USER_INTERFACE_IDIOM() == .phone)
     }
 }
 

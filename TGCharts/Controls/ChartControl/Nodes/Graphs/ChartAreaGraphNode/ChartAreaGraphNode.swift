@@ -13,11 +13,16 @@ protocol IChartAreaGraphNode: IChartGraphNode {
 }
 
 class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
-    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+    override init(chart: Chart,
+                  config: ChartConfig,
+                  formattingProvider: IFormattingProvider,
+                  localeProvider: ILocaleProvider,
+                  enableControls: Bool) {
         super.init(
             chart: chart,
             config: config,
             formattingProvider: formattingProvider,
+            localeProvider: localeProvider,
             enableControls: enableControls
         )
         
@@ -91,6 +96,10 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
         }
     }
     
+    override func updateVisibility(config: ChartConfig, duration: TimeInterval) {
+        super.updateVisibility(config: config, duration: duration)
+    }
+    
     override func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         super.updateEyes(eyes, edges: edges, duration: duration)
     }
@@ -135,7 +144,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                         )
                     }
                 ),
-                options: [.line],
+                options: [.line, .anchor],
                 duration: duration *  2
             )
         }
@@ -143,7 +152,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
             container?.adjustPointer(
                 pointing: nil,
                 content: nil,
-                options: [.line, .dots],
+                options: [.line, .anchor],
                 duration: duration *  2
             )
         }

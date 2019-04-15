@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+struct ChartControlUpdateOptions: OptionSet {
+    let rawValue: Int
+    init(rawValue: Int) { self.rawValue = rawValue }
+    static let main = ChartControlUpdateOptions(rawValue: 1 << 0)
+    static let navigation = ChartControlUpdateOptions(rawValue: 1 << 0)
+}
+
 enum ChartControlTag: Int {
     case unknown
     case graph
@@ -20,7 +27,7 @@ enum ChartControlTag: Int {
 
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool)
 }
 
 protocol IChartSceneDelegate: class {
@@ -37,6 +44,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     let optionsNode: ChartOptionsControl
     
     private let chart: Chart
+    private let navigatorOptions: ChartNavigatorOptions
     private var config: ChartConfig
     
     init(chart: Chart,
@@ -45,6 +53,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
          localeProvider: ILocaleProvider,
          formattingProvider: IFormattingProvider) {
         self.chart = chart
+        self.navigatorOptions = navigatorOptions
         self.config = config
         
         headerNode = ChartHeader(
@@ -87,6 +96,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 enableControls: true
             )
         )
@@ -96,6 +106,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 enableControls: false
             )
         )
@@ -112,16 +123,34 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         abort()
     }
     
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool) {
         self.config = config
         
         setNeedsLayout()
         layoutIfNeeded()
         
-        graphContainer.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
-        timelineNode.update(config: config, duration: duration)
-        navigatorNode.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
-        populateOptions(chart: chart, config: config, animated: (duration > 0))
+        graphContainer.update(
+            config: config,
+            shouldUpdateEye: wantsActualEye,
+            duration: duration
+        )
+        
+        timelineNode.update(
+            config: config,
+            duration: duration
+        )
+        
+        navigatorNode.update(
+            config: config,
+            duration: duration,
+            wantsActualEye: wantsActualEye
+        )
+        
+        populateOptions(
+            chart: chart,
+            config: config,
+            animated: (duration > 0)
+        )
     }
     
     override func updateDesign() {
@@ -168,6 +197,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
     private func obtainGraph(chart: Chart,
                              config: ChartConfig,
                              formattingProvider: IFormattingProvider,
+                             localeProvider: ILocaleProvider,
                              enableControls: Bool) -> ChartGraphNode {
         switch chart.type {
         case .duo:
@@ -175,6 +205,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 width: 2,
                 enableControls: enableControls
             )
@@ -184,6 +215,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 enableControls: enableControls
             )
             
@@ -192,6 +224,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 enableControls: enableControls
             )
             
@@ -200,6 +233,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
                 chart: chart,
                 config: config,
                 formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
                 width: 2,
                 enableControls: enableControls
             )

@@ -163,7 +163,7 @@ fileprivate extension Operation {
             let left = config.range.start
             let right = config.range.end
             
-            if totalEdge.distance > 0 {
+            if sliceEdge.distance > 0, totalEdge.distance > 0 {
                 let top = sliceEdge.end / totalEdge.end
                 let edges = UIEdgeInsets(top: top, left: left, bottom: 0, right: right)
                 return ChartGraphEye(edges: edges, scaleFactor: 1.0)

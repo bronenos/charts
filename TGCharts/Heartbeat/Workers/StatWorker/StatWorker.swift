@@ -53,7 +53,7 @@ final class StatWorker: IStatWorker {
                 return
             }
             
-            guard let chartsURL = fm.scan(atPath: folderURL.path) else {
+            guard let chartsURL = fm.scan(atPath: folderURL.path)?.sorted() else {
                 DispatchQueue.main.async { self?.storeAndBroadcast(charts: []) }
                 return
             }
@@ -91,14 +91,18 @@ final class StatWorker: IStatWorker {
     }
     
     private func storeAndBroadcast(charts: [Chart]) {
-        if charts.count >= 5 {
-            let chartMetas = [
-                ChartMeta(title: "Followers", chart: charts[0]),
-                ChartMeta(title: "Interactions", chart: charts[3]),
-                ChartMeta(title: "Messages", chart: charts[2]),
-                ChartMeta(title: "Views", chart: charts[1]),
-                ChartMeta(title: "Apps", chart: charts[4])
-            ]
+        let standardTitles: [String] = [
+            "Followers",
+            "Interactions",
+            "Messages",
+            "Views",
+            "Apps"
+        ]
+        
+        if charts.count == standardTitles.count {
+            let chartMetas = zip(charts, standardTitles).map { chart, title in
+                ChartMeta(title: title, chart: chart)
+            }
             
             state = .ready(chartMetas)
             stateObservable.broadcast(state)

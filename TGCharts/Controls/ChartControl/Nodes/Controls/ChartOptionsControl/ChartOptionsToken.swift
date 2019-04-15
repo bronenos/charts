@@ -62,10 +62,13 @@ final class ChartOptionsToken: UIView {
         
         if animated {
             setNeedsLayout()
-            UIView.animate(withDuration: 0.2) { [weak self] in
-                _block()
-                self?.layoutIfNeeded()
-            }
+            UIView.animate(
+                withDuration: DesignBook.shared.duration(.toggleOption),
+                animations: { [weak self] in
+                    _block()
+                    self?.layoutIfNeeded()
+                }
+            )
         }
         else {
             _block()

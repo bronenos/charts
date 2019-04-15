@@ -40,7 +40,7 @@ class ChartAreaPointsOperation: ChartPointsOperation {
         let context = ChartEyeOperationContext(
             valueEdges: [totalSummRange],
             totalEdges: [totalEdge],
-            lineEdges: []
+            lineEdges: [totalEdge]
         )
         
         let eye = calculateEye(

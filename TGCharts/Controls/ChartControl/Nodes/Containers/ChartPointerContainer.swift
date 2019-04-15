@@ -14,8 +14,9 @@ struct ChartPointerOptions: OptionSet {
     init(rawValue: Int) { self.rawValue = rawValue }
     static let line = ChartPointerOptions(rawValue: 1 << 0)
     static let dots = ChartPointerOptions(rawValue: 1 << 1)
-    static let closely = ChartPointerOptions(rawValue: 1 << 2)
-    static let disclosable = ChartPointerOptions(rawValue: 1 << 3)
+    static let anchor = ChartPointerOptions(rawValue: 1 << 2)
+    static let closely = ChartPointerOptions(rawValue: 1 << 3)
+    static let disclosable = ChartPointerOptions(rawValue: 1 << 4)
 }
 
 protocol IChartPointerContainer: IChartNode {
@@ -142,7 +143,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
             dotNodes: dotNodes,
             cloudNode: cloudNode,
             pointing: pointing,
-            closely: options.contains(.closely)
+            options: options
         )
     }
 }
@@ -152,10 +153,10 @@ fileprivate struct Layout {
     let dotNodes: [ChartFigureNode]
     let cloudNode: ChartPointerCloudControl
     let pointing: ChartGraphPointing
-    let closely: Bool
+    let options: ChartPointerOptions
     
     private let cloudOffscreen = CGFloat(10)
-    private let cloudExtraMove = CGFloat(10)
+    private let cloudExtraMove = CGFloat(20)
 
     var lineNodeFrame: CGRect {
         if let pointedX = pointing.coordX {
@@ -184,13 +185,24 @@ fileprivate struct Layout {
     }
     
     private var cloudTopMargin: CGFloat {
-        return closely ? 0 : 5
+        return options.contains(.closely) ? 0 : 5
     }
 
     private var cloudNodeFrame: CGRect {
         let size = cloudNode.sizeThatFits(.zero)
-        let leftX = (bounds.width + cloudOffscreen * 2 - size.width) * pointing.pointer - cloudOffscreen
-        let baseFrame = CGRect(x: leftX, y: cloudTopMargin, width: size.width, height: size.height)
+        
+        let leftX = between(
+            value: (bounds.width * pointing.pointer) - size.width * 0.5,
+            minimum: -cloudOffscreen,
+            maximum: bounds.width + cloudOffscreen - size.width
+        )
+        
+        let baseFrame = CGRect(
+            x: leftX,
+            y: cloudTopMargin,
+            width: size.width,
+            height: size.height
+        )
         
         guard let topDotFrame = dotNodeFrames.sorted(by: { $0.minY < $1.minY }).first else {
             return baseFrame

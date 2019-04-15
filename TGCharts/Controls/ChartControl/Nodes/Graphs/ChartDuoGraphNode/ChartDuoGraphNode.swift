@@ -52,6 +52,10 @@ class ChartDuoGraphNode: ChartLineGraphNode, IChartDuoGraphNode {
         super.updateChart(points: points)
     }
     
+    override func updateVisibility(config: ChartConfig, duration: TimeInterval) {
+        super.updateVisibility(config: config, duration: duration)
+    }
+    
     override func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         super.updateEyes(eyes, edges: edges, duration: duration)
     }

@@ -9,14 +9,25 @@
 import Foundation
 import UIKit
 
-struct ChartNavigatorOptions {
-    let caretStandardWidth: CGFloat
+class ChartNavigatorOptions {
     let caretStandardDistance: CGFloat
+    private(set) var caretStandardWidth: CGFloat
+    
+    private let caretDefaultWidth = CGFloat(50)
+
+    init(caretStandardDistance: CGFloat) {
+        self.caretStandardDistance = caretStandardDistance
+        self.caretStandardWidth = caretDefaultWidth
+    }
+    
+    func update(caretStandardWidth: CGFloat) {
+        self.caretStandardWidth = max(caretDefaultWidth, caretStandardWidth)
+    }
 }
 
 protocol IChartNavigatorControl: IChartNode {
     func inject(graph: ChartGraphNode)
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool)
 }
 
 final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
@@ -66,17 +77,33 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         graphContainer.inject(graph: graph)
     }
     
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool) {
+        let oldConfig = self.config
         self.config = config
+        
+        options.update(
+            caretStandardWidth: DesignBook.shared.caretStandardWidth(navigationWidth: bounds.width)
+        )
         
         setNeedsLayout()
         layoutIfNeeded()
         
-        currentGraph?.update(
-            config: config.withRange(range: calculator.graphCurrentRange),
-            duration: duration,
-            needsRecalculate: needsRecalculate
-        )
+        if let graph = currentGraph {
+            let fittingConfig = config.withRange(range: calculator.graphCurrentRange)
+            let shouldForceUpdate = graph.shouldReset(newConfig: config, oldConfig: oldConfig)
+            let caretOriginalWidth = graph.bounds.width * options.caretStandardDistance
+            let graphFits = (abs(caretOriginalWidth - options.caretStandardWidth) < 0.1)
+            
+            if !wantsActualEye || shouldForceUpdate {
+                graph.update(config: fittingConfig, shouldUpdateEye: false, duration: duration)
+            }
+            else if graphFits {
+                graph.updateVisibility(config: fittingConfig, duration: duration)
+            }
+            else {
+                graph.update(config: fittingConfig, shouldUpdateEye: true, duration: duration)
+            }
+        }
     }
     
     override func updateDesign() {

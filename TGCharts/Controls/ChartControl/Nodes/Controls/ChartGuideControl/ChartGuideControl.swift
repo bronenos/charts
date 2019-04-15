@@ -42,11 +42,13 @@ final class ChartGuideControl: ChartNode, IChartGuideControl {
         super.init(frame: .zero)
         
         primaryGuides.forEach { node in
+            node.autoresizingMask = [.flexibleWidth]
             node.alpha = 1.0
             addSubview(node)
         }
         
         secondaryGuides.forEach { node in
+            node.autoresizingMask = [.flexibleWidth]
             node.alpha = 0
             addSubview(node)
         }

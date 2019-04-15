@@ -11,4 +11,4 @@
 "Stat.Mode.Light" = "Day Mode";
 "Stat.Mode.Dark" = "Night Mode";
 "Chart.Control.ZoomOut" = "〈 Zoom Out";
-
+"Chart.Bar.Total" = "All";

@@ -13,11 +13,17 @@ protocol IChartLineGraphNode: IChartGraphNode {
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, width: CGFloat, enableControls: Bool) {
+    init(chart: Chart,
+         config: ChartConfig,
+         formattingProvider: IFormattingProvider,
+         localeProvider: ILocaleProvider,
+         width: CGFloat,
+         enableControls: Bool) {
         super.init(
             chart: chart,
             config: config,
             formattingProvider: formattingProvider,
+            localeProvider: localeProvider,
             enableControls: enableControls
         )
         
@@ -72,6 +78,17 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
         
         for (node, line) in zip(orderedNodes, chart.lines) {
             node.points = points[line.key] ?? []
+        }
+    }
+    
+    override func updateVisibility(config: ChartConfig, duration: TimeInterval) {
+        super.updateVisibility(config: config, duration: duration)
+        
+        zip(orderedNodes, config.lines).forEach { node, lineConfig in
+            let targetAlpha = CGFloat(lineConfig.visible ? 1.0 : 0)
+            if node.alpha != targetAlpha {
+                UIView.animate(withDuration: duration) { node.alpha = targetAlpha }
+            }
         }
     }
     
@@ -132,13 +149,6 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 options: [.line, .dots],
                 duration: duration *  2
             )
-        }
-    }
-    
-    override func calculatePoints(forIndex index: Int) -> [CGPoint] {
-        return zip(chart.lines, orderedNodes).map { line, node in
-            let originalPoint = cachedPoints[line.key]?[index] ?? .zero
-            return node.convertOriginalToEffective(point: originalPoint)
         }
     }
 }

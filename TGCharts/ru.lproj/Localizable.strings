@@ -11,3 +11,4 @@
 "Stat.Mode.Light" = "Дневной режим";
 "Stat.Mode.Dark" = "Ночной режим";
 "Chart.Control.ZoomOut" = "〈 Обратно";
+"Chart.Bar.Total" = "Все";

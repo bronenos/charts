@@ -15,11 +15,16 @@ protocol IChartBarGraphNode: IChartGraphNode {
 class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
     private let dimmingNode = ChartFigureNode(figure: .filledPaths)
 
-    override init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+    override init(chart: Chart,
+                  config: ChartConfig,
+                  formattingProvider: IFormattingProvider,
+                  localeProvider: ILocaleProvider,
+                  enableControls: Bool) {
         super.init(
             chart: chart,
             config: config,
             formattingProvider: formattingProvider,
+            localeProvider: localeProvider,
             enableControls: enableControls
         )
         
@@ -99,6 +104,10 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         }
     }
     
+    override func updateVisibility(config: ChartConfig, duration: TimeInterval) {
+        super.updateVisibility(config: config, duration: duration)
+    }
+    
     override func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         super.updateEyes(eyes, edges: edges, duration: duration)
     }
@@ -115,9 +124,37 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                                 valueEdges: [ChartRange],
                                 duration: TimeInterval) {
         if let pointer = config.pointer {
-            let pointing = calculatePointing(pointer: pointer, rounder: round)
+            let pointing = calculatePointing(pointer: pointer, rounder: floor)
             let date = chart.axis[pointing.index].date
             let lines = chart.visibleLines(config: config)
+            
+            var totalSumm = 0
+            let values: [ChartPointerCloudValue] = lines.map { line in
+                let value = line.values[pointing.index]
+                totalSumm += value
+                
+                return ChartPointerCloudValue(
+                    percent: nil,
+                    title: line.name,
+                    value: formattingProvider.format(guide: value),
+                    color: line.color
+                )
+            }
+            
+            let totalValues: [ChartPointerCloudValue]
+            if lines.count > 1 {
+                totalValues = [
+                    ChartPointerCloudValue(
+                        percent: nil,
+                        title: localeProvider.localize(key: "Chart.Bar.Total"),
+                        value: formattingProvider.format(guide: totalSumm),
+                        color: DesignBook.shared.color(.chartPointerCloudForeground)
+                    )
+                ]
+            }
+            else {
+                totalValues = []
+            }
             
             container?.adjustPointer(
                 pointing: pointing,
@@ -127,18 +164,9 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                         style: .dayAndDate
                     ),
                     disclosable: true,
-                    values: lines.map { line in
-                        ChartPointerCloudValue(
-                            percent: nil,
-                            title: line.name,
-                            value: formattingProvider.format(
-                                guide: line.values[pointing.index]
-                            ),
-                            color: line.color
-                        )
-                    }
+                    values: values + totalValues
                 ),
-                options: [],
+                options: [.anchor],
                 duration: duration *  2
             )
         }
@@ -156,10 +184,21 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
             
             let dimmingAlpha = CGFloat(config.pointer == nil ? 0 : 1.0)
             if dimmingNode.alpha != dimmingAlpha {
-                UIView.animate(withDuration: 0.25) { [weak self] in
-                    self?.dimmingNode.alpha = dimmingAlpha
-                }
+                UIView.animate(
+                    withDuration: DesignBook.shared.duration(.pointerDimming),
+                    animations: { [weak self] in
+                        self?.dimmingNode.alpha = dimmingAlpha
+                    }
+                )
             }
+        }
+    }
+    
+    override func calculatePoints(forIndex index: Int) -> [CGPoint] {
+        return zip(chart.lines, orderedNodes).map { line, node in
+            let originalPoint = cachedPoints[line.key]?[index * 2] ?? .zero
+            let value = node.convertOriginalToEffective(point: originalPoint)
+            return value
         }
     }
     

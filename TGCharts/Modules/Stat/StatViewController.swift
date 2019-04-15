@@ -115,9 +115,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     }
     
     @objc private func handleOrientationChange() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
-            self?.dataSource.reload()
-        }
+        dataSource.reload()
     }
 }
 

@@ -32,7 +32,7 @@ struct ChartGraphPointing {
 
 protocol IChartGraphNode {
     var container: IChartGraphContainer? { get set }
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
+    func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval)
     func calculatePointing(pointer: CGFloat, rounder: (CGFloat) -> CGFloat) -> ChartGraphPointing
 }
 
@@ -60,6 +60,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     let chart: Chart
     let enableControls: Bool
     let formattingProvider: IFormattingProvider
+    let localeProvider: ILocaleProvider
     
     private(set) var config: ChartConfig
     private(set) var eyes: [ChartGraphEye]
@@ -73,10 +74,11 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     var cachedPoints = [String: [CGPoint]]()
     var cachedEyesContext: ChartEyeOperationContext?
 
-    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, enableControls: Bool) {
+    init(chart: Chart, config: ChartConfig, formattingProvider: IFormattingProvider, localeProvider: ILocaleProvider, enableControls: Bool) {
         self.chart = chart
         self.enableControls = enableControls
         self.formattingProvider = formattingProvider
+        self.localeProvider = localeProvider
         self.config = config
         self.eyes = chart.axis.indices.map { _ in ChartGraphEye(edges: .zero, scaleFactor: 1.0) }
         
@@ -125,14 +127,14 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         }
     }
     
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
+    func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval) {
         if shouldReset(newConfig: config, oldConfig: self.config) {
             discardCache()
         }
         
         self.config = config
         
-        if needsRecalculate {
+        if shouldUpdateEye {
             enqueueRecalculation(duration: duration)
         }
         else {
@@ -219,6 +221,10 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         self.cachedPoints = points
     }
     
+    func updateVisibility(config: ChartConfig, duration: TimeInterval) {
+        self.config = config
+    }
+    
     func updateEyes(_ eyes: [ChartGraphEye], edges: [ChartRange], duration: TimeInterval) {
         self.eyes = eyes
         
@@ -238,7 +244,11 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
     }
     
     func calculatePoints(forIndex index: Int) -> [CGPoint] {
-        return []
+        return zip(chart.lines, orderedNodes).map { line, node in
+            let originalPoint = cachedPoints[line.key]?[index] ?? .zero
+            let value = node.convertOriginalToEffective(point: originalPoint)
+            return value
+        }
     }
     
     override func updateDesign() {
@@ -315,7 +325,7 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
                     )
                     
                     self.updateGuides(
-                        edges: result.context.totalEdges,
+                        edges: result.context.lineEdges,
                         duration: duration
                     )
                 }

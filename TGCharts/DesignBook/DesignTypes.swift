@@ -40,6 +40,14 @@ enum DesignBookFontWeight {
     case medium
 }
 
+enum DesignBookAnimation {
+    case designChange
+    case toggleLine
+    case toggleOption
+    case updateEye
+    case pointerDimming
+}
+
 protocol DesignBookUpdatable: class {
     func updateDesign()
 }

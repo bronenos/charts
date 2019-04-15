@@ -162,9 +162,17 @@ fileprivate extension Operation {
             else {
                 let top = contextualSliceEdge.end.percent(inside: totalEdge)
                 let bottom = contextualSliceEdge.start.percent(inside: totalEdge)
-                let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-                let scaleFactor = (config.standardDistance / config.range.distance)
-                return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
+                
+                if top > bottom {
+                    let edges = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+                    let scaleFactor = (config.standardDistance / config.range.distance)
+                    return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
+                }
+                else {
+                    let edges = UIEdgeInsets(top: bottom + 1.0, left: left, bottom: bottom, right: right)
+                    let scaleFactor = (config.standardDistance / config.range.distance)
+                    return ChartGraphEye(edges: edges, scaleFactor: scaleFactor)
+                }
             }
         }
     }

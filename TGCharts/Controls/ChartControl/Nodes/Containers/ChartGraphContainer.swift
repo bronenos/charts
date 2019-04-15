@@ -11,8 +11,9 @@ import UIKit
 
 protocol IChartGraphContainer: IChartNode {
     func inject(graph: ChartGraphNode)
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool)
+    func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval)
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval)
+    
     func adjustPointer(pointing: ChartGraphPointing?,
                        content: ChartPointerCloudContent?,
                        options: ChartPointerOptions,
@@ -55,8 +56,8 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
         insertSubview(graph, belowSubview: guidesContainer)
     }
     
-    func update(config: ChartConfig, duration: TimeInterval, needsRecalculate: Bool) {
-        innerGraph?.update(config: config, duration: duration, needsRecalculate: needsRecalculate)
+    func update(config: ChartConfig, shouldUpdateEye: Bool, duration: TimeInterval) {
+        innerGraph?.update(config: config, shouldUpdateEye: shouldUpdateEye, duration: duration)
     }
     
     func adjustGuides(left: ChartRange?, right: ChartRange?, duration: TimeInterval) {
