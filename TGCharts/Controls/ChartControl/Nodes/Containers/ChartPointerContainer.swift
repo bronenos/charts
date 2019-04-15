@@ -27,20 +27,23 @@ protocol IChartPointerContainer: IChartNode {
 }
 
 final class ChartPointerContainer: ChartNode, IChartPointerContainer {
+    private let chart: Chart
     private let formattingProvider: IFormattingProvider
     
     private let lineNode: ChartNode
-    private let dotNodes: [ChartFigureNode]
+    private let orderedDotNodes: [ChartFigureNode]
+    private var dotNodes = [String: ChartFigureNode]()
     private let cloudNode: ChartPointerCloudControl
     
     private var pointing: ChartGraphPointing?
     private var options: ChartPointerOptions = []
 
     init(chart: Chart, formattingProvider: IFormattingProvider) {
+        self.chart = chart
         self.formattingProvider = formattingProvider
         
         lineNode = ChartNode()
-        dotNodes = chart.lines.map(generateDotNode)
+        orderedDotNodes = chart.lines.map(generateDotNode)
         cloudNode = ChartPointerCloudControl()
 
         super.init(frame: .zero)
@@ -48,9 +51,10 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         lineNode.alpha = 0
         addSubview(lineNode)
         
-        dotNodes.forEach { node in
+        zip(chart.lines, orderedDotNodes).forEach { line, node in
             node.isHidden = true
             addSubview(node)
+            dotNodes[line.key] = node
         }
         
         cloudNode.alpha = 0
@@ -65,14 +69,28 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
                 content: ChartPointerCloudContent?,
                 options: ChartPointerOptions,
                 duration: TimeInterval) {
-        if let _ = pointing {
+        if let points = pointing?.points {
             lineNode.backgroundColor = DesignBook.shared.color(.chartPointerFocusedLineStroke)
             
-            for node in dotNodes { node.isHidden = !options.contains(.dots) }
+            for (line, node) in zip(chart.lines, orderedDotNodes) {
+                if !options.contains(.dots) {
+                    node.isHidden = true
+                }
+                else if let _ = points[line.key] {
+                    node.isHidden = false
+                }
+                else {
+                    node.isHidden = true
+                }
+            }
+            
             lineNode.isHidden = !options.contains(.line)
         }
         else {
-            for node in dotNodes { node.isHidden = true }
+            for node in orderedDotNodes {
+                node.isHidden = true
+            }
+            
             lineNode.isHidden = true
         }
         
@@ -118,6 +136,10 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
                 self?.lineNode.alpha = 0
             }
         }
+        else {
+            self.pointing = pointing
+            self.options = options
+        }
     }
     
     override func updateDesign() {
@@ -131,7 +153,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         if let pointing = pointing {
             let layout = getLayout(size: bounds.size, pointing: pointing)
             lineNode.frame = layout.lineNodeFrame
-            zip(dotNodes, layout.dotNodeFrames).forEach { node, frame in node.frame = frame }
+            zip(orderedDotNodes, layout.dotNodeFrames).forEach { node, frame in node.frame = frame }
             cloudNode.layer.bounds = layout.cloudNodeBounds
             cloudNode.layer.position = layout.cloudNodePosition
         }
@@ -139,8 +161,9 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
     
     private func getLayout(size: CGSize, pointing: ChartGraphPointing) -> Layout {
         return Layout(
+            chart: chart,
             bounds: CGRect(origin: .zero, size: size),
-            dotNodes: dotNodes,
+            dotNodes: orderedDotNodes,
             cloudNode: cloudNode,
             pointing: pointing,
             options: options
@@ -149,6 +172,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
 }
 
 fileprivate struct Layout {
+    let chart: Chart
     let bounds: CGRect
     let dotNodes: [ChartFigureNode]
     let cloudNode: ChartPointerCloudControl
@@ -168,8 +192,9 @@ fileprivate struct Layout {
     }
     
     var dotNodeFrames: [CGRect] {
-        return pointing.points.map { point in
-            CGRect(origin: point, size: .zero)
+        return chart.lines.map { line in
+            guard let point = pointing.points[line.key] else { return .zero }
+            return CGRect(origin: point, size: .zero)
         }
     }
     

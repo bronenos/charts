@@ -13,16 +13,16 @@ struct ChartGraphPointing {
     let pointer: CGFloat
     let index: Int
     let coordX: CGFloat?
-    let points: [CGPoint]
+    let points: [String: CGPoint]
     
     init() {
         pointer = 0
         index = 0
         coordX = nil
-        points = []
+        points = [:]
     }
     
-    init(pointer: CGFloat, index: Int, coordX: CGFloat?, points: [CGPoint]) {
+    init(pointer: CGFloat, index: Int, coordX: CGFloat?, points: [String: CGPoint]) {
         self.pointer = pointer
         self.index = index
         self.coordX = coordX
@@ -249,14 +249,23 @@ class ChartGraphNode: ChartNode, IChartGraphNode {
         abort()
     }
     
-    func calculatePoints(forIndex index: Int) -> [CGPoint] {
-        return zip(chart.lines, orderedNodes).map { line, node in
+    func calculatePoints(forIndex index: Int) -> [String: CGPoint] {
+        var result = [String: CGPoint]()
+        for lineIndex in chart.lines.indices {
+            guard config.lines[lineIndex].visible else { continue }
+            
+            let line = chart.lines[lineIndex]
+            let node = orderedNodes[lineIndex]
+            
             let originalPoint = cachedPoints[line.key]?[index] ?? .zero
             let value = node.convertOriginalToEffective(point: originalPoint)
-            return value
+            
+            result[line.key] = value
         }
+        
+        return result
     }
-    
+
     override func updateDesign() {
         super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)

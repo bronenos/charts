@@ -122,7 +122,7 @@ final class LightDesignBook: DesignBook {
         case .sliderBackground: return UIColor(red: 0.71, green: 0.78, blue: 0.88, alpha: 1.0)
         case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         case .optionForeground: return UIColor.white
-        case .actionForeground: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
+        case .actionForeground: return UIColor(hex: "108BE3")
         }
     }
     
@@ -154,7 +154,7 @@ final class DarkDesignBook: DesignBook {
         case .sliderBackground: return UIColor(red: 0.27, green: 0.31, blue: 0.35, alpha: 1.0)
         case .sliderForeground: return UIColor.white
         case .optionForeground: return UIColor.white
-        case .actionForeground: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
+        case .actionForeground: return UIColor(hex: "2EA6FE")
         }
     }
     

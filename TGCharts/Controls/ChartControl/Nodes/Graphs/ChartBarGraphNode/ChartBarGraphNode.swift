@@ -194,12 +194,21 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
         }
     }
     
-    override func calculatePoints(forIndex index: Int) -> [CGPoint] {
-        return zip(chart.lines, orderedNodes).map { line, node in
+    override func calculatePoints(forIndex index: Int) -> [String: CGPoint] {
+        var result = [String: CGPoint]()
+        chart.lines.enumerated().forEach { lineIndex, line in
+            guard config.lines[lineIndex].visible else { return }
+            
+            let line = chart.lines[lineIndex]
+            let node = orderedNodes[lineIndex]
+            
             let originalPoint = cachedPoints[line.key]?[index * 2] ?? .zero
             let value = node.convertOriginalToEffective(point: originalPoint)
-            return value
+            
+            result[line.key] = value
         }
+        
+        return result
     }
     
     override func layoutSubviews() {
