@@ -25,7 +25,7 @@ final class ChartSliderArrowNode: ChartFigureNode, IChartSliderArrowNode {
         
         super.init(figure: .joinedLines)
         
-        width = 2
+        strokeWidth = 2
         
         switch direction {
         case .left: tag = ChartControlTag.leftArrow.rawValue

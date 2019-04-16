@@ -27,52 +27,12 @@ struct ChartLabelNodeContent: Equatable {
 }
 
 protocol IChartLabelNode: IChartNode {
-    var content: ChartLabelNodeContent? { get set }
 }
 
 final class ChartLabelNode: UILabel, IChartLabelNode {
-    var content: ChartLabelNodeContent? {
-        didSet {
-            text = content?.text
-            textColor = content?.color
-            font = content?.font
-            textAlignment = content?.alignment ?? .center
-            clipsToBounds = content?.limitedToBounds ?? false
-        }
-    }
-    
     func updateDesign() {
     }
     
-//    override func sizeThatFits(_ size: CGSize) -> CGSize {
-//        guard let content = content else { return .zero }
-//        guard let string = constructAttributedString() else { return .zero }
-//
-//        let drawingBounds = string.boundingRect(
-//            with: CGSize(
-//                width: content.limitedToBounds ? bounds.size.width : .infinity,
-//                height: .infinity
-//            ),
-//            options: [.usesLineFragmentOrigin, .usesFontLeading],
-//            context: nil
-//        )
-//
-//        return drawingBounds.size
-//    }
-    
-//    private func constructAttributedString() -> NSAttributedString? {
-//        guard let content = content else { return nil }
-//        
-//        let style = NSMutableParagraphStyle()
-//        style.alignment = content.alignment
-//        
-//        return NSMutableAttributedString(
-//            string: content.text,
-//            attributes: [
-//                NSAttributedString.Key.foregroundColor: content.color,
-//                NSAttributedString.Key.font: content.font,
-//                NSAttributedString.Key.paragraphStyle: style
-//            ]
-//        )
-//    }
+    func discardCache() {
+    }
 }

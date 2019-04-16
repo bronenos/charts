@@ -10,17 +10,17 @@ import Foundation
 import UIKit
 
 protocol IStatParser: class {
-    func parse(data: Data) throws -> [Chart]
+    func parse(data: Data, colorStyles: [ChartType: ChartStylePair]) throws -> Chart?
 }
 
 final class StatParser: IStatParser {
-    func parse(data: Data) throws -> [Chart] {
+    func parse(data: Data, colorStyles: [ChartType: ChartStylePair]) throws -> Chart? {
         let json = JsonReader(data: data)
-        let charts = json.array?.map(JsonReader.init).compactMap(parseChart) ?? []
-        return charts
+        let chart = parseChart(object: json, colorStyles: colorStyles)
+        return chart
     }
     
-    private func parseChart(object: JsonReader) -> Chart? {
+    private func parseChart(object: JsonReader, colorStyles: [ChartType: ChartStylePair]) -> Chart? {
         guard let columns = object["columns"].array else { return nil }
         
         let columnNames: [String] = columns.map(JsonReader.init).compactMap { $0[0].string }
@@ -28,11 +28,22 @@ final class StatParser: IStatParser {
         
         guard let dates = parseChartDates(object: object, key: "x") else { return nil }
         let numberOfDates = dates.count
-
+        
         let lines = columnNames.compactMap({ parseChartLine(object: object, key: $0) })
         guard lines.allSatisfy({ $0.values.count == numberOfDates }) else { return nil }
+        guard let firstLine = lines.first else { return nil }
+        
+        let type = parseChartType(
+            object: object,
+            firstLineType: firstLine.type
+        )
+        
+        guard let stylePair = colorStyles[type] else {
+            return nil
+        }
         
         return Chart(
+            type: type,
             length: numberOfDates,
             lines: lines,
             axis: dates.enumerated().map { index, date in
@@ -40,8 +51,18 @@ final class StatParser: IStatParser {
                     date: date,
                     values: calculateValues(lines: lines, index: index)
                 )
-            }
+            },
+            stylePair: stylePair
         )
+    }
+    
+    private func parseChartType(object: JsonReader, firstLineType: String) -> ChartType {
+        switch firstLineType {
+        case "line" where object["y_scaled"].boolValue: return .duo
+        case "bar": return .bar
+        case "area": return .area
+        default: return .line
+        }
     }
     
     private func parseChartDates(object: JsonReader, key: String) -> [Date]? {
@@ -51,11 +72,11 @@ final class StatParser: IStatParser {
     }
     
     private func parseChartLine(object: JsonReader, key: String) -> ChartLine? {
-        guard object["types"][key].string == "line" else { return nil }
         guard let name = object["names"][key].string else { return nil }
-        guard let color = object["colors"][key].string else { return nil }
+        guard let type = object["types"][key].string else { return nil }
+        guard let colorKey = object["colors"][key].string else { return nil }
         let values: [Int] = obtainColumnValues(object: object, key: key)
-        return ChartLine(key: key, name: name, color: UIColor(hex: color), values: values)
+        return ChartLine(key: key, name: name, type: type, colorKey: colorKey, values: values)
     }
     
     private func obtainColumnValues<T>(object: JsonReader, key: String) -> [T] {
@@ -77,3 +98,8 @@ final class StatParser: IStatParser {
         return edges
     }
 }
+
+// bar / area
+// root.y_scaled
+// root.stacked
+// root.percentage

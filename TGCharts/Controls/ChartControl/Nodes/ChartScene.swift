@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+struct ChartControlUpdateOptions: OptionSet {
+    let rawValue: Int
+    init(rawValue: Int) { self.rawValue = rawValue }
+    static let main = ChartControlUpdateOptions(rawValue: 1 << 0)
+    static let navigation = ChartControlUpdateOptions(rawValue: 1 << 0)
+}
+
 enum ChartControlTag: Int {
     case unknown
     case graph
@@ -20,48 +27,100 @@ enum ChartControlTag: Int {
 
 protocol IChartSceneNode: IChartNode {
     var delegate: IChartSceneDelegate? { get set }
-    func update(config: ChartConfig, duration: TimeInterval)
+    func updateHeight(mainGraphHeight: CGFloat)
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool)
 }
 
 protocol IChartSceneDelegate: class {
-    func sceneDidToggleLine(index: Int)
+    func sceneDidToggleLine(index: Int, exclusive: Bool)
 }
 
 final class ChartSceneNode: ChartNode, IChartSceneNode {
     weak var delegate: IChartSceneDelegate?
     
     let headerNode: ChartHeader
-    let graphNode: ChartLineGraphNode
-    let timelineNode: ChartTimelineNode
-    let navigatorNode: ChartNavigatorNode
-    let optionsNode: ChartOptions
+    let graphContainer: ChartGraphContainer
+    let timelineNode: ChartTimelineControl
+    let navigatorNode: ChartNavigatorControl
+    let optionsNode: ChartOptionsControl
     
     private let chart: Chart
+    private let navigatorOptions: ChartNavigatorOptions
     private var config: ChartConfig
     
-    init(chart: Chart, config: ChartConfig, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+    init(chart: Chart,
+         mainGraphHeight: CGFloat,
+         navigatorOptions: ChartNavigatorOptions,
+         config: ChartConfig,
+         localeProvider: ILocaleProvider,
+         formattingProvider: IFormattingProvider) {
         self.chart = chart
+        self.navigatorOptions = navigatorOptions
         self.config = config
         
-        headerNode = ChartHeader(zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"), formattingProvider: formattingProvider)
-        graphNode = ChartLineGraphNode(chart: chart, config: config, formattingProvider: formattingProvider, width: 2, guidable: true)
-        timelineNode = ChartTimelineNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        navigatorNode = ChartNavigatorNode(chart: chart, config: config, formattingProvider: formattingProvider)
-        optionsNode = ChartOptions()
+        headerNode = ChartHeader(
+            zoomOutTitle: localeProvider.localize(key: "Chart.Control.ZoomOut"),
+            formattingProvider: formattingProvider
+        )
+        
+        graphContainer = ChartGraphContainer(
+            chart: chart,
+            config: config,
+            headerNode: headerNode,
+            formattingProvider: formattingProvider,
+            mainGraphHeight: mainGraphHeight,
+            enableControls: true
+        )
+        
+        timelineNode = ChartTimelineControl(
+            chart: chart,
+            config: config,
+            formattingProvider: formattingProvider
+        )
+        
+        navigatorNode = ChartNavigatorControl(
+            chart: chart,
+            config: config,
+            options: navigatorOptions,
+            formattingProvider: formattingProvider
+        )
+        
+        optionsNode = ChartOptionsControl()
 
         super.init(frame: .zero)
         
+        clipsToBounds = true
+        
         addSubview(headerNode)
-        addSubview(graphNode)
+        addSubview(graphContainer)
         addSubview(timelineNode)
         addSubview(navigatorNode)
         addSubview(optionsNode)
         
-        populateOptions(chart: chart, config: config)
+        graphContainer.inject(
+            graph: obtainGraph(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                enableControls: true
+            )
+        )
+        
+        navigatorNode.inject(
+            graph: obtainGraph(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                enableControls: false
+            )
+        )
+        
         updateDesign()
         
-        optionsNode.tokenTapHandler = { [weak self] index in
-            self?.delegate?.sceneDidToggleLine(index: index)
+        optionsNode.tokenTapHandler = { [weak self] index, exclusive in
+            self?.delegate?.sceneDidToggleLine(index: index, exclusive: exclusive)
         }
     }
     
@@ -69,26 +128,58 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         abort()
     }
     
-    func update(config: ChartConfig, duration: TimeInterval) {
+    func updateHeight(mainGraphHeight: CGFloat) {
+        graphContainer.updateHeight(mainGraphHeight: mainGraphHeight)
+    }
+    
+    func update(config: ChartConfig, duration: TimeInterval, wantsActualEye: Bool) {
         self.config = config
         
-        graphNode.update(config: config, duration: duration)
-        timelineNode.update(config: config, duration: 0)
-        navigatorNode.update(config: config, duration: duration)
-        populateOptions(chart: chart, config: config)
+        setNeedsLayout()
+        layoutIfNeeded()
+        
+        graphContainer.update(
+            config: config,
+            shouldUpdateEye: wantsActualEye,
+            duration: duration
+        )
+        
+        timelineNode.update(
+            config: config,
+            duration: duration
+        )
+        
+        navigatorNode.update(
+            config: config,
+            duration: duration,
+            wantsActualEye: wantsActualEye
+        )
+        
+        populateOptions(
+            chart: chart,
+            config: config,
+            animated: (duration > 0)
+        )
     }
     
     override func updateDesign() {
         super.updateDesign()
         backgroundColor = DesignBook.shared.color(.primaryBackground)
         headerNode.updateDesign()
-        graphNode.updateDesign()
+        graphContainer.updateDesign()
         timelineNode.updateDesign()
         navigatorNode.updateDesign()
+        populateOptions(chart: chart, config: config, animated: false)
+    }
+    
+    override func discardCache() {
+        super.discardCache()
+        graphContainer.discardCache()
+        navigatorNode.discardCache()
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        let layout = getLayout(size: bounds.size)
+        let layout = getLayout(size: size)
         return layout.totalSize
     }
     
@@ -97,7 +188,7 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
         
         let layout = getLayout(size: bounds.size)
         headerNode.frame = layout.headerNodeFrame
-        graphNode.frame = layout.graphNodeFrame
+        graphContainer.frame = layout.graphContainerFrame
         timelineNode.frame = layout.timelineFrame
         navigatorNode.frame = layout.navigatorFrame
         optionsNode.frame = layout.optionsNodeFrame
@@ -108,21 +199,71 @@ final class ChartSceneNode: ChartNode, IChartSceneNode {
             bounds: CGRect(origin: .zero, size: size),
             config: config,
             headerNode: headerNode,
-            graphNode: graphNode,
+            graphContainer: graphContainer,
             optionsNode: optionsNode
         )
     }
     
-    private func populateOptions(chart: Chart, config: ChartConfig) {
+    private func obtainGraph(chart: Chart,
+                             config: ChartConfig,
+                             formattingProvider: IFormattingProvider,
+                             localeProvider: ILocaleProvider,
+                             enableControls: Bool) -> ChartGraphNode {
+        switch chart.type {
+        case .duo:
+            return ChartDuoGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                width: 2,
+                enableControls: enableControls
+            )
+            
+        case .bar:
+            return ChartBarGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                enableControls: enableControls
+            )
+            
+        case .area:
+            return ChartAreaGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                enableControls: enableControls
+            )
+            
+        default:
+            return ChartLineGraphNode(
+                chart: chart,
+                config: config,
+                formattingProvider: formattingProvider,
+                localeProvider: localeProvider,
+                width: 2,
+                enableControls: enableControls
+            )
+        }
+    }
+    
+    private func populateOptions(chart: Chart, config: ChartConfig, animated: Bool) {
         optionsNode.populate(
             zip(chart.lines, config.lines).map { line, lineConfig in
-                ChartOption(
+                ChartOptionsItem(
                     key: line.key,
-                    color: line.color,
+                    color: DesignBook.shared.color(
+                        chart: chart,
+                        key: .button(line.colorKey)
+                    ),
                     title: line.name,
                     enabled: lineConfig.visible
                 )
-            }
+            },
+            animated: animated
         )
     }
 }
@@ -138,11 +279,10 @@ fileprivate struct Layout {
     let bounds: CGRect
     let config: ChartConfig
     let headerNode: ChartHeader
-    let graphNode: ChartGraphNode
-    let optionsNode: ChartOptions
+    let graphContainer: ChartGraphContainer
+    let optionsNode: ChartOptionsControl
     
     private let gaps = Layout.totalGaps
-    private let graphHeight = CGFloat(300)
     private let timelineHeight = CGFloat(25)
     private let navigatorHeight = CGFloat(40)
     
@@ -151,16 +291,16 @@ fileprivate struct Layout {
         return CGRect(x: 0, y: 0, width: bounds.width, height: size.height)
     }
     
-    var graphNodeFrame: CGRect {
+    var graphContainerFrame: CGRect {
         let leftX = gaps.left
         let topY = headerNodeFrame.maxY + gaps.bottom
         let width = bounds.width - gaps.right - leftX
-        let height = graphNode.sizeThatFits(.zero).height
+        let height = graphContainer.sizeThatFits(.zero).height
         return CGRect(x: leftX, y: topY, width: width, height: height)
     }
     
     var timelineFrame: CGRect {
-        let topY = graphNodeFrame.maxY
+        let topY = graphContainerFrame.maxY
         let leftX = gaps.left
         let width = bounds.width - gaps.right - leftX
         return CGRect(x: leftX, y: topY, width: width, height: timelineHeight)
@@ -182,6 +322,7 @@ fileprivate struct Layout {
     }
     
     var totalSize: CGSize {
-        return CGSize(width: bounds.width, height: optionsNodeFrame.maxY)
+        let height = optionsNodeFrame.maxY
+        return CGSize(width: bounds.width, height: height)
     }
 }

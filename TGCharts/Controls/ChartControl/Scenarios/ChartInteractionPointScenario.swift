@@ -10,22 +10,27 @@ import Foundation
 import UIKit
 
 final class ChartInteractionPointScenario: IChartInteractorScenario {
+    private let sceneNode: ChartSceneNode
     private let graphNode: UIView
     private let pointUpdateBlock: (CGFloat?) -> Void
     
-    init(graphNode: UIView,
+    init(sceneNode: ChartSceneNode,
+         graphNode: UIView,
          pointUpdateBlock: @escaping (CGFloat?) -> Void) {
+        self.sceneNode = sceneNode
         self.graphNode = graphNode
         self.pointUpdateBlock = pointUpdateBlock
     }
     
-    func interactionDidStart(at point: CGPoint) {
-        let pointer = calculatePointer(point)
+    func interactionDidStart(at point: CGPoint, event: UIEvent?) {
+        let graphPoint = sceneNode.convert(point, to: graphNode)
+        let pointer = calculatePointer(graphPoint)
         pointUpdateBlock(pointer)
     }
     
     func interactionDidMove(to point: CGPoint) {
-        let pointer = calculatePointer(point)
+        let graphPoint = sceneNode.convert(point, to: graphNode)
+        let pointer = calculatePointer(graphPoint)
         pointUpdateBlock(pointer)
     }
     
@@ -34,7 +39,7 @@ final class ChartInteractionPointScenario: IChartInteractorScenario {
     }
     
     private func calculatePointer(_ point: CGPoint) -> CGFloat {
-        let pointer = (point.x - graphNode.bounds.origin.x) / graphNode.bounds.size.width
-        return max(0, min(pointer, 1.0))
+        let pointer = (point.x - graphNode.bounds.minX) / graphNode.bounds.width
+        return pointer
     }
 }

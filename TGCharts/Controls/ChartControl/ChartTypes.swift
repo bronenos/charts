@@ -10,17 +10,13 @@ import Foundation
 import UIKit
 
 struct ChartConfig: Equatable {
+    let standardDistance: CGFloat
     var lines: [ChartLineConfig]
     var range: ChartRange
     var pointer: CGFloat?
     
-    init() {
-        lines = []
-        range = ChartRange(start: 0, end: 1.0)
-        pointer = nil
-    }
-    
-    init(lines: [ChartLineConfig], range: ChartRange, pointer: CGFloat?) {
+    init(standardDistance: CGFloat, lines: [ChartLineConfig], range: ChartRange, pointer: CGFloat?) {
+        self.standardDistance = standardDistance
         self.lines = lines
         self.range = range
         self.pointer = pointer
@@ -35,10 +31,11 @@ struct ChartConfig: Equatable {
         return nil
     }
     
-    func fullRanged() -> ChartConfig {
+    func withRange(range: ChartRange) -> ChartConfig {
         return ChartConfig(
+            standardDistance: standardDistance,
             lines: lines,
-            range: ChartRange(start: 0, end: 1.0),
+            range: range,
             pointer: pointer
         )
     }
@@ -46,7 +43,7 @@ struct ChartConfig: Equatable {
     static func ==(lhs: ChartConfig, rhs: ChartConfig) -> Bool {
         guard lhs.lines == rhs.lines else { return false }
         guard lhs.range == rhs.range else { return false }
-        guard lhs.pointer == rhs.pointer else { return false }
+//        guard lhs.pointer == rhs.pointer else { return false }
         return true
     }
 }
@@ -63,9 +60,14 @@ struct ChartLineConfig: Equatable {
 }
 
 struct ChartRange: Equatable {
+    static let empty = ChartRange(start: 0, end: 0)
+    
     let start: CGFloat
     let end: CGFloat
-    var distance: CGFloat { return end - start }
+    
+    var distance: CGFloat {
+        return end - start
+    }
     
     static func ==(lhs: ChartRange, rhs: ChartRange) -> Bool {
         guard lhs.start == rhs.start else { return false }
@@ -79,4 +81,13 @@ struct ChartMargins {
     let left: CGFloat
     let right: CGFloat
     var total: CGFloat { return left + right }
+}
+
+struct ChartSliceMeta: Equatable {
+    let bounds: CGRect
+    let config: ChartConfig
+    let range: ChartRange
+    let totalWidth: CGFloat
+    let stepX: CGFloat
+    let visibleIndices: Range<Int>
 }

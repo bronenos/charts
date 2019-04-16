@@ -18,11 +18,12 @@ protocol IChartInteractor: IChartInteracting {
 protocol IChartInteractorDelegate: class {
     func interactorDidBegin()
     func interactorDidEnd()
-    func interactorDidInformToUpdate()
+    func interactorDidInformToUpdate(wantsActualEye: Bool)
 }
 
 final class ChartInteractor: IChartInteractor {
-    private var scene: ChartSceneNode
+    private let scene: ChartSceneNode
+    private let navigatorOptions: ChartNavigatorOptions
     private(set) var range: ChartRange
     private(set) var pointer: CGFloat?
     weak var delegate: IChartInteractorDelegate?
@@ -35,13 +36,14 @@ final class ChartInteractor: IChartInteractor {
 
     private var scenario: IChartInteractorScenario?
 
-    init(scene: ChartSceneNode, range: ChartRange) {
+    init(scene: ChartSceneNode, navigatorOptions: ChartNavigatorOptions, range: ChartRange) {
         self.scene = scene
+        self.navigatorOptions = navigatorOptions
         self.range = range
         self.pointer = nil
     }
     
-    func interactionDidStart(at point: CGPoint) {
+    func interactionDidStart(at point: CGPoint, event: UIEvent?) {
         guard let node = scene.hitTest(point, with: nil) else { return }
         guard let sliderNode = scene.viewWithTag(ChartControlTag.slider.rawValue) else { return }
         guard let navigatorNode = scene.viewWithTag(ChartControlTag.navigator.rawValue) else { return }
@@ -55,7 +57,9 @@ final class ChartInteractor: IChartInteractor {
                 navigatorNode: navigatorNode,
                 startPoint: point,
                 startRange: range,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .leftArrow:
@@ -64,9 +68,13 @@ final class ChartInteractor: IChartInteractor {
                 sliderNode: sliderNode,
                 navigatorNode: navigatorNode,
                 startPoint: point,
+                startOrigin: scene.convert(point, to: sliderNode).x,
                 startRange: range,
                 direction: .left,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                navigatorOptions: navigatorOptions,
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .rightArrow:
@@ -75,24 +83,30 @@ final class ChartInteractor: IChartInteractor {
                 sliderNode: sliderNode,
                 navigatorNode: navigatorNode,
                 startPoint: point,
+                startOrigin: scene.convert(point, to: sliderNode).x,
                 startRange: range,
                 direction: .right,
-                rangeUpdateBlock: { [weak self] range in self?.updateRange(range) }
+                navigatorOptions: navigatorOptions,
+                rangeUpdateBlock: { [weak self] range in
+                    self?.updateRange(range)
+                }
             )
 
         case .graph:
             scenario = ChartInteractionPointScenario(
+                sceneNode: scene,
                 graphNode: graphNode,
-                pointUpdateBlock: { [weak self] pointer in self?.updatePointer(pointer) }
+                pointUpdateBlock: { [weak self] pointer in
+                    self?.updatePointer(pointer)
+                }
             )
 
         default:
-            print("\(#function) -> tag[\(node.tag)] scenario[-]")
             scenario = nil
         }
         
         if let scenario = scenario {
-            scenario.interactionDidStart(at: point)
+            scenario.interactionDidStart(at: point, event: event)
             delegate?.interactorDidBegin()
         }
     }
@@ -108,11 +122,11 @@ final class ChartInteractor: IChartInteractor {
     
     private func updateRange(_ range: ChartRange) {
         self.range = range
-        delegate?.interactorDidInformToUpdate()
+        delegate?.interactorDidInformToUpdate(wantsActualEye: true)
     }
     
     private func updatePointer(_ pointer: CGFloat?) {
         self.pointer = pointer
-        delegate?.interactorDidInformToUpdate()
+        delegate?.interactorDidInformToUpdate(wantsActualEye: false)
     }
 }

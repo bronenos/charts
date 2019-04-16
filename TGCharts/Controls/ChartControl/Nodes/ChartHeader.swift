@@ -59,7 +59,7 @@ final class ChartHeader: ChartNode, IChartHeader {
     func setDateInterval(sinceDate: Date, untilDate: Date) {
         let sinceText = formattingProvider.format(date: sinceDate, style: .mediumDate)
         let untilText = formattingProvider.format(date: untilDate, style: .mediumDate)
-        dateHeader.text = "\(sinceText) — \(untilText)"
+        dateHeader.text = "\(sinceText) - \(untilText)"
         
         setNeedsLayout()
     }

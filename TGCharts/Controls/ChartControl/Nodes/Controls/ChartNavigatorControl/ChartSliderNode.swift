@@ -23,6 +23,8 @@ final class ChartSliderNode: ChartFigureNode, IChartSliderNode {
     let leftArrowNode = ChartSliderArrowNode(direction: .left)
     let rightArrowNode = ChartSliderArrowNode(direction: .right)
     
+    private let sideTappableMargin = CGFloat(10)
+    
     init() {
         super.init(figure: .nestedBezierPaths)
         
@@ -48,11 +50,31 @@ final class ChartSliderNode: ChartFigureNode, IChartSliderNode {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        let outerPath = UIBezierPath(roundedRect: bounds, cornerRadius: 2)
+        let outerPath = UIBezierPath(roundedRect: bounds, cornerRadius: DesignBook.shared.standardRadius)
         let innerPath = UIBezierPath(rect: bounds.insetBy(dx: horizontalGap, dy: verticalGap))
         bezierPaths = [outerPath, innerPath]
         
-        leftArrowNode.frame = bounds.divided(atDistance: horizontalGap, from: .minXEdge).slice
-        rightArrowNode.frame = bounds.divided(atDistance: horizontalGap, from: .maxXEdge).slice
+        leftArrowNode.frame = bounds
+            .divided(atDistance: horizontalGap, from: .minXEdge).slice
+            .insetBy(dx: -sideTappableMargin, dy: -verticalGap)
+        
+        rightArrowNode.frame = bounds
+            .divided(atDistance: horizontalGap, from: .maxXEdge).slice
+            .insetBy(dx: -sideTappableMargin, dy: -verticalGap)
+    }
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        for child in subviews {
+            let childPoint = convert(point, to: child)
+            if child.point(inside: childPoint, with: event) {
+                return true
+            }
+        }
+        
+        if bounds.insetBy(dx: -sideTappableMargin, dy: 0).contains(point) {
+            return true
+        }
+        
+        return false
     }
 }

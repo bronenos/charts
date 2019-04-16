@@ -78,7 +78,7 @@ final class RootRouter: IRootRouter {
             block()
             
             UIView.animate(
-                withDuration: 0.15,
+                withDuration: DesignBook.shared.duration(.designChange),
                 animations: { snapshot.alpha = 0 },
                 completion: { _ in snapshot.removeFromSuperview() }
             )

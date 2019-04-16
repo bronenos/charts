@@ -16,11 +16,25 @@ extension Notification.Name {
     static let designBookChanged = Notification.Name(rawValue: "DesignBookChanged")
 }
 
+enum ChartColorKey {
+    case x
+    case y
+    case line(String)
+    case button(String)
+    case tooltip(String)
+    case dimming
+}
+
 protocol IDesignBook: class {
     var style: DesignBookStyle { get }
     var styleObservable: BroadcastObservable<DesignBookStyle> { get }
+    var standardRadius: CGFloat { get }
     func color(_ color: DesignBookColor) -> UIColor
+    func color(chart: Chart, key: ChartColorKey) -> UIColor
     func font(size: CGFloat, weight: DesignBookFontWeight) -> UIFont
+    func duration(_ animation: DesignBookAnimation) -> TimeInterval
+    func mainGraphHeight(bounds: CGRect, traitCollection: UITraitCollection) -> CGFloat
+    func caretStandardWidth(navigationWidth: CGFloat) -> CGFloat
     func resolveStatusBarStyle() -> UIStatusBarStyle
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key: Any]
 }
@@ -44,7 +58,15 @@ class DesignBook: IDesignBook {
         return sharedStyleObservable
     }
     
+    var standardRadius: CGFloat {
+        return 6
+    }
+    
     func color(_ color: DesignBookColor) -> UIColor {
+        abort()
+    }
+    
+    func color(chart: Chart, key: ChartColorKey) -> UIColor {
         abort()
     }
     
@@ -56,12 +78,54 @@ class DesignBook: IDesignBook {
         }
     }
     
+    func duration(_ animation: DesignBookAnimation) -> TimeInterval {
+        switch animation {
+        case .designChange: return 0.15
+        case .toggleLine: return 0.25
+        case .toggleOption: return 0.25
+        case .updateEye: return isPhone ? 0.075 : 0
+        case .pointerDimming: return 0.25
+        }
+    }
+    
+    func mainGraphHeight(bounds: CGRect, traitCollection: UITraitCollection) -> CGFloat {
+        if isPhone {
+            switch traitCollection.verticalSizeClass {
+            case .regular: return min(bounds.height * 0.5, 300)
+            case .compact: return 150
+            default: return 50
+            }
+        }
+        else {
+            return 300
+        }
+    }
+    
+    func caretStandardWidth(navigationWidth: CGFloat) -> CGFloat {
+        return isPhone ? 95 : (navigationWidth / 12)
+    }
+    
     func resolveStatusBarStyle() -> UIStatusBarStyle {
         preconditionFailure("Must use the specific subclass")
     }
     
     func resolveNavigationTitleAttributes() -> [NSAttributedString.Key : Any] {
         return [.foregroundColor: color(.primaryForeground)]
+    }
+    
+    fileprivate var isPhone: Bool {
+        return (UI_USER_INTERFACE_IDIOM() == .phone)
+    }
+    
+    fileprivate func color(style: ChartStyle, key: ChartColorKey) -> UIColor {
+        switch key {
+        case .x: return style.axis.horizontal
+        case .y: return style.axis.vertical
+        case .line(let colorKey): return style.lines[colorKey]?.line ?? UIColor(hex: colorKey)
+        case .button(let colorKey): return style.lines[colorKey]?.button ?? UIColor(hex: colorKey)
+        case .tooltip(let colorKey): return style.lines[colorKey]?.tooltip ?? UIColor(hex: colorKey)
+        case .dimming: return style.mask ?? UIColor.clear
+        }
     }
 }
 
@@ -77,17 +141,21 @@ final class LightDesignBook: DesignBook {
         case .focusedBackground: return UIColor(white: 0.9, alpha: 1.0)
         case .primaryForeground: return UIColor.black
         case .secondaryForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
-        case .chartIndexForeground: return UIColor(red: 0.52, green: 0.55, blue: 0.57, alpha: 1.0)
-        case .chartPointerStepperLineStroke: return UIColor(red: 0.94, green: 0.94, blue: 0.94, alpha: 1.0)
-        case .chartPointerFocusedLineStroke: return UIColor(red: 0.77, green: 0.78, blue: 0.78, alpha: 1.0)
+        case .chartGridStroke: return UIColor(hex: "182D3B").withAlphaComponent(0.1)
         case .chartPointerCloudBackground: return UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor(red: 0.35, green: 0.35, blue: 0.37, alpha: 1.0)
-        case .navigatorBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1.0)
-        case .navigatorCoverBackground: return UIColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.75, green: 0.79, blue: 0.84, alpha: 0.85)
+        case .chartPointerCloudControls: return UIColor(hex: "59606D").withAlphaComponent(0.3)
+        case .navigatorBackground: return UIColor(hex: "E9F3FA")
+        case .navigatorCoverBackground: return self.color(.navigatorBackground).withAlphaComponent(0.5)
+        case .sliderBackground: return UIColor(hex: "B4C7D9")
         case .sliderForeground: return UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        case .actionForeground: return UIColor(red: 0.05, green: 0.40, blue: 0.87, alpha: 1.0)
+        case .optionForeground: return UIColor.white
+        case .actionForeground: return UIColor(hex: "108BE3")
         }
+    }
+    
+    override func color(chart: Chart, key: ChartColorKey) -> UIColor {
+        return color(style: chart.stylePair.light, key: key)
     }
     
     override func resolveStatusBarStyle() -> UIStatusBarStyle {
@@ -107,17 +175,21 @@ final class DarkDesignBook: DesignBook {
         case .focusedBackground: return UIColor(red: 0.20, green: 0.24, blue: 0.29, alpha: 1.0)
         case .primaryForeground: return UIColor.white
         case .secondaryForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
-        case .chartIndexForeground: return UIColor(red: 0.29, green: 0.35, blue: 0.42, alpha: 1.0)
-        case .chartPointerStepperLineStroke: return UIColor(red: 0.08, green: 0.11, blue: 0.15, alpha: 1.0)
-        case .chartPointerFocusedLineStroke: return UIColor(red: 0.06, green: 0.08, blue: 0.11, alpha: 1.0)
+        case .chartGridStroke: return UIColor(hex: "8596AB").withAlphaComponent(0.2)
         case .chartPointerCloudBackground: return UIColor(red: 0.08, green: 0.11, blue: 0.16, alpha: 1.0)
         case .chartPointerCloudForeground: return UIColor.white
-        case .navigatorBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 1.0)
-        case .navigatorCoverBackground: return UIColor(red: 0.09, green: 0.12, blue: 0.17, alpha: 0.7)
-        case .sliderBackground: return UIColor(red: 0.16, green: 0.21, blue: 0.28, alpha: 0.85)
+        case .chartPointerCloudControls: return UIColor(hex: "D2D5D7").withAlphaComponent(0.3)
+        case .navigatorBackground: return UIColor(hex: "151C27")
+        case .navigatorCoverBackground: return self.color(.navigatorBackground).withAlphaComponent(0.5)
+        case .sliderBackground: return UIColor(hex: "444F5A")
         case .sliderForeground: return UIColor.white
-        case .actionForeground: return UIColor(red: 0.09, green: 0.48, blue: 1.0, alpha: 1.0)
+        case .optionForeground: return UIColor.white
+        case .actionForeground: return UIColor(hex: "2EA6FE")
         }
+    }
+    
+    override func color(chart: Chart, key: ChartColorKey) -> UIColor {
+        return color(style: chart.stylePair.dark, key: key)
     }
     
     override func resolveStatusBarStyle() -> UIStatusBarStyle {

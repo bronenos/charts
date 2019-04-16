@@ -10,9 +10,14 @@ import Foundation
 import UIKit
 
 protocol IChartInteracting: class {
-    func interactionDidStart(at point: CGPoint)
+    func interactionDidStart(at point: CGPoint, event: UIEvent?)
     func interactionDidMove(to point: CGPoint)
     func interactionDidEnd(at point: CGPoint)
+}
+
+protocol IChartControlDelegate: class {
+    func chartControlDidBeginInteraction()
+    func chartControlDidEndInteraction()
 }
 
 protocol IChartControl: class {
@@ -21,17 +26,13 @@ protocol IChartControl: class {
     func setDelegate(_ delegate: IChartControlDelegate?)
     func link(to parentView: UIView)
     func unlink()
+    func updateHeight(mainGraphHeight: CGFloat)
     func update()
-}
-
-protocol IChartControlDelegate: class {
-    func chartControlDidBeginInteraction()
-    func chartControlDidEndInteraction()
 }
 
 final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChartSceneDelegate {
     let chart: Chart
-    private(set) var config: ChartConfig
+    private let feedbackDriver: IFeedbackDriver
 
     private weak var delegate: IChartControlDelegate?
 
@@ -39,13 +40,46 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
     private let scene: ChartSceneNode
     private let interactor: IChartInteractor
     
-    private let startupRange = ChartRange(start: 0.75, end: 1.0)
-    
-    init(chart: Chart, localeProvider: ILocaleProvider, formattingProvider: IFormattingProvider) {
+    private let standardDistance: CGFloat
+    private let standardRange: ChartRange
+    private let navigatorOptions: ChartNavigatorOptions
+    private(set) var config: ChartConfig
+
+    init(chart: Chart,
+         mainGraphHeight: CGFloat,
+         localeProvider: ILocaleProvider,
+         formattingProvider: IFormattingProvider,
+         feedbackDriver: IFeedbackDriver) {
         self.chart = chart
-        self.config = startupConfig(chart: chart, range: startupRange)
-        self.scene = ChartSceneNode(chart: chart, config: config, localeProvider: localeProvider, formattingProvider: formattingProvider)
-        self.interactor = ChartInteractor(scene: scene, range: startupRange)
+        self.feedbackDriver = feedbackDriver
+        
+        standardDistance = CGFloat(1.0 / 12.0)
+        standardRange = ChartRange(start: 1.0 - standardDistance, end: 1.0)
+
+        navigatorOptions = ChartNavigatorOptions(
+            caretStandardDistance: standardDistance
+        )
+        
+        config = startupConfig(
+            chart: chart,
+            standardDistance: standardDistance,
+            range: standardRange
+        )
+        
+        scene = ChartSceneNode(
+            chart: chart,
+            mainGraphHeight: mainGraphHeight,
+            navigatorOptions: navigatorOptions,
+            config: config,
+            localeProvider: localeProvider,
+            formattingProvider: formattingProvider
+        )
+        
+        interactor = ChartInteractor(
+            scene: scene,
+            navigatorOptions: navigatorOptions,
+            range: standardRange
+        )
         
         super.init(frame: .zero)
         
@@ -59,6 +93,10 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         abort()
     }
     
+    override var frame: CGRect {
+        didSet { update() }
+    }
+    
     func setDelegate(_ delegate: IChartControlDelegate?) {
         self.delegate = delegate
     }
@@ -69,25 +107,44 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         parentView.addSubview(self)
         
         scene.frame = CGRect(origin: .zero, size: bounds.size)
-        render()
+        render(duration: 0, wantsActualEye: false)
     }
     
     func unlink() {
         removeFromSuperview()
     }
     
-    func render(duration: TimeInterval = 0) {
-        scene.update(config: config, duration: duration)
+    func updateHeight(mainGraphHeight: CGFloat) {
+        scene.updateHeight(mainGraphHeight: mainGraphHeight)
+        render(duration: 0, wantsActualEye: false)
+        setNeedsLayout()
     }
     
     func update() {
         scene.updateDesign()
-        render()
+        render(duration: 0, wantsActualEye: false)
     }
     
-    func sceneDidToggleLine(index: Int) {
-        config.lines[index].visible.toggle()
-        render(duration: 0.25)
+    func sceneDidToggleLine(index: Int, exclusive: Bool) {
+        if exclusive {
+            config.lines.indices.forEach {  config.lines[$0].visible = false }
+            config.lines[index].visible = true
+        }
+        else {
+            config.lines[index].visible.toggle()
+        }
+        
+        render(
+            duration: DesignBook.shared.duration(.toggleLine),
+            wantsActualEye: true
+        )
+        
+        if exclusive {
+            feedbackDriver.vibrateOnAction(strength: .strong)
+        }
+        else {
+            feedbackDriver.vibrateOnAction(strength: .medium)
+        }
     }
     
     func interactorDidBegin() {
@@ -98,10 +155,16 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         delegate?.chartControlDidEndInteraction()
     }
     
-    func interactorDidInformToUpdate() {
+    func interactorDidInformToUpdate(wantsActualEye: Bool) {
         config.range = interactor.range
         config.pointer = interactor.pointer
-        render()
+        
+        render(
+            duration: DesignBook.shared.duration(.updateEye),
+            wantsActualEye: wantsActualEye
+        )
+        
+//        feedbackDriver.vibrateOnSlide()
     }
     
     override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -112,7 +175,7 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
         super.touchesBegan(touches, with: event)
         
         if let point = touches.first?.location(in: self) {
-            interactor.interactionDidStart(at: point)
+            interactor.interactionDidStart(at: point, event: event)
         }
     }
     
@@ -139,10 +202,15 @@ final class ChartControl: UIView, IChartControl, IChartInteractorDelegate, IChar
             interactor.interactionDidEnd(at: point)
         }
     }
+    
+    private func render(duration: TimeInterval, wantsActualEye: Bool) {
+        scene.update(config: config, duration: duration, wantsActualEye: wantsActualEye)
+    }
 }
 
-fileprivate func startupConfig(chart: Chart, range: ChartRange) -> ChartConfig {
+fileprivate func startupConfig(chart: Chart, standardDistance: CGFloat, range: ChartRange) -> ChartConfig {
     return ChartConfig(
+        standardDistance: standardDistance,
         lines: chart.lines.map { line in
             ChartLineConfig(key: line.key, visible: true)
         },

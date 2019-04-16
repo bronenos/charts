@@ -14,25 +14,34 @@ enum ChartFigure {
     case separatePoints
     case roundedSquare
     case nestedBezierPaths
+    case filledPaths
 }
 
 protocol IChartFigureNode: IChartNode {
     var figure: ChartFigure { get set }
     var points: [CGPoint] { get set }
     var bezierPaths: [UIBezierPath] { get set }
-    var width: CGFloat { get set }
+    var strokeWidth: CGFloat { get set }
     var strokeColor: UIColor { get set }
     var fillColor: UIColor { get set }
     var radius: CGFloat { get set }
-    func overwriteNextAnimation(duration: TimeInterval)
+    func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval)
+    func convertEffectiveToOriginal(point: CGPoint) -> CGPoint
+    func convertEffectiveToOriginal(x: CGFloat) -> CGFloat
+    func convertOriginalToEffective(point: CGPoint) -> CGPoint
+    func convertOriginalToEffective(x: CGFloat) -> CGFloat
 }
 
 class ChartFigureNode: ChartNode, IChartFigureNode {
     private let shapeLayer = CAShapeLayer()
+    private var rootBezierPath = UIBezierPath()
     
-    private let standardAnimationDuration = TimeInterval(0.075)
-    private var nextAnimationDuration: TimeInterval?
+    var strokeWidth = CGFloat(1)
+    var borderWidth = CGFloat(0)
+    var minimalScaledWidth = CGFloat(0)
 
+    private var effectiveTransform = CGAffineTransform.identity
+    
     init(figure: ChartFigure) {
         super.init(frame: .zero)
         
@@ -48,61 +57,108 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
     var figure = ChartFigure.joinedLines {
         didSet {
             guard figure != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     override var frame: CGRect {
         didSet {
             guard frame.size != oldValue.size else { return }
-            update()
+            updateFigure()
         }
     }
     
     var points = [CGPoint]() {
         didSet {
             guard points != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     var bezierPaths = [UIBezierPath]() {
         didSet {
             guard bezierPaths != oldValue else { return }
-            update()
-        }
-    }
-    
-    var width = CGFloat(0) {
-        didSet {
-            guard width != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
     var strokeColor = UIColor.clear {
         didSet {
-            guard strokeColor != oldValue else { return }
-            update()
+            shapeLayer.strokeColor = strokeColor.cgColor
         }
     }
     
     var fillColor = UIColor.clear {
         didSet {
-            guard fillColor != oldValue else { return }
-            update()
+            shapeLayer.fillColor = fillColor.cgColor
         }
     }
     
     var radius = CGFloat(0) {
         didSet {
             guard radius != oldValue else { return }
-            update()
+            updateFigure()
         }
     }
     
-    func overwriteNextAnimation(duration: TimeInterval) {
-        nextAnimationDuration = duration
+    func setEye(insets: UIEdgeInsets?, scale: CGFloat, duration: TimeInterval) {
+        let path: CGPath
+        if let insets = insets {
+            var targetTransform = CGAffineTransform.identity
+            
+            let scaleX = 1.0 / (insets.right - insets.left)
+            let scaleY = 1.0 / (insets.top - insets.bottom)
+            targetTransform = targetTransform.scaledBy(x: scaleX, y: scaleY)
+            
+            let moveX = -(bounds.width * insets.left)
+            let moveY = -(bounds.height * (1.0 - insets.top))
+            targetTransform = targetTransform.translatedBy(x: moveX, y: moveY)
+            
+            let transformedBezierPath = UIBezierPath(cgPath: rootBezierPath.cgPath)
+            transformedBezierPath.apply(targetTransform)
+            effectiveTransform = targetTransform
+            
+            path = transformedBezierPath.cgPath
+        }
+        else {
+            effectiveTransform = .identity
+            path = rootBezierPath.cgPath
+        }
+
+        if duration > 0 {
+            CATransaction.begin()
+            let animation = CABasicAnimation(keyPath: "path")
+            animation.duration = duration
+            animation.fromValue = shapeLayer.presentation()?.path
+            animation.toValue = path
+            
+            shapeLayer.lineWidth = max(minimalScaledWidth, strokeWidth * scale)
+            shapeLayer.path = path
+            shapeLayer.add(animation, forKey: animation.keyPath)
+            CATransaction.commit()
+        }
+        else {
+            shapeLayer.lineWidth = max(minimalScaledWidth, strokeWidth * scale)
+            shapeLayer.path = path
+        }
+    }
+    
+    func convertEffectiveToOriginal(point: CGPoint) -> CGPoint {
+        return point.applying(effectiveTransform.inverted())
+    }
+    
+    func convertEffectiveToOriginal(x: CGFloat) -> CGFloat {
+        let point = CGPoint(x: x, y: 0)
+        return convertEffectiveToOriginal(point: point).x
+    }
+    
+    func convertOriginalToEffective(point: CGPoint) -> CGPoint {
+        return point.applying(effectiveTransform)
+    }
+    
+    func convertOriginalToEffective(x: CGFloat) -> CGFloat {
+        let point = CGPoint(x: x, y: 0)
+        return convertOriginalToEffective(point: point).x
     }
     
     override func layoutSubviews() {
@@ -111,12 +167,16 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         shapeLayer.frame = layer.bounds
     }
     
-    private func update() {
+    private func updateFigure() {
+        rootBezierPath.removeAllPoints()
+        effectiveTransform = .identity
+
         switch figure {
         case .joinedLines: renderJoinedLines()
         case .separatePoints: renderSeparatePoints()
         case .roundedSquare: renderRoundedSquare()
         case .nestedBezierPaths: renderNestedBezierPaths()
+        case .filledPaths: renderFilledPaths()
         }
     }
     
@@ -127,67 +187,57 @@ class ChartFigureNode: ChartNode, IChartFigureNode {
         let firstPoint = restPoints.removeFirst()
         guard !restPoints.isEmpty else { return }
 
-        let bezierPath = UIBezierPath()
-        bezierPath.lineWidth = width
-        bezierPath.lineJoinStyle = .round
-        bezierPath.lineCapStyle = .round
-        bezierPath.move(to: firstPoint)
-        restPoints.forEach(bezierPath.addLine)
+        rootBezierPath.move(to: firstPoint)
+        restPoints.forEach(rootBezierPath.addLine)
         
-        CATransaction.begin()
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.duration = resolvedAnimationDuration
-        animation.fromValue = shapeLayer.presentation()?.path
-        animation.toValue = bezierPath.cgPath
-        
-        shapeLayer.lineWidth = width
+        shapeLayer.lineWidth = strokeWidth
         shapeLayer.strokeColor = strokeColor.cgColor
         shapeLayer.fillColor = fillColor.cgColor
         shapeLayer.lineJoin = .round
         shapeLayer.lineCap = .round
-        shapeLayer.path = bezierPath.cgPath
-        shapeLayer.add(animation, forKey: animation.keyPath)
-        CATransaction.commit()
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderSeparatePoints() {
-        let bezierPath = UIBezierPath()
-        
         points.forEach { point in
-            let offset = width * 0.5
+            let offset = strokeWidth * 0.5
             let rect = CGRect(x: point.x, y: point.y, width: 0, height: 0).insetBy(dx: offset, dy: offset)
             let bezierSubpath = UIBezierPath(roundedRect: rect, cornerRadius: offset)
-            bezierPath.append(bezierSubpath)
+            rootBezierPath.append(bezierSubpath)
         }
         
         shapeLayer.strokeColor = strokeColor.cgColor
-        shapeLayer.path = bezierPath.cgPath
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderRoundedSquare() {
-        let bezierPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+        rootBezierPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
         
         shapeLayer.fillColor = fillColor.cgColor
-        shapeLayer.path = bezierPath.cgPath
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
     private func renderNestedBezierPaths() {
         var restPaths = bezierPaths
         guard !restPaths.isEmpty else { return }
         
-        let firstPath = restPaths.removeFirst()
-        firstPath.usesEvenOddFillRule = true
-        restPaths.forEach(firstPath.append)
+        rootBezierPath = restPaths.removeFirst()
+        restPaths.forEach(rootBezierPath.append)
         
         shapeLayer.strokeColor = strokeColor.cgColor
-        shapeLayer.lineWidth = width
+        shapeLayer.lineWidth = strokeWidth
+        shapeLayer.borderWidth = borderWidth
         shapeLayer.fillRule = .evenOdd
         shapeLayer.fillColor = fillColor.cgColor
-        shapeLayer.path = firstPath.cgPath
+        shapeLayer.fillRule = .evenOdd
+        shapeLayer.path = rootBezierPath.cgPath
     }
     
-    private var resolvedAnimationDuration: TimeInterval {
-        defer { nextAnimationDuration = nil }
-        return nextAnimationDuration ?? standardAnimationDuration
+    private func renderFilledPaths() {
+        rootBezierPath = UIBezierPath()
+        bezierPaths.forEach(rootBezierPath.append)
+        
+        shapeLayer.fillColor = fillColor.cgColor
+        shapeLayer.path = rootBezierPath.cgPath
     }
 }

@@ -8,6 +8,7 @@
 
 "Stat.Title" = "Статистика";
 "Stat.Section.TitlePrefix" = "График";
-"Stat.Mode.Light" = "Переключиться в дневной режим";
-"Stat.Mode.Dark" = "Переключиться в ночной режим";
+"Stat.Mode.Light" = "Дневной режим";
+"Stat.Mode.Dark" = "Ночной режим";
 "Chart.Control.ZoomOut" = "〈 Обратно";
+"Chart.Bar.Total" = "Все";

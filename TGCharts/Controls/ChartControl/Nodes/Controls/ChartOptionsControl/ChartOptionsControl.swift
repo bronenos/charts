@@ -1,5 +1,5 @@
 //
-//  ChartOptions.swift
+//  ChartOptionsControl.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 07/04/2019.
@@ -9,32 +9,47 @@
 import Foundation
 import UIKit
 
-protocol IChartOptions: class {
-    var tokenTapHandler: ((Int) -> Void)? { get set }
-    func populate(_ options: [ChartOption])
+protocol IChartOptionsControl: class {
+    var tokenTapHandler: ((Int, Bool) -> Void)? { get set }
+    func populate(_ options: [ChartOptionsItem], animated: Bool)
 }
 
-final class ChartOptions: ChartNode, IChartOptions {
-    var tokenTapHandler: ((Int) -> Void)?
+final class ChartOptionsControl: ChartNode, IChartOptionsControl {
+    var tokenTapHandler: ((Int, Bool) -> Void)?
     
-    private var tokenOptions = [ChartOption]()
-    private var tokenControls = [ChartOptionToken]()
+    private var tokenOptions = [ChartOptionsItem]()
+    private var tokenControls = [ChartOptionsToken]()
     
-    func populate(_ options: [ChartOption]) {
+    func populate(_ options: [ChartOptionsItem], animated: Bool) {
         self.tokenOptions = options
         
         if options.count == tokenControls.count {
             zip(options, tokenControls).forEach { option, control in
-                control.configure(color: option.color, title: option.title, enabled: option.enabled)
+                control.configure(
+                    color: option.color,
+                    title: option.title,
+                    enabled: option.enabled,
+                    animated: animated
+                )
             }
         }
         else {
             tokenControls.forEach { $0.removeFromSuperview() }
             
             tokenControls = options.map { option in
-                let control = ChartOptionToken()
-                control.configure(color: option.color, title: option.title, enabled: option.enabled)
-                control.addTarget(self, action: #selector(handleTokenTap), for: .touchUpInside)
+                let control = ChartOptionsToken()
+                
+                control.configure(
+                    color: option.color,
+                    title: option.title,
+                    enabled: option.enabled,
+                    animated: animated
+                )
+                
+                control.tapHandler = { [weak self] exclusive in
+                    self?.handleTokenTap(control, exclusive: exclusive)
+                }
+                
                 return control
             }
             
@@ -59,15 +74,15 @@ final class ChartOptions: ChartNode, IChartOptions {
         )
     }
     
-    @objc private func handleTokenTap(_ control: ChartOptionToken) {
+    @objc private func handleTokenTap(_ control: ChartOptionsToken, exclusive: Bool) {
         guard let index = tokenControls.firstIndex(of: control) else { return }
-        tokenTapHandler?(index)
+        tokenTapHandler?(index, exclusive)
     }
 }
 
 fileprivate struct Layout {
     let bounds: CGRect
-    let tokenControls: [ChartOptionToken]
+    let tokenControls: [ChartOptionsToken]
     
     private let verticalGap = CGFloat(10)
     private let horizontalGap = CGFloat(0)

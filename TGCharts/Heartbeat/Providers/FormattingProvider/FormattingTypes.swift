@@ -12,5 +12,6 @@ enum FormattingDateStyle {
     case shortDate
     case justYear
     case mediumDate
+    case dayAndDate
     case fullDate
 }

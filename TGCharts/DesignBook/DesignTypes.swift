@@ -20,15 +20,15 @@ enum DesignBookColor {
     case focusedBackground
     case primaryForeground
     case secondaryForeground
-    case chartIndexForeground
-    case chartPointerStepperLineStroke
-    case chartPointerFocusedLineStroke
+    case chartGridStroke
     case chartPointerCloudBackground
     case chartPointerCloudForeground
+    case chartPointerCloudControls
     case navigatorBackground
     case navigatorCoverBackground
     case sliderBackground
     case sliderForeground
+    case optionForeground
     case actionForeground
 }
 
@@ -36,6 +36,14 @@ enum DesignBookFontWeight {
     case light
     case regular
     case medium
+}
+
+enum DesignBookAnimation {
+    case designChange
+    case toggleLine
+    case toggleOption
+    case updateEye
+    case pointerDimming
 }
 
 protocol DesignBookUpdatable: class {

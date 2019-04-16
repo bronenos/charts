@@ -1,5 +1,5 @@
 //
-//  ChartVerticalStepNode.swift
+//  ChartGuideStepNode.swift
 //  TGCharts
 //
 //  Created by Stan Potemkin on 21/03/2019.
@@ -9,21 +9,25 @@
 import Foundation
 import UIKit
 
-protocol IChartVerticalStepNode: IChartNode {
-    var value: String { get set }
-    var color: UIColor? { get set }
+protocol IChartGuideStepNode: IChartNode {
+    var value: String? { get set }
+    var valueColor: UIColor? { get set }
+    var underlineColor: UIColor? { get set }
 }
 
-final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
+final class ChartGuideStepNode: ChartNode, IChartGuideStepNode {
     private let valueNode = ChartLabelNode()
     private let underlineNode = ChartNode()
     
-    init() {
+    init(alignment: NSTextAlignment) {
         super.init(frame: .zero)
         
         isUserInteractionEnabled = false
         
+        valueNode.font = DesignBook.shared.font(size: 10, weight: .regular)
+        valueNode.textAlignment = alignment
         addSubview(valueNode)
+        
         addSubview(underlineNode)
     }
     
@@ -31,23 +35,17 @@ final class ChartVerticalStepNode: ChartNode, IChartVerticalStepNode {
         abort()
     }
     
-    var value = String() {
-        didSet {
-            guard value != oldValue else { return }
-            
-            valueNode.content = ChartLabelNodeContent(
-                text: value,
-                color: DesignBook.shared.color(.chartIndexForeground),
-                font: UIFont.systemFont(ofSize: 12),
-                alignment: .left,
-                limitedToBounds: false
-            )
-            
-            setNeedsLayout()
-        }
+    var value: String? {
+        get { return valueNode.text }
+        set { valueNode.text = newValue }
     }
     
-    var color: UIColor? {
+    var valueColor: UIColor? {
+        get { return valueNode.textColor }
+        set { valueNode.textColor = newValue }
+    }
+    
+    var underlineColor: UIColor? {
         get { return underlineNode.backgroundColor }
         set { underlineNode.backgroundColor = newValue }
     }
@@ -72,8 +70,7 @@ fileprivate struct Layout {
     private let underlineHeight = CGFloat(1)
     
     var valueNodeFrame: CGRect {
-        let size = valueNode.sizeThatFits(.zero)
-        return CGRect(x: 0, y: 0, width: size.width, height: bounds.height)
+        return bounds
     }
     
     var underlineNodeFrame: CGRect {

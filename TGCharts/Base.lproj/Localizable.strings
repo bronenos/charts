@@ -8,7 +8,7 @@
 
 "Stat.Title" = "Statistics";
 "Stat.Section.TitlePrefix" = "Chart";
-"Stat.Mode.Light" = "Switch to Day Mode";
-"Stat.Mode.Dark" = "Switch to Night Mode";
+"Stat.Mode.Light" = "Day Mode";
+"Stat.Mode.Dark" = "Night Mode";
 "Chart.Control.ZoomOut" = "〈 Zoom Out";
-
+"Chart.Bar.Total" = "All";

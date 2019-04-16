@@ -11,9 +11,13 @@ import UIKit
 
 protocol IChartNode: class {
     func updateDesign()
+    func discardCache()
 }
 
 class ChartNode: UIView, IChartNode {
     func updateDesign() {
+    }
+    
+    func discardCache() {
     }
 }

@@ -11,7 +11,7 @@ import UIKit
 
 protocol IStatView: class {
     func setTitle(_ title: String)
-    func setCharts(titlePrefix: String, charts: [Chart])
+    func setChartMetas(_ metas: [ChartMeta])
     func setDesignSwitcher(title: String)
 }
 
@@ -19,6 +19,7 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     var router: IStatRouter!
     weak var interactor: IStatInteractor!
     
+    private let rightBarButton = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
     private let tableView = UITableView(frame: .zero, style: .grouped)
     
     private let dataSource = StatDataSource()
@@ -27,49 +28,54 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
     override init(designObservable: BroadcastObservable<DesignBookStyle>) {
         super.init(designObservable: designObservable)
         
+        rightBarButton.target = self
+        rightBarButton.action = #selector(handleDesignToggle)
+        navigationItem.rightBarButtonItem = rightBarButton
+        
         tableView.alwaysBounceVertical = true
         tableView.tableFooterView = UIView()
-        
-        dataSource.switchDesignHandler = { [weak self] in
-            self?.interactor.toggleDesign()
-        }
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleOrientationChange),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
     }
     
     required init?(coder aDecoder: NSCoder) {
         abort()
     }
     
-    func setCharts(titlePrefix: String, charts: [Chart]) {
+    func setChartMetas(_ metas: [ChartMeta]) {
+        let localeProvider = interactor.localeProvider
         let formattingProvider = interactor.formattingProvider
+        let feedbackDriver = interactor.feedbackDriver
         
         chartControls.forEach { control in control.setDelegate(nil) }
-        chartControls = charts.map {
+        chartControls = metas.map { meta in
             ChartControl(
-                chart: $0,
-                localeProvider: interactor.localeProvider,
-                formattingProvider: formattingProvider
+                chart: meta.chart,
+                mainGraphHeight: DesignBook.shared.mainGraphHeight(
+                    bounds: view.bounds,
+                    traitCollection: traitCollection
+                ),
+                localeProvider: localeProvider,
+                formattingProvider: formattingProvider,
+                feedbackDriver: feedbackDriver
             )
         }
         chartControls.forEach { control in control.setDelegate(self) }
         
-        dataSource.setChartControls(titlePrefix: titlePrefix, controls: chartControls)
+        dataSource.setMetas(
+            metas: zip(metas, chartControls).map { meta, control in
+                return ChartControlMeta(chartMeta: meta, control: control)
+            }
+        )
     }
     
     func setDesignSwitcher(title: String) {
-        dataSource.setDesignSwitcherTitle(title)
+        rightBarButton.title = title
     }
     
     override func updateDesign() {
         super.updateDesign()
         
         tableView.backgroundColor = DesignBook.shared.color(.spaceBackground)
+        rightBarButton.tintColor = DesignBook.shared.color(.actionForeground)
         dataSource.updateDesign()
     }
     
@@ -104,10 +110,19 @@ final class StatViewController: BaseViewController, IStatView, IChartControlDele
         tableView.isScrollEnabled = true
     }
     
-    @objc private func handleOrientationChange() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
-            self?.dataSource.reload()
-        }
+    @objc private func handleDesignToggle() {
+        interactor.toggleDesign()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        dataSource.reload(
+            mainGraphHeight: DesignBook.shared.mainGraphHeight(
+                bounds: view.bounds,
+                traitCollection: traitCollection
+            )
+        )
     }
 }
 

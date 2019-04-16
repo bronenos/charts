@@ -13,6 +13,7 @@ protocol IStatInteractor: IBaseInteractor {
     var view: IStatView! { get set }
     var localeProvider: ILocaleProvider { get }
     var formattingProvider: IFormattingProvider { get }
+    var feedbackDriver: IFeedbackDriver { get }
     func toggleDesign()
 }
 
@@ -28,9 +29,8 @@ final class StatInteractor: IStatInteractor {
         self.heartbeat = heartbeat
         
         statObserver = heartbeat.workers.statWorker.stateObservable.addObserver { [weak self] value in
-            guard case .ready(let charts) = value else { return }
-            let prefix = heartbeat.localized(key: "Stat.Section.TitlePrefix")
-            self?.view.setCharts(titlePrefix: prefix, charts: charts)
+            guard case .ready(let metas) = value else { return }
+            self?.view.setChartMetas(metas)
         }
     }
     
@@ -40,6 +40,10 @@ final class StatInteractor: IStatInteractor {
     
     var formattingProvider: IFormattingProvider {
         return heartbeat.providers.formattingProvider
+    }
+    
+    var feedbackDriver: IFeedbackDriver {
+        return heartbeat.drivers.feedbackDriver
     }
     
     func interfaceStartup() {
