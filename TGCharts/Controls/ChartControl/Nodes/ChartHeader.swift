@@ -105,9 +105,11 @@ fileprivate struct Layout {
     private let height = CGFloat(45)
 
     var zoomOutButtonFrame: CGRect {
-        let size = zoomOutButton.sizeThatFits(.zero)
-        let topY = (bounds.height - size.height) * 0.5
-        return CGRect(x: gap, y: topY, width: size.width, height: size.height)
+        return .zero
+        
+//        let size = zoomOutButton.sizeThatFits(.zero)
+//        let topY = (bounds.height - size.height) * 0.5
+//        return CGRect(x: gap, y: topY, width: size.width, height: size.height)
     }
     
     var dateHeaderFrame: CGRect {
