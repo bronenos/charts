@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:TGCharts.xcodeproj">
+      location = "self:/Users/bronenos/Documents/Development/TGCharts/Charts.xcodeproj">
    </FileRef>
 </Workspace>

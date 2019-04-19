@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D46182182234614F006B72A7"
-               BuildableName = "TGCharts.app"
-               BlueprintName = "TGCharts"
-               ReferencedContainer = "container:TGCharts.xcodeproj">
+               BuildableName = "Charts.app"
+               BlueprintName = "Charts"
+               ReferencedContainer = "container:Charts.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D46182182234614F006B72A7"
-            BuildableName = "TGCharts.app"
-            BlueprintName = "TGCharts"
-            ReferencedContainer = "container:TGCharts.xcodeproj">
+            BuildableName = "Charts.app"
+            BlueprintName = "Charts"
+            ReferencedContainer = "container:Charts.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D46182182234614F006B72A7"
-            BuildableName = "TGCharts.app"
-            BlueprintName = "TGCharts"
-            ReferencedContainer = "container:TGCharts.xcodeproj">
+            BuildableName = "Charts.app"
+            BlueprintName = "Charts"
+            ReferencedContainer = "container:Charts.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -87,9 +87,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D46182182234614F006B72A7"
-            BuildableName = "TGCharts.app"
-            BlueprintName = "TGCharts"
-            ReferencedContainer = "container:TGCharts.xcodeproj">
+            BuildableName = "Charts.app"
+            BlueprintName = "Charts"
+            ReferencedContainer = "container:Charts.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

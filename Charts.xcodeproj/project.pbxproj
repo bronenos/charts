@@ -110,7 +110,7 @@
 		D45D926E224411EB004E136C /* ChartGuideStepNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGuideStepNode.swift; sourceTree = "<group>"; };
 		D460353C2244DBC9006551F9 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		D460353E2244DBCF006551F9 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		D46182192234614F006B72A7 /* TGCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TGCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D46182192234614F006B72A7 /* Charts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Charts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D461821C2234614F006B72A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D461822322346151006B72A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D461822822346151006B72A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -287,7 +287,7 @@
 		D46182102234614F006B72A7 = {
 			isa = PBXGroup;
 			children = (
-				D461821B2234614F006B72A7 /* TGCharts */,
+				D461821B2234614F006B72A7 /* Charts */,
 				D461821A2234614F006B72A7 /* Products */,
 				D460353B2244DBC9006551F9 /* Frameworks */,
 			);
@@ -296,12 +296,12 @@
 		D461821A2234614F006B72A7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D46182192234614F006B72A7 /* TGCharts.app */,
+				D46182192234614F006B72A7 /* Charts.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D461821B2234614F006B72A7 /* TGCharts */ = {
+		D461821B2234614F006B72A7 /* Charts */ = {
 			isa = PBXGroup;
 			children = (
 				D4618231223464D9006B72A7 /* Heartbeat */,
@@ -317,7 +317,7 @@
 				D46182682234E0D5006B72A7 /* Localizable.strings */,
 				D46BA28E225B799C001EFED6 /* graph_data */,
 			);
-			path = TGCharts;
+			path = Charts;
 			sourceTree = "<group>";
 		};
 		D461822E223461F4006B72A7 /* Modules */ = {
@@ -582,9 +582,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D46182182234614F006B72A7 /* TGCharts */ = {
+		D46182182234614F006B72A7 /* Charts */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D461822B22346151006B72A7 /* Build configuration list for PBXNativeTarget "TGCharts" */;
+			buildConfigurationList = D461822B22346151006B72A7 /* Build configuration list for PBXNativeTarget "Charts" */;
 			buildPhases = (
 				D46182152234614F006B72A7 /* Sources */,
 				D46182162234614F006B72A7 /* Frameworks */,
@@ -594,9 +594,9 @@
 			);
 			dependencies = (
 			);
-			name = TGCharts;
+			name = Charts;
 			productName = TGCharts;
-			productReference = D46182192234614F006B72A7 /* TGCharts.app */;
+			productReference = D46182192234614F006B72A7 /* Charts.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -623,7 +623,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D46182142234614F006B72A7 /* Build configuration list for PBXProject "TGCharts" */;
+			buildConfigurationList = D46182142234614F006B72A7 /* Build configuration list for PBXProject "Charts" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -637,7 +637,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D46182182234614F006B72A7 /* TGCharts */,
+				D46182182234614F006B72A7 /* Charts */,
 			);
 		};
 /* End PBXProject section */
@@ -890,7 +890,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = V8NCXSZ3T7;
-				INFOPLIST_FILE = TGCharts/Info.plist;
+				INFOPLIST_FILE = Charts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -909,7 +909,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = V8NCXSZ3T7;
-				INFOPLIST_FILE = TGCharts/Info.plist;
+				INFOPLIST_FILE = Charts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -925,7 +925,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D46182142234614F006B72A7 /* Build configuration list for PBXProject "TGCharts" */ = {
+		D46182142234614F006B72A7 /* Build configuration list for PBXProject "Charts" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D461822922346151006B72A7 /* Debug */,
@@ -934,7 +934,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D461822B22346151006B72A7 /* Build configuration list for PBXNativeTarget "TGCharts" */ = {
+		D461822B22346151006B72A7 /* Build configuration list for PBXNativeTarget "Charts" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D461822C22346151006B72A7 /* Debug */,
