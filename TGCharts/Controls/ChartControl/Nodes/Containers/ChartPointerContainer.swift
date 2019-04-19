@@ -23,7 +23,7 @@ protocol IChartPointerContainer: IChartNode {
     func update(pointing: ChartGraphPointing?,
                 content: ChartPointerCloudContent?,
                 options: ChartPointerOptions,
-                scale: CGFloat,
+                dotBorder: CGFloat,
                 duration: TimeInterval)
 }
 
@@ -38,7 +38,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
     
     private var pointing: ChartGraphPointing?
     private var options: ChartPointerOptions = []
-    private var scale = CGFloat(1.0)
+    private var dotBorder = CGFloat(1.0)
 
     init(chart: Chart, formattingProvider: IFormattingProvider) {
         self.chart = chart
@@ -65,14 +65,14 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
     func update(pointing: ChartGraphPointing?,
                 content: ChartPointerCloudContent?,
                 options: ChartPointerOptions,
-                scale: CGFloat,
+                dotBorder: CGFloat,
                 duration: TimeInterval) {
+        if let _ = pointing, self.pointing == nil {
+            self.dotBorder = dotBorder
+            recreateDots()
+        }
+        
         if let points = pointing?.points {
-            if self.pointing == nil {
-                self.scale = scale
-                recreateDots()
-            }
-            
             lineNode.backgroundColor = DesignBook.shared.color(.chartGridStroke)
             
             for (line, node) in zip(chart.lines, orderedDotNodes) {
@@ -180,7 +180,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
         orderedDotNodes = chart.lines.map { line in
             let path = UIBezierPath(
                 arcCenter: .zero,
-                radius: 3 * scale,
+                radius: dotBorder * 1.5,
                 startAngle: 0,
                 endAngle: .pi * 2,
                 clockwise: true
@@ -189,7 +189,7 @@ final class ChartPointerContainer: ChartNode, IChartPointerContainer {
             let node = ChartFigureNode(figure: .nestedBezierPaths)
             node.strokeColor = DesignBook.shared.color(chart: chart, key: .line(line.colorKey))
             node.fillColor = DesignBook.shared.color(.primaryBackground)
-            node.strokeWidth = 2 * scale
+            node.strokeWidth = dotBorder
             node.bezierPaths = [path]
             return node
         }

@@ -13,12 +13,16 @@ protocol IChartLineGraphNode: IChartGraphNode {
 }
 
 class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
+    private let width: CGFloat
+    
     init(chart: Chart,
          config: ChartConfig,
          formattingProvider: IFormattingProvider,
          localeProvider: ILocaleProvider,
          width: CGFloat,
          enableControls: Bool) {
+        self.width = width
+        
         super.init(
             chart: chart,
             config: config,
@@ -147,7 +151,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                     }
                 ),
                 options: [.line, .dots, .closely],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: max(1, width * (eyes.first?.scaleFactor ?? 1.0)),
                 duration: duration *  2
             )
         }
@@ -156,7 +160,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 pointing: nil,
                 content: nil,
                 options: [.line, .dots],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: max(1, width * (eyes.first?.scaleFactor ?? 1.0)),
                 duration: duration *  2
             )
         }

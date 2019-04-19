@@ -24,7 +24,7 @@ protocol IChartGraphContainer: IChartNode {
     func adjustPointer(pointing: ChartGraphPointing?,
                        content: ChartPointerCloudContent?,
                        options: ChartPointerOptions,
-                       scale: CGFloat,
+                       dotBorder: CGFloat,
                        duration: TimeInterval)
 }
 
@@ -90,13 +90,13 @@ final class ChartGraphContainer: ChartNode, IChartGraphContainer {
     func adjustPointer(pointing: ChartGraphPointing?,
                        content: ChartPointerCloudContent?,
                        options: ChartPointerOptions,
-                       scale: CGFloat,
+                       dotBorder: CGFloat,
                        duration: TimeInterval) {
         pointerContainer.update(
             pointing: pointing,
             content: content,
             options: options,
-            scale: scale,
+            dotBorder: dotBorder,
             duration: duration
         )
     }

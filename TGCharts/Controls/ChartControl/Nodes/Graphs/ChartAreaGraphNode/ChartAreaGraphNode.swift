@@ -152,7 +152,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                     }
                 ),
                 options: [.line, .anchor],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: 0,
                 duration: duration *  2
             )
         }
@@ -161,7 +161,7 @@ class ChartAreaGraphNode: ChartGraphNode, IChartAreaGraphNode {
                 pointing: nil,
                 content: nil,
                 options: [.line, .anchor],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: 0,
                 duration: duration *  2
             )
         }

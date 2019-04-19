@@ -174,7 +174,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                     values: values + totalValues
                 ),
                 options: [.anchor],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: 0,
                 duration: duration *  2
             )
         }
@@ -183,7 +183,7 @@ class ChartBarGraphNode: ChartGraphNode, IChartBarGraphNode {
                 pointing: nil,
                 content: nil,
                 options: [],
-                scale: eyes.first?.scaleFactor ?? 1.0,
+                dotBorder: 0,
                 duration: duration *  2
             )
         }
