@@ -147,6 +147,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                     }
                 ),
                 options: [.line, .dots, .closely],
+                scale: eyes.first?.scaleFactor ?? 1.0,
                 duration: duration *  2
             )
         }
@@ -155,6 +156,7 @@ class ChartLineGraphNode: ChartGraphNode, IChartLineGraphNode {
                 pointing: nil,
                 content: nil,
                 options: [.line, .dots],
+                scale: eyes.first?.scaleFactor ?? 1.0,
                 duration: duration *  2
             )
         }

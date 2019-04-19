@@ -140,8 +140,8 @@ fileprivate extension Operation {
         
         let distanceBase = config.standardDistance
         let distanceFactor = config.range.distance.percent(from: distanceBase, to: distanceBase * 3)
-        let scaleFactor = 1.0 - (0.75 * distanceFactor)
-        
+        let scaleFactor = max(0.2, 1.0 - (0.75 * distanceFactor))
+
         return config.lines.indices.map { index in
             let totalEdge = context.totalEdges[index]
             let contextualSliceEdge = context.lineEdges[index]
