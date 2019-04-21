@@ -58,7 +58,6 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
         
         super.init(frame: .zero)
         
-        backgroundColor = DesignBook.shared.color(.navigatorBackground)
         tag = ChartControlTag.navigator.rawValue
         layer.cornerRadius = 8
         layer.masksToBounds = true
@@ -112,6 +111,7 @@ final class ChartNavigatorControl: ChartNode, IChartNavigatorControl {
     
     override func updateDesign() {
         super.updateDesign()
+        backgroundColor = DesignBook.shared.color(.navigatorBackground)
         spaceNode.backgroundColor = DesignBook.shared.color(.primaryBackground)
         leftDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)
         rightDim.backgroundColor = DesignBook.shared.color(.navigatorCoverBackground)

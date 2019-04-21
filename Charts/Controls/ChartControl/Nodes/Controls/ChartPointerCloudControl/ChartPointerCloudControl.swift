@@ -104,6 +104,7 @@ final class ChartPointerCloudControl: ChartNode, IChartPointerCloudControl {
                     .map({ "\($0)%" })
                     .joined(separator: "\n"),
                 attributes: [
+                    .foregroundColor: DesignBook.shared.color(.chartPointerCloudForeground),
                     .paragraphStyle: _style(alignment: .right)
                 ]
             )
